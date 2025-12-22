@@ -1,72 +1,83 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key_change_in_production';
+const JWT_SECRET =
+  process.env.JWT_SECRET || "your_jwt_secret_key_change_in_production";
 
 /**
  * Register a new user
  */
 exports.register = async (req, res) => {
   if (!req.isMongoConnected) {
-    return res.status(503).json({ error: 'Database unavailable' });
+    return res.status(503).json({ error: "Database unavailable" });
   }
 
   try {
-    const { 
-      name, 
-      email, 
-      password, 
+    const {
+      name,
+      username,
+      email,
+      password,
       skillLevel,
       minWaveHeight,
       maxWaveHeight,
       tidePreference,
-      boardType
+      boardType,
     } = req.body;
 
-    // Check if user exists
+    // Check if user exists by email
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ error: 'User already exists' });
+      return res
+        .status(400)
+        .json({ error: "User already exists with this email" });
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Check if username is taken
+    if (username) {
+      const existingUsername = await User.findOne({ username });
+      if (existingUsername) {
+        return res.status(400).json({ error: "Username is already taken" });
+      }
+    }
 
-    // Create user
+    // Create user (password will be hashed by the model's pre-save hook)
     user = new User({
       name,
+      username,
       email,
-      password: hashedPassword,
-      skillLevel: skillLevel || 'Beginner',
+      password,
+      skillLevel: skillLevel || "Beginner",
       preferences: {
-        skillLevel: skillLevel || 'Beginner',
+        skillLevel: skillLevel || "Beginner",
         minWaveHeight: parseFloat(minWaveHeight) || 0.5,
         maxWaveHeight: parseFloat(maxWaveHeight) || 2.0,
-        tidePreference: tidePreference || 'Any',
-        boardType: boardType || 'Soft-top'
-      }
+        tidePreference: tidePreference || "Any",
+        boardType: boardType || "Soft-top",
+      },
     });
 
     await user.save();
 
     // Create token
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+      expiresIn: "30d",
+    });
 
     res.status(201).json({
       token,
       user: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         skillLevel: user.skillLevel,
-        preferences: user.preferences
-      }
+        preferences: user.preferences,
+      },
     });
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Registration error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -75,40 +86,54 @@ exports.register = async (req, res) => {
  */
 exports.login = async (req, res) => {
   if (!req.isMongoConnected) {
-    return res.status(503).json({ error: 'Database unavailable' });
+    return res.status(503).json({ error: "Database unavailable" });
   }
 
   try {
     const { email, password } = req.body;
+    console.log("Login attempt for email:", email);
 
-    // Check user
+    // Check user by email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      console.log("User not found with email:", email);
+      return res.status(400).json({ error: "Invalid credentials" });
     }
+
+    console.log("User found:", user.email, "Username:", user.username);
+    console.log("Password from request:", password);
+    console.log("Hashed password from DB:", user.password);
+    console.log("Password length:", password?.length);
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password comparison result:", isMatch);
+
     if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      console.log("Password mismatch for user:", email);
+      return res.status(400).json({ error: "Invalid credentials" });
     }
 
+    console.log("Login successful for user:", email);
+
     // Create token
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+      expiresIn: "30d",
+    });
 
     res.json({
       token,
       user: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         skillLevel: user.skillLevel,
-        preferences: user.preferences
-      }
+        preferences: user.preferences,
+      },
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -117,21 +142,22 @@ exports.login = async (req, res) => {
  */
 exports.getProfile = async (req, res) => {
   if (!req.isMongoConnected) {
-    return res.status(503).json({ error: 'Database unavailable' });
+    return res.status(503).json({ error: "Database unavailable" });
   }
 
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ error: 'No token, authorization denied' });
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token)
+      return res.status(401).json({ error: "No token, authorization denied" });
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.userId).select('-password');
-    
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) return res.status(404).json({ error: "User not found" });
 
     res.json(user);
   } catch (error) {
-    res.status(401).json({ error: 'Token is not valid' });
+    res.status(401).json({ error: "Token is not valid" });
   }
 };
 
@@ -140,19 +166,20 @@ exports.getProfile = async (req, res) => {
  */
 exports.updatePreferences = async (req, res) => {
   if (!req.isMongoConnected) {
-    return res.status(503).json({ error: 'Database unavailable' });
+    return res.status(503).json({ error: "Database unavailable" });
   }
 
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ error: 'No token, authorization denied' });
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token)
+      return res.status(401).json({ error: "No token, authorization denied" });
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const { preferences } = req.body;
 
     // Prepare update object
     const updateData = { preferences };
-    
+
     // If skillLevel is in preferences, update the top-level field too
     if (preferences && preferences.skillLevel) {
       updateData.skillLevel = preferences.skillLevel;
@@ -162,12 +189,12 @@ exports.updatePreferences = async (req, res) => {
       decoded.userId,
       { $set: updateData },
       { new: true }
-    ).select('-password');
+    ).select("-password");
 
     res.json(user);
   } catch (error) {
-    console.error('Update preferences error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Update preferences error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -176,8 +203,9 @@ exports.updatePreferences = async (req, res) => {
  */
 exports.updateProfile = async (req, res) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ error: 'No token, authorization denied' });
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token)
+      return res.status(401).json({ error: "No token, authorization denied" });
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const { name, email } = req.body;
@@ -186,12 +214,12 @@ exports.updateProfile = async (req, res) => {
       decoded.userId,
       { $set: { name, email } },
       { new: true }
-    ).select('-password');
+    ).select("-password");
 
     res.json(user);
   } catch (error) {
-    console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Update profile error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -200,26 +228,28 @@ exports.updateProfile = async (req, res) => {
  */
 exports.changePassword = async (req, res) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ error: 'No token, authorization denied' });
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token)
+      return res.status(401).json({ error: "No token, authorization denied" });
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const { currentPassword, newPassword } = req.body;
 
     const user = await User.findById(decoded.userId);
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid current password' });
+    if (!isMatch)
+      return res.status(400).json({ error: "Invalid current password" });
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
 
-    res.json({ message: 'Password updated successfully' });
+    res.json({ message: "Password updated successfully" });
   } catch (error) {
-    console.error('Change password error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Change password error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -228,15 +258,16 @@ exports.changePassword = async (req, res) => {
  */
 exports.deleteAccount = async (req, res) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ error: 'No token, authorization denied' });
+    const token = req.header("Authorization")?.replace("Bearer ", "");
+    if (!token)
+      return res.status(401).json({ error: "No token, authorization denied" });
 
     const decoded = jwt.verify(token, JWT_SECRET);
     await User.findByIdAndDelete(decoded.userId);
 
-    res.json({ message: 'Account deleted successfully' });
+    res.json({ message: "Account deleted successfully" });
   } catch (error) {
-    console.error('Delete account error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Delete account error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
