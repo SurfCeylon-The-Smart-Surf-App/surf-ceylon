@@ -15,6 +15,8 @@ import SpotCard from "../components/SpotCard";
 import axios from "axios";
 import { getStaticApiBaseUrl } from "../utils/networkConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useUser } from "../context/UserContext";
+import { filterSpotsByRadius, addDistanceToSpots } from "../data/locationUtils";
 
 export default function SpotRecommender() {
   const [spots, setSpots] = useState([]);
@@ -22,10 +24,11 @@ export default function SpotRecommender() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState("all");
   const router = useRouter();
+  const { userLocation } = useUser();
 
   useEffect(() => {
     fetchSpots();
-  }, []);
+  }, [userLocation]); // Re-fetch when location changes
 
   const fetchSpots = async () => {
     try {
@@ -49,7 +52,31 @@ export default function SpotRecommender() {
       const API_URL = getStaticApiBaseUrl();
       const response = await axios.get(`${API_URL}/spots`, { params });
 
-      setSpots(response.data.spots || []);
+      let fetchedSpots = response.data.spots || [];
+
+      // Filter spots within 10km radius if location is available
+      if (userLocation) {
+        console.log(
+          "Filtering spots within 10km radius from user location:",
+          userLocation
+        );
+        fetchedSpots = filterSpotsByRadius(fetchedSpots, userLocation, 10);
+        // Add distance information to each spot
+        fetchedSpots = addDistanceToSpots(fetchedSpots, userLocation);
+        // Sort by distance (closest first) within same score category
+        fetchedSpots.sort((a, b) => {
+          if (Math.abs(a.score - b.score) < 5) {
+            // If scores are similar (within 5 points), sort by distance
+            return (a.distance || 999) - (b.distance || 999);
+          }
+          return b.score - a.score;
+        });
+        console.log(`Found ${fetchedSpots.length} spots within 10km radius`);
+      } else {
+        console.log("User location not available, showing all spots");
+      }
+
+      setSpots(fetchedSpots);
     } catch (error) {
       console.error("Error fetching spots:", error);
     } finally {
@@ -76,10 +103,7 @@ export default function SpotRecommender() {
 
   if (loading) {
     return (
-      <LinearGradient
-        colors={["#2563eb", "#1d4ed8"]}
-        className="flex-1"
-      >
+      <LinearGradient colors={["#2563eb", "#1d4ed8"]} className="flex-1">
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#ffffff" />
           <Text className="mt-4 text-white text-base font-medium">
@@ -170,6 +194,18 @@ export default function SpotRecommender() {
             count={spots.filter((s) => s.score < 50).length}
           />
         </ScrollView>
+
+        {/* Location info */}
+        {userLocation && spots.length > 0 && (
+          <View className="px-4 pt-2">
+            <View className="flex-row items-center">
+              <Ionicons name="location" size={14} color="#6b7280" />
+              <Text className="text-xs text-gray-600 ml-1">
+                Showing spots within 10km of your location
+              </Text>
+            </View>
+          </View>
+        )}
       </View>
 
       {/* Content */}

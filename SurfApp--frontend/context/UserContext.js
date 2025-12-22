@@ -1,7 +1,7 @@
-import React, { createContext, useState, useEffect } from 'react';
-import * as Location from 'expo-location';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '../data/config';
+import React, { createContext, useState, useEffect } from "react";
+import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "../data/config";
 
 export const UserContext = createContext();
 
@@ -9,7 +9,7 @@ export const UserContext = createContext();
 export const useUser = () => {
   const context = React.useContext(UserContext);
   if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };
@@ -23,74 +23,81 @@ export const UserProvider = ({ children }) => {
   // Active session tracking
   const [activeSessionId, setActiveSessionId] = useState(null);
   const [activeSessionSpot, setActiveSessionSpot] = useState(null);
+  const [activeSessionStartTime, setActiveSessionStartTime] = useState(null);
 
   // Auth functions
   const login = async (email, password) => {
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Login failed');
-      
-      await AsyncStorage.setItem('userToken', data.token);
-      await AsyncStorage.setItem('userData', JSON.stringify(data.user));
-      
+      if (!response.ok) throw new Error(data.error || "Login failed");
+
+      await AsyncStorage.setItem("userToken", data.token);
+      await AsyncStorage.setItem("userData", JSON.stringify(data.user));
+
       setToken(data.token);
       setUser(data.user);
       setUserId(data.user.id);
-      
+
       // Ensure skillLevel is included in preferences
       const prefs = data.user.preferences || {};
       setUserPreferences({
         ...prefs,
-        skillLevel: data.user.skillLevel || 'Beginner'
+        skillLevel: data.user.skillLevel || "Beginner",
       });
-      
+
       return true;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       throw error;
     }
   };
 
-  const register = async (name, email, password, skillLevel, preferences = {}) => {
+  const register = async (
+    name,
+    email,
+    password,
+    skillLevel,
+    preferences = {}
+  ) => {
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name, 
-          email, 
-          password, 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
           skillLevel,
-          ...preferences 
+          ...preferences,
         }),
       });
-      
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Registration failed');
-      
-      await AsyncStorage.setItem('userToken', data.token);
-      await AsyncStorage.setItem('userData', JSON.stringify(data.user));
-      
+      if (!response.ok) throw new Error(data.error || "Registration failed");
+
+      await AsyncStorage.setItem("userToken", data.token);
+      await AsyncStorage.setItem("userData", JSON.stringify(data.user));
+
       setToken(data.token);
       setUser(data.user);
       setUserId(data.user.id);
-      
+
       // Ensure skillLevel is included in preferences
       const prefs = data.user.preferences || {};
       setUserPreferences({
         ...prefs,
-        skillLevel: data.user.skillLevel || skillLevel || 'Beginner'
+        skillLevel: data.user.skillLevel || skillLevel || "Beginner",
       });
-      
+
       return true;
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
       throw error;
     }
   };
@@ -98,22 +105,22 @@ export const UserProvider = ({ children }) => {
   const updateProfile = async (name, email) => {
     try {
       const response = await fetch(`${API_URL}/auth/profile`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ name, email }),
       });
-      
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Update failed');
-      
-      await AsyncStorage.setItem('userData', JSON.stringify(data));
+      if (!response.ok) throw new Error(data.error || "Update failed");
+
+      await AsyncStorage.setItem("userData", JSON.stringify(data));
       setUser(data);
       return true;
     } catch (error) {
-      console.error('Update profile error:', error);
+      console.error("Update profile error:", error);
       throw error;
     }
   };
@@ -121,19 +128,19 @@ export const UserProvider = ({ children }) => {
   const changePassword = async (currentPassword, newPassword) => {
     try {
       const response = await fetch(`${API_URL}/auth/password`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
-      
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Password change failed');
+      if (!response.ok) throw new Error(data.error || "Password change failed");
       return true;
     } catch (error) {
-      console.error('Change password error:', error);
+      console.error("Change password error:", error);
       throw error;
     }
   };
@@ -141,86 +148,108 @@ export const UserProvider = ({ children }) => {
   const deleteAccount = async () => {
     try {
       const response = await fetch(`${API_URL}/auth/account`, {
-        method: 'DELETE',
-        headers: { 
-          'Authorization': `Bearer ${token}`
-        }
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
+
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Delete account failed');
+        throw new Error(data.error || "Delete account failed");
       }
-      
+
       await logout();
       return true;
     } catch (error) {
-      console.error('Delete account error:', error);
+      console.error("Delete account error:", error);
       throw error;
     }
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('userToken');
-    await AsyncStorage.removeItem('userData');
+    await AsyncStorage.removeItem("userToken");
+    await AsyncStorage.removeItem("userData");
     setToken(null);
     setUser(null);
     setUserId(null);
     setActiveSessionId(null);
     setActiveSessionSpot(null);
     setUserPreferences({
-      skillLevel: 'Beginner',
+      skillLevel: "Beginner",
       minWaveHeight: 0.5,
       maxWaveHeight: 1.5,
-      tidePreference: 'Any',
-      boardType: 'Soft-top',
+      tidePreference: "Any",
+      boardType: "Soft-top",
     });
   };
 
   // Session management functions
-  const setActiveSession = (sessionId, spotInfo) => {
+  const setActiveSession = async (sessionId, spotInfo) => {
+    console.log("Setting active session:", sessionId, spotInfo?.name);
+    const startTime = new Date().toISOString();
     setActiveSessionId(sessionId);
     setActiveSessionSpot(spotInfo);
+    setActiveSessionStartTime(startTime);
+    // Persist to AsyncStorage
+    try {
+      await AsyncStorage.setItem("activeSessionId", sessionId);
+      await AsyncStorage.setItem("activeSessionSpot", JSON.stringify(spotInfo));
+      await AsyncStorage.setItem("activeSessionStartTime", startTime);
+    } catch (error) {
+      console.error("Failed to save session to storage:", error);
+    }
   };
 
-  const clearActiveSession = () => {
+  const clearActiveSession = async () => {
+    console.log("Clearing active session");
     setActiveSessionId(null);
     setActiveSessionSpot(null);
+    setActiveSessionStartTime(null);
+    // Clear from AsyncStorage
+    try {
+      await AsyncStorage.removeItem("activeSessionId");
+      await AsyncStorage.removeItem("activeSessionSpot");
+      await AsyncStorage.removeItem("activeSessionStartTime");
+    } catch (error) {
+      console.error("Failed to clear session from storage:", error);
+    }
   };
 
   const updateUserPreferences = async (newPreferences) => {
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      if (!token) throw new Error('No token found');
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) throw new Error("No token found");
 
       const response = await fetch(`${API_URL}/auth/preferences`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ preferences: newPreferences }),
       });
-      
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to update preferences');
-      
+      if (!response.ok)
+        throw new Error(data.error || "Failed to update preferences");
+
       // Update local storage and state
       // Update top-level skillLevel if it changed
-      const updatedUser = { 
-        ...user, 
+      const updatedUser = {
+        ...user,
         preferences: newPreferences,
-        skillLevel: newPreferences.skillLevel || user.skillLevel
+        skillLevel: newPreferences.skillLevel || user.skillLevel,
       };
-      
-      await AsyncStorage.setItem('userData', JSON.stringify(updatedUser));
-      
+
+      await AsyncStorage.setItem("userData", JSON.stringify(updatedUser));
+
       setUser(updatedUser);
       setUserPreferences(newPreferences);
-      
+
       return true;
     } catch (error) {
-      console.error('Update preferences error:', error);
+      console.error("Update preferences error:", error);
       throw error;
     }
   };
@@ -229,43 +258,61 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const storedToken = await AsyncStorage.getItem('userToken');
-        const storedUser = await AsyncStorage.getItem('userData');
-        
+        const storedToken = await AsyncStorage.getItem("userToken");
+        const storedUser = await AsyncStorage.getItem("userData");
+
         if (storedToken && storedUser) {
           setToken(storedToken);
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
           setUserId(parsedUser.id);
-          
+
           // Merge preferences with skillLevel
           const prefs = parsedUser.preferences || {};
           setUserPreferences({
             ...prefs,
-            skillLevel: parsedUser.skillLevel || 'Beginner'
+            skillLevel: parsedUser.skillLevel || "Beginner",
           });
         }
+
+        // Restore active session if any
+        const storedSessionId = await AsyncStorage.getItem("activeSessionId");
+        const storedSessionSpot = await AsyncStorage.getItem(
+          "activeSessionSpot"
+        );
+        const storedSessionStartTime = await AsyncStorage.getItem(
+          "activeSessionStartTime"
+        );
+        if (storedSessionId && storedSessionSpot) {
+          console.log("Restoring active session:", storedSessionId);
+          setActiveSessionId(storedSessionId);
+          setActiveSessionSpot(JSON.parse(storedSessionSpot));
+          if (storedSessionStartTime) {
+            setActiveSessionStartTime(storedSessionStartTime);
+            console.log("Restored session start time:", storedSessionStartTime);
+          }
+        }
       } catch (e) {
-        console.error('Auth check failed', e);
+        console.error("Auth check failed", e);
       } finally {
         setIsLoading(false);
       }
     };
     checkLogin();
   }, []);
-  
+
   const [userPreferences, setUserPreferences] = useState({
-    skillLevel: 'Beginner',
+    skillLevel: "Beginner",
     minWaveHeight: 0.5,
     maxWaveHeight: 1.5,
-    tidePreference: 'Any',
-    boardType: 'Soft-top',
+    tidePreference: "Any",
+    boardType: "Soft-top",
   });
-  
+
   const [userLocation, setUserLocation] = useState(null);
   const [locationError, setLocationError] = useState(null);
   const [locationLoading, setLocationLoading] = useState(true);
-  
+
   // Store selected spot for detail navigation (avoids URL param size limits)
   const [selectedSpot, setSelectedSpot] = useState(null);
 
@@ -274,13 +321,15 @@ export const UserProvider = ({ children }) => {
     (async () => {
       try {
         setLocationLoading(true);
-        
+
         // Request foreground permissions
         const { status } = await Location.requestForegroundPermissionsAsync();
-        
-        if (status !== 'granted') {
-          console.log('Location permission denied - app will work without location filtering');
-          setLocationError('Location permission denied');
+
+        if (status !== "granted") {
+          console.log(
+            "Location permission denied - app will work without location filtering"
+          );
+          setLocationError("Location permission denied");
           setLocationLoading(false);
           return;
         }
@@ -291,25 +340,28 @@ export const UserProvider = ({ children }) => {
         });
 
         // Add a timeout to prevent hanging
-        const timeout = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Location timeout')), 5000)
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Location timeout")), 5000)
         );
 
         const location = await Promise.race([locationPromise, timeout]);
-        
+
         setUserLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
         setLocationError(null);
-        console.log('Location obtained successfully');
+        console.log("Location obtained successfully");
       } catch (error) {
-        console.log('Location unavailable - using default location (Weligama) for demo:', error.message);
+        console.log(
+          "Location unavailable - using default location (Weligama) for demo:",
+          error.message
+        );
         setLocationError(null); // Don't show error to user, just work without location
         // Set default location to Weligama for demo purposes when GPS is unavailable
         setUserLocation({
           latitude: 5.9721,
-          longitude: 80.4264
+          longitude: 80.4264,
         });
       } finally {
         setLocationLoading(false);
@@ -317,7 +369,7 @@ export const UserProvider = ({ children }) => {
     })();
   }, []);
 
-  const value = { 
+  const value = {
     userId,
     user,
     token,
@@ -328,7 +380,7 @@ export const UserProvider = ({ children }) => {
     updateProfile,
     changePassword,
     deleteAccount,
-    userPreferences, 
+    userPreferences,
     setUserPreferences,
     updateUserPreferences,
     userLocation,
@@ -338,13 +390,10 @@ export const UserProvider = ({ children }) => {
     setSelectedSpot,
     activeSessionId,
     activeSessionSpot,
+    activeSessionStartTime,
     setActiveSession,
     clearActiveSession,
   };
 
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };

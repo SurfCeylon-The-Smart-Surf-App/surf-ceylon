@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { get7DayForecast } from "../data/surfApi";
 
-const ForecastChart = ({ spotId = "2", forecast = null }) => {
+const ForecastChart = ({ spotId = "2", forecast = null, onViewModeChange }) => {
   const [forecastData, setForecastData] = useState(forecast);
   const [loading, setLoading] = useState(!forecast);
   const [viewMode, setViewMode] = useState("daily"); // 'daily' or 'hourly'
@@ -189,7 +189,10 @@ const ForecastChart = ({ spotId = "2", forecast = null }) => {
             styles.toggleButton,
             viewMode === "daily" && styles.toggleButtonActive,
           ]}
-          onPress={() => setViewMode("daily")}
+          onPress={() => {
+            setViewMode("daily");
+            if (onViewModeChange) onViewModeChange("daily");
+          }}
         >
           <Text
             style={[
@@ -208,6 +211,7 @@ const ForecastChart = ({ spotId = "2", forecast = null }) => {
           onPress={() => {
             setViewMode("hourly");
             setSelectedDay(0);
+            if (onViewModeChange) onViewModeChange("hourly");
           }}
         >
           <Text
