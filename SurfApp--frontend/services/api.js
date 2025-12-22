@@ -49,6 +49,8 @@ export const authAPI = {
   register: (userData) => api.post("/auth/register", userData),
   login: (credentials) => api.post("/auth/login", credentials),
   getCurrentUser: () => api.get("/auth/me"),
+  updatePreferences: (preferences) => api.put("/auth/preferences", preferences),
+  changePassword: (passwords) => api.put("/auth/password", passwords),
 };
 
 // User APIs
