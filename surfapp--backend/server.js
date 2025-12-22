@@ -28,13 +28,19 @@ app.use((req, res, next) => {
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // MongoDB Connection
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB connected successfully"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+const { connectDatabase, getConnectionStatus } = require("./config/database");
+
+connectDatabase().then(() => {
+  // Load spot metadata after database connection attempt
+  const { loadSpotMetadata } = require("./config/spotMetadata");
+  loadSpotMetadata();
+});
+
+// Middleware to check MongoDB connection status
+app.use((req, res, next) => {
+  req.isMongoConnected = getConnectionStatus();
+  next();
+});
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
@@ -43,14 +49,11 @@ app.use("/api/posts", require("./routes/posts"));
 app.use("/api/follow", require("./routes/follow"));
 app.use("/api/messages", require("./routes/messages"));
 
-// Health check route
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    message: "Server is running",
-    timestamp: new Date().toISOString(),
-  });
-});
+// New routes from thilina version
+app.use("/api/spots", require("./routes/spots"));
+app.use("/api/sessions", require("./routes/sessions"));
+app.use("/api/forecast", require("./routes/forecast"));
+app.use("/api/health", require("./routes/health"));
 
 // Default route
 app.get("/", (req, res) => {

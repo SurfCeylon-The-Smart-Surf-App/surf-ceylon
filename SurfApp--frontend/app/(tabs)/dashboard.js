@@ -9,11 +9,30 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { dummyDashboardFeatures } from "../../constants/dummyData";
 
 export default function DashboardScreen() {
+  const router = useRouter();
+
+  const handleFeaturePress = (item) => {
+    if (item.id === 1) {
+      // Spot Recommender
+      router.push("/spotRecommender");
+    } else if (item.id === 5) {
+      // Weather Forecasting
+      router.push("/weatherForecasting");
+    } else {
+      // Other features not implemented yet
+      console.log(`Feature "${item.title}" not yet implemented`);
+    }
+  };
+
   const renderFeatureCard = ({ item }) => (
-    <TouchableOpacity className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-100">
+    <TouchableOpacity
+      className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-100"
+      onPress={() => handleFeaturePress(item)}
+    >
       <View className="flex-row items-start">
         <View
           className={`w-12 h-12 ${item.color} rounded-lg items-center justify-center mr-4`}
