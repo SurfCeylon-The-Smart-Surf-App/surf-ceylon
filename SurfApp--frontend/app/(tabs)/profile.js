@@ -15,7 +15,10 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -26,6 +29,7 @@ import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import { getUserSessions, getUserInsights } from "../../data/surfApi";
 
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const [userPosts, setUserPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -60,6 +64,25 @@ export default function ProfileScreen() {
 
   const { user, logout } = useAuth();
   const { getFollowerDelta, getFollowingDelta } = useRealTimeUpdates(user?._id);
+
+  // Sort sessions based on selected filter
+  const sortedSessions = React.useMemo(() => {
+    if (!sessions || sessions.length === 0) return [];
+
+    const sorted = [...sessions];
+    if (sessionFilter === "newest") {
+      return sorted.sort(
+        (a, b) => new Date(b.startTime) - new Date(a.startTime)
+      );
+    } else if (sessionFilter === "oldest") {
+      return sorted.sort(
+        (a, b) => new Date(a.startTime) - new Date(b.startTime)
+      );
+    } else if (sessionFilter === "highest_rated") {
+      return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+    return sorted;
+  }, [sessions, sessionFilter]);
 
   useEffect(() => {
     if (user) {
@@ -260,9 +283,9 @@ export default function ProfileScreen() {
     }
   };
 
-  const SessionCard = ({ session }) => (
+  const SessionCard = ({ session, onPress }) => (
     <TouchableOpacity
-      onPress={() => setSelectedSession(session)}
+      onPress={onPress || (() => setSelectedSession(session))}
       className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100"
     >
       <View className="flex-row justify-between items-center mb-2">
@@ -580,20 +603,37 @@ export default function ProfileScreen() {
         transparent={true}
         onRequestClose={() => setSelectedSession(null)}
       >
-        <SafeAreaView className="flex-1 bg-gray-50">
-          <View className="flex-row items-center justify-between px-4 py-4 bg-white border-b border-gray-200">
-            <Text className="text-lg font-bold text-gray-900">
-              Session Details
-            </Text>
-            <TouchableOpacity onPress={() => setSelectedSession(null)}>
-              <Ionicons name="close" size={24} color="#6b7280" />
-            </TouchableOpacity>
+        <View className="flex-1 bg-gray-50">
+          <View
+            className="bg-white border-b border-gray-200"
+            style={{ paddingTop: insets.top }}
+          >
+            <View className="flex-row items-center justify-between px-4 py-4">
+              <Text className="text-lg font-bold text-gray-900">
+                Session Details
+              </Text>
+              <TouchableOpacity
+                onPress={() => setSelectedSession(null)}
+                style={{ padding: 8, margin: -8 }}
+                hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              >
+                <Ionicons name="close" size={28} color="#6b7280" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {selectedSession && (
-            <ScrollView className="p-4">
+            <ScrollView className="p-4 flex-1">
+              {/* Session Overview */}
               <View className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                <Text className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                  Session Overview
+                </Text>
                 <DetailRow label="Spot" value={selectedSession.spotName} />
+                <DetailRow
+                  label="Region"
+                  value={selectedSession.spotRegion || "N/A"}
+                />
                 <DetailRow
                   label="Date"
                   value={new Date(selectedSession.startTime).toLocaleDateString(
@@ -607,35 +647,101 @@ export default function ProfileScreen() {
                   )}
                 />
                 <DetailRow
+                  label="Time"
+                  value={new Date(selectedSession.startTime).toLocaleTimeString(
+                    "en-US",
+                    { hour: "2-digit", minute: "2-digit" }
+                  )}
+                />
+                <DetailRow
                   label="Duration"
                   value={`${selectedSession.duration} minutes`}
                 />
-                <DetailRow
-                  label="Rating"
-                  value={`${selectedSession.rating} ⭐`}
-                />
+                <View className="flex-row justify-between items-center py-3">
+                  <Text className="text-sm text-gray-600">Rating</Text>
+                  <View className="flex-row items-center">
+                    <Text className="text-lg font-bold text-yellow-600 mr-1">
+                      {selectedSession.rating}
+                    </Text>
+                    <Text className="text-lg">⭐</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Weather Conditions */}
+              <View className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                <Text className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                  Weather Conditions
+                </Text>
                 <DetailRow
                   label="Wave Height"
-                  value={`${selectedSession.waveHeight}m`}
+                  value={
+                    selectedSession.waveHeight
+                      ? `${selectedSession.waveHeight}m`
+                      : "N/A"
+                  }
+                />
+                <DetailRow
+                  label="Wave Period"
+                  value={
+                    selectedSession.wavePeriod
+                      ? `${selectedSession.wavePeriod}s`
+                      : "N/A"
+                  }
                 />
                 <DetailRow
                   label="Wind Speed"
-                  value={`${selectedSession.windSpeed} kph`}
+                  value={
+                    selectedSession.windSpeed
+                      ? `${selectedSession.windSpeed} kph`
+                      : "N/A"
+                  }
                 />
-                {selectedSession.comments && (
-                  <View className="py-3 border-t border-gray-100 mt-3">
-                    <Text className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-                      Comments
-                    </Text>
-                    <Text className="text-gray-900">
-                      {selectedSession.comments}
-                    </Text>
-                  </View>
-                )}
+                <DetailRow
+                  label="Wind Direction"
+                  value={selectedSession.windDirection || "N/A"}
+                />
+                <DetailRow label="Tide" value={selectedSession.tide || "N/A"} />
+                <View className="flex-row justify-between items-center py-3">
+                  <Text className="text-sm text-gray-600">Crowd Level</Text>
+                  <Text className="text-sm font-semibold text-gray-900">
+                    {selectedSession.crowdLevel || "N/A"}
+                  </Text>
+                </View>
               </View>
+
+              {/* Comments */}
+              {selectedSession.comments && (
+                <View className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                  <Text className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    Comments
+                  </Text>
+                  <Text className="text-gray-900 leading-6">
+                    {selectedSession.comments}
+                  </Text>
+                </View>
+              )}
+
+              {/* Would Return */}
+              {selectedSession.wouldReturn !== undefined && (
+                <View className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                  <Text className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                    Would Return?
+                  </Text>
+                  <Text
+                    className={`text-lg font-bold ${
+                      selectedSession.wouldReturn
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {selectedSession.wouldReturn ? "Yes ✓" : "No ✗"}
+                  </Text>
+                </View>
+              )}
             </ScrollView>
           )}
-        </SafeAreaView>
+        </View>
       </Modal>
 
       {/* Settings Menu Modal */}
@@ -1024,14 +1130,19 @@ export default function ProfileScreen() {
         transparent={true}
       >
         <SafeAreaView className="flex-1 bg-gray-50">
-          <View className="flex-row items-center justify-between px-4 py-4 bg-white border-b border-gray-200">
-            <Text className="text-lg font-bold text-gray-900">
-              All Sessions
-            </Text>
-            <TouchableOpacity onPress={() => setActiveModal(null)}>
-              <Ionicons name="close" size={24} color="#6b7280" />
-            </TouchableOpacity>
-          </View>
+          <SafeAreaView
+            edges={["top"]}
+            className="bg-white border-b border-gray-200"
+          >
+            <View className="flex-row items-center justify-between px-4 py-4">
+              <Text className="text-lg font-bold text-gray-900">
+                All Sessions
+              </Text>
+              <TouchableOpacity onPress={() => setActiveModal(null)}>
+                <Ionicons name="close" size={24} color="#6b7280" />
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
 
           <View className="bg-white px-4 py-3 border-b border-gray-200 flex-row gap-2">
             {["newest", "oldest", "highest_rated"].map((filter) => (
@@ -1060,9 +1171,17 @@ export default function ProfileScreen() {
           </View>
 
           <FlatList
-            data={sessions}
+            data={sortedSessions}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <SessionCard session={item} />}
+            renderItem={({ item }) => (
+              <SessionCard
+                session={item}
+                onPress={() => {
+                  setActiveModal(null);
+                  setTimeout(() => setSelectedSession(item), 300);
+                }}
+              />
+            )}
             contentContainerStyle={{ padding: 16 }}
             ListEmptyComponent={
               <View className="items-center justify-center py-12">
