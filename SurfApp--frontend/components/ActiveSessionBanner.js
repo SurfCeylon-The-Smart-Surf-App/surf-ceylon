@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../context/UserContext";
@@ -13,17 +14,6 @@ const ActiveSessionBanner = () => {
     setSelectedSpot,
   } = useUser();
   const [elapsed, setElapsed] = useState("");
-
-  console.log(
-    "ActiveSessionBanner render - sessionId:",
-    activeSessionId,
-    "spot:",
-    activeSessionSpot?.name,
-    "startTime:",
-    activeSessionStartTime,
-    "elapsed:",
-    elapsed
-  );
 
   useEffect(() => {
     if (!activeSessionStartTime) {
@@ -62,36 +52,46 @@ const ActiveSessionBanner = () => {
   const handleBannerPress = () => {
     // Set the selected spot so the detail page can access it
     setSelectedSpot(activeSessionSpot);
-    // Navigate to the spot detail page where the session can be ended
-    router.push(`/(spots)/detail?origin=banner`);
+    // Navigate to the spot detail page and scroll to session button
+    router.push(`/(spots)/detail?origin=banner&scrollToSession=true`);
   };
 
   return (
-    <TouchableOpacity
-      style={styles.banner}
-      onPress={handleBannerPress}
-      activeOpacity={0.8}
-    >
-      <View style={styles.bannerContent}>
-        <Ionicons name="recording" size={16} color="#fff" style={styles.icon} />
-        <View style={styles.textContainer}>
-          <Text style={styles.bannerText}>
-            Session at {activeSessionSpot.name}
-          </Text>
-          <Text style={styles.timerText}>⏱️ {elapsed}</Text>
+    <SafeAreaView edges={["top"]} style={styles.bannerWrapper}>
+      <TouchableOpacity
+        style={styles.banner}
+        onPress={handleBannerPress}
+        activeOpacity={0.8}
+      >
+        <View style={styles.bannerContent}>
+          <Ionicons
+            name="recording"
+            size={16}
+            color="#fff"
+            style={styles.icon}
+          />
+          <View style={styles.textContainer}>
+            <Text style={styles.bannerText}>
+              Session at {activeSessionSpot.name}
+            </Text>
+            <Text style={styles.timerText}>⏱️ {elapsed}</Text>
+          </View>
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color="#fff"
+            style={styles.chevron}
+          />
         </View>
-        <Ionicons
-          name="chevron-forward"
-          size={16}
-          color="#fff"
-          style={styles.chevron}
-        />
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  bannerWrapper: {
+    backgroundColor: "#dc2626",
+  },
   banner: {
     backgroundColor: "#dc2626",
     paddingVertical: 12,

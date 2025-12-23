@@ -81,10 +81,9 @@ export const dummyMarketServices = [
 export const dummyDashboardFeatures = [
   {
     id: 1,
-    title: "Spot Recommender",
-    description:
-      "Get personalized surf spots based on your skill level and preferences.",
-    icon: "📍",
+    title: "Surf Market",
+    description: "Find surf schools, instructors & gear",
+    icon: "🏪",
     color: "bg-blue-500",
   },
   {
@@ -108,14 +107,6 @@ export const dummyDashboardFeatures = [
     description: "Get personalized surf lessons and tips from an AI tutor.",
     icon: "🎓",
     color: "bg-green-500",
-  },
-  {
-    id: 5,
-    title: "Weather Forecasting",
-    description:
-      "Get detailed weather forecasts for surf spots, including wave height and wind speed.",
-    icon: "☀️",
-    color: "bg-orange-500",
   },
   {
     id: 6,

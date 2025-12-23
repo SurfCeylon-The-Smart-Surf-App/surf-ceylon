@@ -1,14 +1,28 @@
 import { Platform } from "react-native";
+import Constants from "expo-constants";
 
-// Simple network configuration for development
-// For Android Emulator, use 10.0.2.2 to access host machine's localhost
-// For iOS/physical devices, use your WiFi IP address
+// Dynamic network configuration for development
+// Automatically detects the dev server IP from Expo
+const getDevServerHost = () => {
+  // For Expo dev server, extract host from manifest
+  const { expoConfig } = Constants;
+  if (expoConfig?.hostUri) {
+    // hostUri format: "192.168.1.x:8081" - extract just the IP
+    return expoConfig.hostUri.split(":")[0];
+  }
+  return null;
+};
+
+// Fallback to manual configuration if Expo host detection fails
+const MANUAL_HOST = "172.20.10.5"; // Update this if your IP changes
+
 const API_HOST =
   Platform.OS === "android"
-    ? "10.0.2.2"
+    ? "10.0.2.2" // Android emulator special IP to reach host machine
     : Platform.OS === "web"
     ? "localhost"
-    : "172.20.10.2";
+    : getDevServerHost() || MANUAL_HOST; // iOS/physical devices: auto-detect or fallback
+
 const API_PORT = 3000;
 
 console.log("Platform.OS:", Platform.OS);

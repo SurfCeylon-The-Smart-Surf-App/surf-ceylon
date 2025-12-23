@@ -1,32 +1,59 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   FlatList,
-  Image,
+  ActivityIndicator,
+  RefreshControl,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { dummySurfConditions, dummyNews } from "../../constants/dummyData";
+import { useRouter } from "expo-router";
+import SpotCard from "../../components/SpotCard";
+import { useUser } from "../../context/UserContext";
+import { getSpotsData } from "../../data/surfApi";
+import { filterSpotsByRadius } from "../../data/locationUtils";
+import { dummyNews } from "../../constants/dummyData";
 
 export default function HomeScreen() {
-  const renderConditionCard = ({ item }) => (
-    <View className="bg-white rounded-lg p-4 mr-4 shadow-sm border border-gray-100 min-w-[200px]">
-      <Text className="font-semibold text-lg text-gray-900 mb-1">
-        {item.location}
-      </Text>
-      <Text className="text-blue-600 font-medium text-base mb-2">
-        {item.waveHeight}
-      </Text>
-      <Text className="text-gray-600 text-sm mb-3">{item.windCondition}</Text>
-      <View className={`px-3 py-1 rounded-full self-start ${item.ratingColor}`}>
-        <Text className="text-white text-xs font-medium">{item.rating}</Text>
-      </View>
-    </View>
-  );
+  const [spots, setSpots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
+  const { userPreferences, userLocation, userId } = useUser();
+
+  useEffect(() => {
+    fetchSpots();
+  }, [userPreferences, userLocation]);
+
+  const fetchSpots = async () => {
+    try {
+      setLoading(true);
+      let data = await getSpotsData(userPreferences, userLocation, userId);
+
+      // Filter spots within 10km radius if location is available
+      if (userLocation) {
+        data = filterSpotsByRadius(data, userLocation, 10);
+      }
+
+      // Get top 3 spots for home screen
+      setSpots(data.slice(0, 3));
+    } catch (error) {
+      console.error("Error fetching spots:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchSpots();
+  };
 
   const renderNewsCard = ({ item }) => (
     <View className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-100">
@@ -58,42 +85,64 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1">
+      <StatusBar barStyle="light-content" />
       {/* Header with gradient extending to notch */}
       <LinearGradient
         colors={["#2563eb", "#1d4ed8"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        className="pt-12 pb-4"
       >
-        <SafeAreaView edges={[]} className="px-6">
+        <SafeAreaView edges={["top"]} className="px-6 pb-4">
           <Text className="text-white text-2xl font-bold">Surf Ceylon</Text>
           <Text className="text-blue-100 text-sm">
-            Latest surf news & updates
+            Your personalized surf recommendations
           </Text>
         </SafeAreaView>
       </LinearGradient>
 
       <View className="flex-1 bg-gray-50">
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          {/* Live Surf Conditions */}
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {/* Top Surf Spots Recommendations */}
           <View className="py-6">
             <View className="flex-row justify-between items-center px-6 mb-4">
-              <Text className="text-xl font-bold text-gray-900">
-                Live Surf Conditions
-              </Text>
-              <TouchableOpacity>
+              <View>
+                <Text className="text-xl font-bold text-gray-900">
+                  Top Spots For You
+                </Text>
+                <Text className="text-sm text-gray-500 mt-0.5">
+                  Based on current conditions & your preferences
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => router.push("/spotRecommender")}>
                 <Text className="text-blue-600 font-medium">View All</Text>
               </TouchableOpacity>
             </View>
 
-            <FlatList
-              data={dummySurfConditions}
-              renderItem={renderConditionCard}
-              keyExtractor={(item) => item.id.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 24 }}
-            />
+            {loading ? (
+              <View className="h-40 justify-center items-center">
+                <ActivityIndicator size="large" color="#2563eb" />
+                <Text className="mt-2 text-gray-500">Loading spots...</Text>
+              </View>
+            ) : spots.length > 0 ? (
+              <View className="px-2">
+                {spots.map((spot) => (
+                  <SpotCard key={spot.id} spot={spot} origin="home" />
+                ))}
+              </View>
+            ) : (
+              <View className="mx-6 bg-white rounded-lg p-6 items-center">
+                <Ionicons name="location-outline" size={40} color="#9ca3af" />
+                <Text className="text-gray-600 text-center mt-2">
+                  No spots available right now
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Featured Stories */}
