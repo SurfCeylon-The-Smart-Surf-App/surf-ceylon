@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -72,14 +73,14 @@ export default function MarketScreen() {
 
   return (
     <View className="flex-1">
+      <StatusBar barStyle="light-content" />
       {/* Header with gradient extending to notch */}
       <LinearGradient
         colors={["#2563eb", "#1d4ed8"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        className="pt-12 pb-4"
       >
-        <SafeAreaView edges={[]} className="px-6">
+        <SafeAreaView edges={["top"]} className="px-6 pb-4">
           <Text className="text-white text-2xl font-bold">Surf Market</Text>
           <Text className="text-blue-100 text-sm">
             Find surf schools, instructors & gear

@@ -7,6 +7,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -68,6 +69,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1"
     >
+      <StatusBar barStyle="dark-content" />
       <ScrollView
         className="flex-1 bg-white"
         contentContainerStyle={{ flexGrow: 1 }}
