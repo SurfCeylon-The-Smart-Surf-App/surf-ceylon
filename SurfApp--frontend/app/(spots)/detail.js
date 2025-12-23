@@ -7,6 +7,10 @@ import {
   Modal,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Stack, useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -397,8 +401,14 @@ const SpotDetailScreen = () => {
         transparent={true}
         onRequestClose={() => setShowEndSessionModal(false)}
       >
-        <View className="flex-1 bg-black/50 justify-center items-center p-4">
-          <View className="bg-white rounded-3xl p-6 w-full max-w-md">
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className="flex-1"
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View className="flex-1 bg-black/50 justify-center items-center p-4">
+              <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+                <View className="bg-white rounded-3xl p-6 w-full max-w-md">
             <Text className="text-2xl font-bold text-gray-900 text-center mb-6">
               Rate Your Session
             </Text>
@@ -471,6 +481,9 @@ const SpotDetailScreen = () => {
               onChangeText={setSessionComments}
               className="bg-gray-100 rounded-lg p-3 text-base text-gray-900 mb-6"
               placeholderTextColor="#9ca3af"
+              returnKeyType="done"
+              blurOnSubmit={true}
+              onSubmitEditing={Keyboard.dismiss}
             />
 
             <View className="flex-row gap-3">
@@ -492,8 +505,11 @@ const SpotDetailScreen = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
-      </Modal>
+        </TouchableWithoutFeedback>
+      </View>
+    </TouchableWithoutFeedback>
+  </KeyboardAvoidingView>
+</Modal>
     </>
   );
 };
