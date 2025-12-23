@@ -5,15 +5,18 @@ import {
   ActivityIndicator,
   Text,
   Pressable,
+  ScrollView,
   Share,
   Linking,
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import { useUser } from "../../context/UserContext";
 import { getSpotsData } from "../../data/surfApi";
+import ForecastChart from "../../components/ForecastChart";
 
 const MapScreen = () => {
   const { userPreferences, userLocation, user, userId } = useUser();
@@ -173,32 +176,50 @@ const MapScreen = () => {
           longitudeDelta: 2,
         }}
       >
-        {spots.map((spot) => (
-          <Marker
-            key={spot.id}
-            coordinate={{
-              latitude: parseFloat(spot.coords[1]),
-              longitude: parseFloat(spot.coords[0]),
-            }}
-            onPress={() => handleMarkerPress(spot)}
-          >
-            <View
-              style={[
-                styles.markerContainer,
-                { backgroundColor: getMarkerColor(spot.score) },
-                selectedSpot?.id === spot.id && styles.markerSelected,
-              ]}
+        {spots.map((spot) => {
+          const isSelected = selectedSpot?.id === spot.id;
+          const size = isSelected ? 70 : 60;
+          const color = getMarkerColor(spot.score);
+
+          return (
+            <Marker
+              key={spot.id}
+              coordinate={{
+                latitude: parseFloat(spot.coords[1]),
+                longitude: parseFloat(spot.coords[0]),
+              }}
+              onPress={() => handleMarkerPress(spot)}
             >
-              <Text style={styles.markerText}>{Math.round(spot.score)}</Text>
-            </View>
-          </Marker>
-        ))}
+              <View
+                style={{
+                  width: size,
+                  height: size,
+                  backgroundColor: color,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderWidth: isSelected ? 3 : 2,
+                  borderColor: "white",
+                  overflow: "visible",
+                }}
+              >
+                <Text
+                  style={[
+                    styles.markerText,
+                    { fontSize: isSelected ? 16 : 14 },
+                  ]}
+                >
+                  {Math.round(spot.score)}
+                </Text>
+              </View>
+            </Marker>
+          );
+        })}
       </MapView>
 
       {/* My Location Button */}
       {userLocation && (
         <Pressable style={styles.myLocationButton} onPress={handleMyLocation}>
-          <Text style={styles.myLocationIcon}>📍</Text>
+          <Ionicons name="navigate" size={24} color="#2563eb" />
         </Pressable>
       )}
 
@@ -212,69 +233,85 @@ const MapScreen = () => {
             <Text style={styles.closeButtonText}>✕</Text>
           </Pressable>
 
-          <Text style={styles.spotName}>{selectedSpot.name}</Text>
-          <Text style={styles.spotRegion}>{selectedSpot.region}</Text>
+          <ScrollView
+            style={styles.infoScroll}
+            nestedScrollEnabled
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.spotName}>{selectedSpot.name}</Text>
+            <Text style={styles.spotRegion}>{selectedSpot.region}</Text>
 
-          {selectedSpot.distance !== undefined && (
-            <Text style={styles.spotDistance}>
-              📍 {selectedSpot.distance}km away
-            </Text>
-          )}
-
-          <View style={styles.infoRow}>
-            <LinearGradient
-              colors={[
-                getMarkerColor(selectedSpot.score),
-                getMarkerColor(selectedSpot.score),
-              ]}
-              style={styles.suitabilityBadge}
-            >
-              <Text style={styles.suitabilityLabel}>
-                {selectedSpot.suitability}
+            {selectedSpot.distance !== undefined && (
+              <Text style={styles.spotDistance}>
+                📍 {selectedSpot.distance}km away
               </Text>
-              <Text style={styles.suitabilityScore}>{selectedSpot.score}%</Text>
-            </LinearGradient>
-          </View>
+            )}
 
-          <View style={styles.forecastGrid}>
-            <View style={styles.forecastItem}>
-              <Text style={styles.forecastIcon}>🌊</Text>
-              <Text style={styles.forecastValue}>
-                {selectedSpot.forecast?.waveHeight}m
-              </Text>
-              <Text style={styles.forecastLabel}>Wave</Text>
+            <View style={styles.infoRow}>
+              <LinearGradient
+                colors={[
+                  getMarkerColor(selectedSpot.score),
+                  getMarkerColor(selectedSpot.score),
+                ]}
+                style={styles.suitabilityBadge}
+              >
+                <Text style={styles.suitabilityLabel}>
+                  {selectedSpot.suitability}
+                </Text>
+                <Text style={styles.suitabilityScore}>
+                  {selectedSpot.score}%
+                </Text>
+              </LinearGradient>
             </View>
-            <View style={styles.forecastItem}>
-              <Text style={styles.forecastIcon}>💨</Text>
-              <Text style={styles.forecastValue}>
-                {selectedSpot.forecast?.windSpeed} kph
-              </Text>
-              <Text style={styles.forecastLabel}>Wind</Text>
-            </View>
-            <View style={styles.forecastItem}>
-              <Text style={styles.forecastIcon}>🌙</Text>
-              <Text style={styles.forecastValue}>
-                {selectedSpot.forecast?.tide?.status}
-              </Text>
-              <Text style={styles.forecastLabel}>Tide</Text>
-            </View>
-          </View>
 
-          <View style={styles.actionButtons}>
-            <Pressable style={styles.actionButton} onPress={handleShare}>
-              <Text style={styles.actionButtonIcon}>📤</Text>
-              <Text style={styles.actionButtonText}>Share</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.actionButton, styles.primaryButton]}
-              onPress={handleDirections}
-            >
-              <Text style={styles.actionButtonIcon}>🗺️</Text>
-              <Text style={[styles.actionButtonText, styles.primaryButtonText]}>
-                Directions
-              </Text>
-            </Pressable>
-          </View>
+            <View style={styles.forecastGrid}>
+              <View style={styles.forecastItem}>
+                <Text style={styles.forecastIcon}>🌊</Text>
+                <Text style={styles.forecastValue}>
+                  {selectedSpot.forecast?.waveHeight}m
+                </Text>
+                <Text style={styles.forecastLabel}>Wave</Text>
+              </View>
+              <View style={styles.forecastItem}>
+                <Text style={styles.forecastIcon}>💨</Text>
+                <Text style={styles.forecastValue}>
+                  {selectedSpot.forecast?.windSpeed} kph
+                </Text>
+                <Text style={styles.forecastLabel}>Wind</Text>
+              </View>
+              <View style={styles.forecastItem}>
+                <Text style={styles.forecastIcon}>🌙</Text>
+                <Text style={styles.forecastValue}>
+                  {selectedSpot.forecast?.tide?.status}
+                </Text>
+                <Text style={styles.forecastLabel}>Tide</Text>
+              </View>
+            </View>
+
+            {/* 7-Day Forecast Chart */}
+            <View style={styles.chartCard}>
+              <Text style={styles.chartTitle}>📈 7-Day Forecast</Text>
+              <ForecastChart spotId={selectedSpot.id} />
+            </View>
+
+            <View style={styles.actionButtons}>
+              <Pressable style={styles.actionButton} onPress={handleShare}>
+                <Text style={styles.actionButtonIcon}>📤</Text>
+                <Text style={styles.actionButtonText}>Share</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.actionButton, styles.primaryButton]}
+                onPress={handleDirections}
+              >
+                <Text style={styles.actionButtonIcon}>🗺️</Text>
+                <Text
+                  style={[styles.actionButtonText, styles.primaryButtonText]}
+                >
+                  Directions
+                </Text>
+              </Pressable>
+            </View>
+          </ScrollView>
         </View>
       )}
 
@@ -359,6 +396,11 @@ const styles = StyleSheet.create({
   myLocationIcon: {
     fontSize: 28,
   },
+  markerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "white",
+  },
   legend: {
     position: "absolute",
     top: 20,
@@ -396,13 +438,17 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 20,
-    paddingBottom: 30,
+    paddingHorizontal: 20,
+    paddingTop: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 10,
+    maxHeight: "70%",
+  },
+  infoScroll: {
+    maxHeight: "100%",
   },
   closeButton: {
     position: "absolute",
@@ -529,6 +575,20 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: "white",
+  },
+  chartCard: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: "#f8fafc",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  chartTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0f172a",
+    marginBottom: 8,
   },
 });
 

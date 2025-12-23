@@ -16,16 +16,8 @@ export default function DashboardScreen() {
   const router = useRouter();
 
   const handleFeaturePress = (item) => {
-    if (item.id === 1) {
-      // Spot Recommender
-      router.push("/spotRecommender");
-    } else if (item.id === 5) {
-      // Weather Forecasting
-      router.push("/weatherForecasting");
-    } else {
-      // Other features not implemented yet
-      console.log(`Feature "${item.title}" not yet implemented`);
-    }
+    // All features not implemented yet
+    console.log(`Feature "${item.title}" not yet implemented`);
   };
 
   const renderFeatureCard = ({ item }) => (
