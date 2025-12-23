@@ -318,7 +318,8 @@ const SpotDetailScreen = () => {
             📈 7-Day Wave Forecast
           </Text>
           <View className="bg-white rounded-2xl p-2.5 shadow-sm border border-gray-100">
-            <ForecastChart forecast={forecast} />
+            {/* Pass spotId and let ForecastChart fetch real 7-day data */}
+            <ForecastChart spotId={spot.id} />
           </View>
         </View>
 

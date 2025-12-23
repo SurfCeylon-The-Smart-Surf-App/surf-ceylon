@@ -307,7 +307,8 @@ export async function getSpotsData(preferences, userLocation = null, userId = nu
  */
 export async function get7DayForecast(spotId = '2', viewMode = 'daily') {
   try {
-    const response = await fetchWithRetry(`${API_BASE_URL}/forecast-chart?spotId=${spotId}&viewMode=${viewMode}`);
+    // Backend exposes /api/forecast supporting either :spotName or ?spotId
+    const response = await fetchWithRetry(`${API_BASE_URL}/forecast?spotId=${spotId}&viewMode=${viewMode}`);
     
     if (!response.ok) {
       throw new Error(`API call failed with status: ${response.status}`);
