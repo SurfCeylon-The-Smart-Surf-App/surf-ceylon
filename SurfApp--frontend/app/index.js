@@ -1,5 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Image, Animated, Easing, StatusBar, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  Animated,
+  Easing,
+  StatusBar,
+  StyleSheet,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useAuth } from "../hooks/useAuth";
