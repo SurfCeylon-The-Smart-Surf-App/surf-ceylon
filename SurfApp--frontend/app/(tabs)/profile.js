@@ -15,7 +15,10 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -65,12 +68,16 @@ export default function ProfileScreen() {
   // Sort sessions based on selected filter
   const sortedSessions = React.useMemo(() => {
     if (!sessions || sessions.length === 0) return [];
-    
+
     const sorted = [...sessions];
     if (sessionFilter === "newest") {
-      return sorted.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+      return sorted.sort(
+        (a, b) => new Date(b.startTime) - new Date(a.startTime)
+      );
     } else if (sessionFilter === "oldest") {
-      return sorted.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+      return sorted.sort(
+        (a, b) => new Date(a.startTime) - new Date(b.startTime)
+      );
     } else if (sessionFilter === "highest_rated") {
       return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
@@ -597,7 +604,10 @@ export default function ProfileScreen() {
         onRequestClose={() => setSelectedSession(null)}
       >
         <View className="flex-1 bg-gray-50">
-          <View className="bg-white border-b border-gray-200" style={{ paddingTop: insets.top }}>
+          <View
+            className="bg-white border-b border-gray-200"
+            style={{ paddingTop: insets.top }}
+          >
             <View className="flex-row items-center justify-between px-4 py-4">
               <Text className="text-lg font-bold text-gray-900">
                 Session Details
