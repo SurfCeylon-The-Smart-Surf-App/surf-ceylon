@@ -13,6 +13,29 @@ import {
 } from "react-native";
 import { get7DayForecast } from "../data/surfApi";
 
+// Generate default 7-day labels starting from today
+const generateDefaultLabels = () => {
+  const labels = [];
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dayName = dayNames[date.getDay()];
+    if (i === 0) labels.push("Today");
+    else if (i === 1) labels.push("Tmrw");
+    else labels.push(dayName);
+  }
+  return labels;
+};
+
+// Ensure chart-friendly arrays: if a single number is provided, repeat it for 7 days
+const ensureArray = (value, fallback) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "number") return Array(7).fill(value);
+  return fallback;
+};
+
 const ForecastChart = ({ spotId = "2", forecast = null, onViewModeChange }) => {
   const [forecastData, setForecastData] = useState(forecast);
   const [loading, setLoading] = useState(!forecast);
@@ -85,7 +108,8 @@ const ForecastChart = ({ spotId = "2", forecast = null, onViewModeChange }) => {
     );
   }
 
-  if (!forecastData || !forecastData.labels) {
+  // If no forecast at all, show a gentle error; otherwise we'll normalize
+  if (!forecastData) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>⚠️ Forecast data not available</Text>
@@ -116,28 +140,19 @@ const ForecastChart = ({ spotId = "2", forecast = null, onViewModeChange }) => {
         dayData, // Store for reference
       };
     } else {
-      // Daily view - use default labels only if forecastData.labels is missing
-      // (should rarely happen as API/fallback should provide labels)
+      // Daily view with normalization and sensible defaults
       return {
-        labels:
-          forecastData.labels ||
-          (() => {
-            const labels = [];
-            const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            const today = new Date();
-            for (let i = 0; i < 7; i++) {
-              const date = new Date(today);
-              date.setDate(today.getDate() + i);
-              const dayName = dayNames[date.getDay()];
-              if (i === 0) labels.push("Today");
-              else if (i === 1) labels.push("Tmrw");
-              else labels.push(dayName);
-            }
-            return labels;
-          })(),
-        waveHeight: forecastData.waveHeight || [1, 1, 1, 1, 1, 1, 1],
-        windSpeed: forecastData.windSpeed || [10, 10, 10, 10, 10, 10, 10],
-        swellPeriod: forecastData.swellPeriod || [10, 10, 10, 10, 10, 10, 10],
+        labels: forecastData.labels || generateDefaultLabels(),
+        waveHeight: ensureArray(forecastData.waveHeight, [1, 1, 1, 1, 1, 1, 1]),
+        windSpeed: ensureArray(
+          forecastData.windSpeed,
+          [10, 10, 10, 10, 10, 10, 10]
+        ),
+        swellPeriod: ensureArray(
+          // Accept either `swellPeriod` or `wavePeriod` as source
+          forecastData.swellPeriod ?? forecastData.wavePeriod,
+          [10, 10, 10, 10, 10, 10, 10]
+        ),
       };
     }
   };
