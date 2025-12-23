@@ -144,7 +144,10 @@ const ForecastChart = ({ spotId = "2", forecast = null, onViewModeChange }) => {
       return {
         labels: forecastData.labels || generateDefaultLabels(),
         waveHeight: ensureArray(forecastData.waveHeight, [1, 1, 1, 1, 1, 1, 1]),
-        windSpeed: ensureArray(forecastData.windSpeed, [10, 10, 10, 10, 10, 10, 10]),
+        windSpeed: ensureArray(
+          forecastData.windSpeed,
+          [10, 10, 10, 10, 10, 10, 10]
+        ),
         swellPeriod: ensureArray(
           // Accept either `swellPeriod` or `wavePeriod` as source
           forecastData.swellPeriod ?? forecastData.wavePeriod,
