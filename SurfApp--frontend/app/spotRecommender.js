@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -150,14 +151,14 @@ export default function SpotRecommender() {
 
   return (
     <View className="flex-1">
+      <StatusBar barStyle="light-content" />
       {/* Header with gradient */}
       <LinearGradient
         colors={["#2563eb", "#1d4ed8"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        className="pt-12 pb-4"
       >
-        <SafeAreaView edges={[]} className="px-4">
+        <SafeAreaView edges={["top"]} className="px-4 pb-4">
           <View className="flex-row items-center justify-between">
             <TouchableOpacity onPress={() => router.back()} className="p-2">
               <Ionicons name="arrow-back" size={24} color="#ffffff" />
