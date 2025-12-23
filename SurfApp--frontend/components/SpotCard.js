@@ -1,43 +1,48 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import { useUser } from '../context/UserContext';
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { useUser } from "../context/UserContext";
 
 const SpotCard = ({ spot, testID, origin }) => {
   const router = useRouter();
   const { setSelectedSpot } = useUser();
-  
-  const waveHeight = spot?.forecast?.waveHeight ?? '?';
-  const wavePeriod = spot?.forecast?.wavePeriod ?? '?';
-  const windSpeed = spot?.forecast?.windSpeed ?? '?';
-  const windDirection = spot?.forecast?.windDirection ?? '?';
-  const tideStatus = spot?.forecast?.tide?.status ?? '-';
-  
+
+  const waveHeight = spot?.forecast?.waveHeight ?? "?";
+  const wavePeriod = spot?.forecast?.wavePeriod ?? "?";
+  const windSpeed = spot?.forecast?.windSpeed ?? "?";
+  const windDirection = spot?.forecast?.windDirection ?? "?";
+  const tideStatus = spot?.forecast?.tide?.status ?? "-";
+
   // Use spot.score (number) for calculations, spot.suitability (string) for label
-  const score = typeof spot?.score === 'number' && !isNaN(spot.score) ? spot.score : 0;
-  const suitabilityLabel = spot?.suitability || 'Unknown';
-  
+  const score =
+    typeof spot?.score === "number" && !isNaN(spot.score) ? spot.score : 0;
+  const suitabilityLabel = spot?.suitability || "Unknown";
+
   // Enhanced breakdown data (Phase 1)
   const breakdown = spot?.breakdown || {};
-  const hasWarnings = spot?.warnings && spot?.warnings.length > 0;
   const canSurf = spot?.canSurf !== undefined ? spot.canSurf : true;
-  
+
   const handlePress = () => {
     setSelectedSpot(spot);
-    router.push({ pathname: '/(spots)/detail', params: { origin } });
+    router.push({ pathname: "/(spots)/detail", params: { origin } });
   };
   // Debug logging
-  if (spot?.name === 'Midigama') {
-    console.log('Midigama card - distance:', spot.distance, 'type:', typeof spot.distance);
+  if (spot?.name === "Midigama") {
+    console.log(
+      "Midigama card - distance:",
+      spot.distance,
+      "type:",
+      typeof spot.distance
+    );
   }
 
   // Determine color based on score
   const getGradientColors = () => {
-    if (score >= 75) return ['#4ade80', '#22c55e']; // Green
-    if (score >= 50) return ['#fbbf24', '#f59e0b']; // Yellow/Orange
-    if (score >= 25) return ['#fb923c', '#f97316']; // Orange
-    return ['#f87171', '#ef4444']; // Red
+    if (score >= 75) return ["#4ade80", "#22c55e"]; // Green
+    if (score >= 50) return ["#fbbf24", "#f59e0b"]; // Yellow/Orange
+    if (score >= 25) return ["#fb923c", "#f97316"]; // Orange
+    return ["#f87171", "#ef4444"]; // Red
   };
 
   return (
@@ -64,7 +69,7 @@ const SpotCard = ({ spot, testID, origin }) => {
               )}
             </View>
           </View>
-          
+
           <LinearGradient
             colors={getGradientColors()}
             start={{ x: 0, y: 0 }}
@@ -80,16 +85,6 @@ const SpotCard = ({ spot, testID, origin }) => {
             {!canSurf && <Text className="text-xs mt-0.5">⚠️</Text>}
           </LinearGradient>
         </View>
-
-        {/* Warning Banner */}
-        {hasWarnings && (
-          <View className="bg-red-50 border-l-3 border-red-500 p-3 mt-3 rounded-lg flex-row items-center">
-            <Text className="text-base mr-2">⚠️</Text>
-            <Text className="text-xs text-red-900 font-semibold">
-              Safety warnings - tap for details
-            </Text>
-          </View>
-        )}
 
         {/* Forecast Details Grid */}
         <View className="flex-row flex-wrap mt-2">
