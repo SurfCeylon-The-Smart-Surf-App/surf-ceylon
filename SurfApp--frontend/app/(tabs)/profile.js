@@ -15,7 +15,7 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -26,6 +26,7 @@ import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import { getUserSessions, getUserInsights } from "../../data/surfApi";
 
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const [userPosts, setUserPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -60,6 +61,21 @@ export default function ProfileScreen() {
 
   const { user, logout } = useAuth();
   const { getFollowerDelta, getFollowingDelta } = useRealTimeUpdates(user?._id);
+
+  // Sort sessions based on selected filter
+  const sortedSessions = React.useMemo(() => {
+    if (!sessions || sessions.length === 0) return [];
+    
+    const sorted = [...sessions];
+    if (sessionFilter === "newest") {
+      return sorted.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+    } else if (sessionFilter === "oldest") {
+      return sorted.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    } else if (sessionFilter === "highest_rated") {
+      return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+    return sorted;
+  }, [sessions, sessionFilter]);
 
   useEffect(() => {
     if (user) {
@@ -581,23 +597,20 @@ export default function ProfileScreen() {
         onRequestClose={() => setSelectedSession(null)}
       >
         <View className="flex-1 bg-gray-50">
-          <SafeAreaView
-            edges={["top"]}
-            className="bg-white border-b border-gray-200"
-          >
-            <View className="flex-row items-center justify-between px-4 py-3">
+          <View className="bg-white border-b border-gray-200" style={{ paddingTop: insets.top }}>
+            <View className="flex-row items-center justify-between px-4 py-4">
               <Text className="text-lg font-bold text-gray-900">
                 Session Details
               </Text>
               <TouchableOpacity
                 onPress={() => setSelectedSession(null)}
-                className="p-2 -m-2"
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                style={{ padding: 8, margin: -8 }}
+                hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
               >
-                <Ionicons name="close" size={24} color="#6b7280" />
+                <Ionicons name="close" size={28} color="#6b7280" />
               </TouchableOpacity>
             </View>
-          </SafeAreaView>
+          </View>
 
           {selectedSession && (
             <ScrollView className="p-4 flex-1">
@@ -1148,7 +1161,7 @@ export default function ProfileScreen() {
           </View>
 
           <FlatList
-            data={sessions}
+            data={sortedSessions}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <SessionCard
