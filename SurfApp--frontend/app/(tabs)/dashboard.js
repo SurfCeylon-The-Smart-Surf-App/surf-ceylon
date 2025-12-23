@@ -17,8 +17,13 @@ export default function DashboardScreen() {
   const router = useRouter();
 
   const handleFeaturePress = (item) => {
-    // All features not implemented yet
-    console.log(`Feature "${item.title}" not yet implemented`);
+    if (item.id === 1) {
+      // Navigate to market tab
+      router.push("/market");
+    } else {
+      // Other features not implemented yet
+      console.log(`Feature "${item.title}" not yet implemented`);
+    }
   };
 
   const renderFeatureCard = ({ item }) => (
@@ -59,8 +64,8 @@ export default function DashboardScreen() {
         end={{ x: 1, y: 0 }}
       >
         <SafeAreaView edges={["top"]} className="px-6 pb-4">
-          <Text className="text-white text-2xl font-bold">Dashboard</Text>
-          <Text className="text-blue-100 text-sm">Advanced surf analytics</Text>
+          <Text className="text-white text-2xl font-bold">Utils</Text>
+          <Text className="text-blue-100 text-sm">Utilities & services</Text>
         </SafeAreaView>
       </LinearGradient>
 
@@ -71,7 +76,7 @@ export default function DashboardScreen() {
         >
           {/* Advanced Features Header */}
           <Text className="text-xl font-bold text-gray-900 mb-6">
-            Advanced Features
+            Features & Services
           </Text>
 
           {/* Feature Cards */}
