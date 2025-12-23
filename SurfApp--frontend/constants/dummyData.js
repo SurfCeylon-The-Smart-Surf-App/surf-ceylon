@@ -80,6 +80,13 @@ export const dummyMarketServices = [
 
 export const dummyDashboardFeatures = [
   {
+    id: 1,
+    title: "Surf Market",
+    description: "Find surf schools, instructors & gear",
+    icon: "🏪",
+    color: "bg-blue-500",
+  },
+  {
     id: 2,
     title: "Risk Analyzer",
     description:
