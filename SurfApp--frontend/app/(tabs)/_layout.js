@@ -37,15 +37,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="market"
-        options={{
-          title: "Market",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="storefront" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="community"
         options={{
           title: "Community",
@@ -66,10 +57,16 @@ export default function TabLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: "Dashboard",
+          title: "Utils",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="analytics" size={size} color={color} />
+            <Ionicons name="apps" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="market"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen

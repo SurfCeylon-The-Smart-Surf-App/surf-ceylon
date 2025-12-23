@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -96,16 +97,16 @@ export default function FollowersListScreen() {
 
   return (
     <View className="flex-1">
+      <StatusBar barStyle="light-content" />
       {/* Header */}
       <LinearGradient
         colors={["#2563eb", "#1d4ed8"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        className="pt-12 pb-4"
       >
         <SafeAreaView
-          edges={[]}
-          className="px-6 flex-row items-center justify-between"
+          edges={["top"]}
+          className="px-6 pb-4 flex-row items-center justify-between"
         >
           <View className="flex-row items-center flex-1">
             <TouchableOpacity onPress={() => router.back()} className="mr-4">

@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,11 +18,8 @@ export default function DashboardScreen() {
 
   const handleFeaturePress = (item) => {
     if (item.id === 1) {
-      // Spot Recommender
-      router.push("/spotRecommender");
-    } else if (item.id === 5) {
-      // Weather Forecasting
-      router.push("/weatherForecasting");
+      // Navigate to market tab
+      router.push("/market");
     } else {
       // Other features not implemented yet
       console.log(`Feature "${item.title}" not yet implemented`);
@@ -58,16 +56,16 @@ export default function DashboardScreen() {
 
   return (
     <View className="flex-1">
+      <StatusBar barStyle="light-content" />
       {/* Header with gradient extending to notch */}
       <LinearGradient
         colors={["#2563eb", "#1d4ed8"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        className="pt-12 pb-4"
       >
-        <SafeAreaView edges={[]} className="px-6">
-          <Text className="text-white text-2xl font-bold">Dashboard</Text>
-          <Text className="text-blue-100 text-sm">Advanced surf analytics</Text>
+        <SafeAreaView edges={["top"]} className="px-6 pb-4">
+          <Text className="text-white text-2xl font-bold">Utils</Text>
+          <Text className="text-blue-100 text-sm">Utilities & services</Text>
         </SafeAreaView>
       </LinearGradient>
 
@@ -78,7 +76,7 @@ export default function DashboardScreen() {
         >
           {/* Advanced Features Header */}
           <Text className="text-xl font-bold text-gray-900 mb-6">
-            Advanced Features
+            Features & Services
           </Text>
 
           {/* Feature Cards */}

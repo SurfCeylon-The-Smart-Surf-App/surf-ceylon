@@ -128,4 +128,29 @@ export const messagesAPI = {
   deleteMessage: (messageId) => api.delete(`/messages/${messageId}`),
 };
 
+// Surf Spots APIs
+export const spotsAPI = {
+  getSpots: (params) => api.get("/spots", { params }),
+  getSpotById: (spotId) => api.get(`/spots/${spotId}`),
+  getForecast: (spotId, viewMode = "daily") =>
+    api.get(`/forecast`, { params: { spotId, viewMode } }),
+};
+
+// Surf Sessions APIs
+export const sessionsAPI = {
+  getSessions: (params) => api.get("/sessions", { params }),
+  getSessionById: (sessionId) => api.get(`/sessions/${sessionId}`),
+  createSession: (sessionData) => api.post("/sessions", sessionData),
+  updateSession: (sessionId, sessionData) =>
+    api.put(`/sessions/${sessionId}`, sessionData),
+  endSession: (sessionId, sessionData) =>
+    api.put(`/sessions/${sessionId}/end`, sessionData),
+  deleteSession: (sessionId) => api.delete(`/sessions/${sessionId}`),
+};
+
+// Health check API
+export const healthAPI = {
+  check: () => api.get("/health"),
+};
+
 export default api;
