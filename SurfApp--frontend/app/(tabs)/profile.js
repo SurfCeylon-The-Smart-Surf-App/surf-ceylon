@@ -701,11 +701,10 @@ export default function ProfileScreen() {
                   label="Wind Direction"
                   value={selectedSession.windDirection || "N/A"}
                 />
-                <DetailRow label="Tide" value={selectedSession.tide || "N/A"} />
                 <View className="flex-row justify-between items-center py-3">
-                  <Text className="text-sm text-gray-600">Crowd Level</Text>
+                  <Text className="text-sm text-gray-600">Tide</Text>
                   <Text className="text-sm font-semibold text-gray-900">
-                    {selectedSession.crowdLevel || "N/A"}
+                    {selectedSession.tide || "N/A"}
                   </Text>
                 </View>
               </View>
