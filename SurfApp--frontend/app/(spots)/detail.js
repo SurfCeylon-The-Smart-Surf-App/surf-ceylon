@@ -401,7 +401,7 @@ const SpotDetailScreen = () => {
         transparent={true}
         onRequestClose={() => setShowEndSessionModal(false)}
       >
-        <KeyboardAvoidingView 
+        <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           className="flex-1"
         >
@@ -409,107 +409,111 @@ const SpotDetailScreen = () => {
             <View className="flex-1 bg-black/50 justify-center items-center p-4">
               <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
                 <View className="bg-white rounded-3xl p-6 w-full max-w-md">
-            <Text className="text-2xl font-bold text-gray-900 text-center mb-6">
-              Rate Your Session
-            </Text>
-
-            <Text className="text-base font-semibold text-gray-700 mb-3">
-              How was your session?
-            </Text>
-            <View className="flex-row justify-between mb-6">
-              {[1, 2, 3, 4, 5].map((rating) => (
-                <TouchableOpacity
-                  key={rating}
-                  onPress={() => setSessionRating(rating)}
-                  className={`w-12 h-12 rounded-full items-center justify-center ${
-                    sessionRating === rating ? "bg-blue-600" : "bg-gray-200"
-                  }`}
-                >
-                  <Text
-                    className={`text-lg font-bold ${
-                      sessionRating === rating ? "text-white" : "text-gray-600"
-                    }`}
-                  >
-                    {rating}
+                  <Text className="text-2xl font-bold text-gray-900 text-center mb-6">
+                    Rate Your Session
                   </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
 
-            <Text className="text-base font-semibold text-gray-700 mb-3">
-              Would you surf here again?
-            </Text>
-            <View className="flex-row gap-3 mb-6">
-              <TouchableOpacity
-                onPress={() => setWouldReturn(true)}
-                className={`flex-1 py-3 rounded-lg items-center ${
-                  wouldReturn ? "bg-green-600" : "bg-gray-200"
-                }`}
-              >
-                <Text
-                  className={`text-base font-semibold ${
-                    wouldReturn ? "text-white" : "text-gray-600"
-                  }`}
-                >
-                  Yes 👍
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setWouldReturn(false)}
-                className={`flex-1 py-3 rounded-lg items-center ${
-                  !wouldReturn ? "bg-green-600" : "bg-gray-200"
-                }`}
-              >
-                <Text
-                  className={`text-base font-semibold ${
-                    !wouldReturn ? "text-white" : "text-gray-600"
-                  }`}
-                >
-                  No 👎
-                </Text>
-              </TouchableOpacity>
-            </View>
+                  <Text className="text-base font-semibold text-gray-700 mb-3">
+                    How was your session?
+                  </Text>
+                  <View className="flex-row justify-between mb-6">
+                    {[1, 2, 3, 4, 5].map((rating) => (
+                      <TouchableOpacity
+                        key={rating}
+                        onPress={() => setSessionRating(rating)}
+                        className={`w-12 h-12 rounded-full items-center justify-center ${
+                          sessionRating === rating
+                            ? "bg-blue-600"
+                            : "bg-gray-200"
+                        }`}
+                      >
+                        <Text
+                          className={`text-lg font-bold ${
+                            sessionRating === rating
+                              ? "text-white"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          {rating}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
 
-            <Text className="text-base font-semibold text-gray-700 mb-3">
-              Comments (optional)
-            </Text>
-            <TextInput
-              placeholder="How were the waves? Any tips?"
-              multiline
-              numberOfLines={3}
-              value={sessionComments}
-              onChangeText={setSessionComments}
-              className="bg-gray-100 rounded-lg p-3 text-base text-gray-900 mb-6"
-              placeholderTextColor="#9ca3af"
-              returnKeyType="done"
-              blurOnSubmit={true}
-              onSubmitEditing={Keyboard.dismiss}
-            />
+                  <Text className="text-base font-semibold text-gray-700 mb-3">
+                    Would you surf here again?
+                  </Text>
+                  <View className="flex-row gap-3 mb-6">
+                    <TouchableOpacity
+                      onPress={() => setWouldReturn(true)}
+                      className={`flex-1 py-3 rounded-lg items-center ${
+                        wouldReturn ? "bg-green-600" : "bg-gray-200"
+                      }`}
+                    >
+                      <Text
+                        className={`text-base font-semibold ${
+                          wouldReturn ? "text-white" : "text-gray-600"
+                        }`}
+                      >
+                        Yes 👍
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setWouldReturn(false)}
+                      className={`flex-1 py-3 rounded-lg items-center ${
+                        !wouldReturn ? "bg-green-600" : "bg-gray-200"
+                      }`}
+                    >
+                      <Text
+                        className={`text-base font-semibold ${
+                          !wouldReturn ? "text-white" : "text-gray-600"
+                        }`}
+                      >
+                        No 👎
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
 
-            <View className="flex-row gap-3">
-              <TouchableOpacity
-                onPress={() => setShowEndSessionModal(false)}
-                className="flex-1 py-3 rounded-lg bg-gray-200 items-center"
-              >
-                <Text className="text-base font-semibold text-gray-700">
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleEndSession}
-                className="flex-1 py-3 rounded-lg bg-blue-600 items-center"
-              >
-                <Text className="text-base font-semibold text-white">
-                  Submit
-                </Text>
-              </TouchableOpacity>
+                  <Text className="text-base font-semibold text-gray-700 mb-3">
+                    Comments (optional)
+                  </Text>
+                  <TextInput
+                    placeholder="How were the waves? Any tips?"
+                    multiline
+                    numberOfLines={3}
+                    value={sessionComments}
+                    onChangeText={setSessionComments}
+                    className="bg-gray-100 rounded-lg p-3 text-base text-gray-900 mb-6"
+                    placeholderTextColor="#9ca3af"
+                    returnKeyType="done"
+                    blurOnSubmit={true}
+                    onSubmitEditing={Keyboard.dismiss}
+                  />
+
+                  <View className="flex-row gap-3">
+                    <TouchableOpacity
+                      onPress={() => setShowEndSessionModal(false)}
+                      className="flex-1 py-3 rounded-lg bg-gray-200 items-center"
+                    >
+                      <Text className="text-base font-semibold text-gray-700">
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleEndSession}
+                      className="flex-1 py-3 rounded-lg bg-blue-600 items-center"
+                    >
+                      <Text className="text-base font-semibold text-white">
+                        Submit
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
             </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </View>
-    </TouchableWithoutFeedback>
-  </KeyboardAvoidingView>
-</Modal>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </Modal>
     </>
   );
 };
