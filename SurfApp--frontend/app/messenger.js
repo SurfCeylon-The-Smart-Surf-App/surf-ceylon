@@ -5,13 +5,14 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  SafeAreaView,
   RefreshControl,
   Alert,
   ActivityIndicator,
   TextInput,
   Modal,
+  StatusBar,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -304,14 +305,14 @@ const MessengerPage = () => {
 
   return (
     <View className="flex-1 bg-gray-50">
+      <StatusBar barStyle="light-content" />
       {/* Header */}
       <LinearGradient
         colors={["#2563eb", "#1d4ed8"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
-        className="pt-12 pb-4"
       >
-        <SafeAreaView edges={[]} className="px-6">
+        <SafeAreaView edges={["top"]} className="px-6 pb-4">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center">
               <TouchableOpacity onPress={() => router.back()} className="mr-3">
