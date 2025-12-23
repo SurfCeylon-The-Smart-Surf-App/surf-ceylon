@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import { startSession, endSession } from "../../data/surfApi";
 
 const SpotDetailScreen = () => {
   const router = useRouter();
-  const { origin } = useLocalSearchParams();
+  const { origin, scrollToSession } = useLocalSearchParams();
   const { user } = useAuth();
   const {
     selectedSpot: contextSpot,
@@ -32,7 +32,26 @@ const SpotDetailScreen = () => {
   const [wouldReturn, setWouldReturn] = useState(true);
   const [sessionComments, setSessionComments] = useState("");
 
+  const scrollViewRef = useRef(null);
+  const [sessionButtonY, setSessionButtonY] = useState(0);
+
   const spot = contextSpot;
+
+  // Scroll to session button when navigating from banner
+  useEffect(() => {
+    if (
+      scrollToSession === "true" &&
+      sessionButtonY > 0 &&
+      scrollViewRef.current
+    ) {
+      setTimeout(() => {
+        scrollViewRef.current?.scrollTo({
+          y: sessionButtonY - 100,
+          animated: true,
+        });
+      }, 500);
+    }
+  }, [scrollToSession, sessionButtonY]);
 
   if (!spot) {
     return (
@@ -174,7 +193,7 @@ const SpotDetailScreen = () => {
           ),
         }}
       />
-      <ScrollView className="flex-1 bg-gray-50">
+      <ScrollView ref={scrollViewRef} className="flex-1 bg-gray-50">
         {/* Hero Section */}
         <LinearGradient
           colors={getGradientColors()}
@@ -288,7 +307,13 @@ const SpotDetailScreen = () => {
         </View>
 
         {/* Session Tracking */}
-        <View className="px-5 py-4">
+        <View
+          onLayout={(event) => {
+            const layout = event.nativeEvent.layout;
+            setSessionButtonY(layout.y);
+          }}
+          className="px-5 py-4"
+        >
           {!activeSessionId ? (
             <TouchableOpacity
               onPress={handleStartSession}

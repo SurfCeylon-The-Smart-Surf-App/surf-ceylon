@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, Image, Animated, Easing } from "react-native";
+import { View, Text, Image, Animated, Easing, StatusBar, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useAuth } from "../hooks/useAuth";
@@ -66,48 +66,106 @@ export default function SplashScreen() {
   });
 
   return (
-    <LinearGradient
-      colors={["#2563eb", "#1d4ed8"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      className="flex-1 items-center justify-center"
-    >
-      {/* Animated Logo Container */}
-      <Animated.View
-        style={{
-          opacity: fadeAnim,
-          transform: [{ scale: scaleAnim }, { translateY: slideAnim }],
-        }}
-        className="items-center mb-8"
+    <View style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        translucent
+        backgroundColor="transparent"
+      />
+      <LinearGradient
+        colors={["#2563eb", "#1d4ed8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
       >
-        {/* Logo */}
-        <View className="w-32 h-32 bg-white rounded-full items-center justify-center mb-6 shadow-2xl">
-          <Image
-            source={require("../assets/logo1.png")}
-            className="w-24 h-24"
-            resizeMode="contain"
-          />
-        </View>
+        {/* Animated Logo Container */}
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }, { translateY: slideAnim }],
+            alignItems: "center",
+            marginBottom: 32,
+          }}
+        >
+          {/* Logo */}
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../assets/logo1.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
 
-        {/* App Title */}
-        <Text className="text-white text-4xl font-bold text-center mb-2">
-          SURF CEYLON
-        </Text>
-        <Text className="text-blue-100 text-lg font-medium tracking-wide">
-          THE SMART SURF APP
-        </Text>
-      </Animated.View>
+          {/* App Title */}
+          <Text style={styles.title}>SURF CEYLON</Text>
+          <Text style={styles.subtitle}>THE SMART SURF APP</Text>
+        </Animated.View>
 
-      {/* Loading Indicator */}
-      <Animated.View
-        style={{
-          opacity: fadeAnim,
-          transform: [{ rotate: spin }],
-        }}
-        className="absolute bottom-20"
-      >
-        <View className="w-10 h-10 border-4 border-white border-t-transparent rounded-full" />
-      </Animated.View>
-    </LinearGradient>
+        {/* Loading Indicator */}
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+            transform: [{ rotate: spin }],
+            position: "absolute",
+            bottom: 80,
+          }}
+        >
+          <View style={styles.spinner} />
+        </Animated.View>
+      </LinearGradient>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#2563eb",
+  },
+  gradient: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoContainer: {
+    width: 128,
+    height: 128,
+    backgroundColor: "white",
+    borderRadius: 64,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 20,
+  },
+  logo: {
+    width: 96,
+    height: 96,
+  },
+  title: {
+    color: "white",
+    fontSize: 36,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  subtitle: {
+    color: "rgba(191, 219, 254, 1)",
+    fontSize: 18,
+    fontWeight: "500",
+    letterSpacing: 1,
+  },
+  spinner: {
+    width: 40,
+    height: 40,
+    borderWidth: 4,
+    borderColor: "white",
+    borderTopColor: "transparent",
+    borderRadius: 20,
+  },
+});
