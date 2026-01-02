@@ -28,24 +28,29 @@ app.add_middleware(
 # REQUEST/RESPONSE MODELS
 # ============================================================================
 
+
 class UserDetails(BaseModel):
     height: Optional[float] = 0
     weight: Optional[float] = 0
     bmi: Optional[float] = None
+
 
 class AdaptiveAdjustments(BaseModel):
     restMultiplierAdjustment: Optional[float] = 0
     setsAdjustment: Optional[int] = 0
     exerciseDifficultyAdjustment: Optional[str] = "same"
 
+
 class PredictionRequest(BaseModel):
     skillLevel: str  # Beginner/Intermediate/Pro
     goal: List[str]  # Array of goals from frontend
     userDetails: Optional[UserDetails] = None
-    durationRange: Optional[str] = None  # "5-10 minutes", "10-20 minutes", "20+ minutes"
+    # "5-10 minutes", "10-20 minutes", "20+ minutes"
+    durationRange: Optional[str] = None
     limitations: Optional[List[str]] = None
     equipment: Optional[str] = "None"  # None/Kettlebell/Gym
     adaptiveAdjustments: Optional[AdaptiveAdjustments] = None
+
 
 class WorkoutPlan(BaseModel):
     planName: str
@@ -57,6 +62,7 @@ class WorkoutPlan(BaseModel):
     focus: str
     bmiCategory: Optional[str] = "normal"
 
+
 class PredictionResponse(BaseModel):
     recommendedPlans: List[WorkoutPlan]
 
@@ -64,13 +70,14 @@ class PredictionResponse(BaseModel):
 # GOAL MAPPING
 # ============================================================================
 
+
 def map_frontend_goals_to_quiz_goal(goals: List[str]) -> str:
     """
     Map frontend ML goals to quiz goals
     Frontend sends: ['Endurance', 'Stamina', etc.]
     Need to convert to: 'Improve endurance', 'Build stamina', etc.
     """
-    
+
     # Mapping from ML goals to quiz goals
     goal_mapping = {
         'Endurance': 'Improve endurance',
@@ -80,21 +87,22 @@ def map_frontend_goals_to_quiz_goal(goals: List[str]) -> str:
         'Warmup': 'Warm up only',
         'Warm up': 'Warm up only'
     }
-    
+
     if not goals:
         return 'Improve endurance'  # Default
-    
+
     # Take the first goal from the list
     primary_goal = goals[0]
-    
+
     # Map to quiz goal
     quiz_goal = goal_mapping.get(primary_goal, 'Improve endurance')
-    
+
     return quiz_goal
 
 # ============================================================================
 # MAIN PREDICTION ENDPOINT
 # ============================================================================
+
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(request: PredictionRequest):
@@ -102,7 +110,7 @@ async def predict(request: PredictionRequest):
     Generate 3 personalized workout plan variations
     Uses ALL quiz data: skill, goal, duration, BMI, limitations, equipment
     """
-    
+
     try:
         # Extract parameters
         skill_level = request.skillLevel
@@ -110,14 +118,14 @@ async def predict(request: PredictionRequest):
         duration_range = request.durationRange or "10-20 minutes"
         equipment = request.equipment or "None"
         limitations = request.limitations or []
-        
+
         # Extract user details
         height_cm = 0
         weight_kg = 0
         if request.userDetails:
             height_cm = request.userDetails.height or 0
             weight_kg = request.userDetails.weight or 0
-        
+
         # Extract adaptive adjustments
         adaptive_adjustments = {}
         if request.adaptiveAdjustments:
@@ -126,15 +134,15 @@ async def predict(request: PredictionRequest):
                 'setsAdjustment': request.adaptiveAdjustments.setsAdjustment,
                 'exerciseDifficultyAdjustment': request.adaptiveAdjustments.exerciseDifficultyAdjustment
             }
-        
+
         # Map goals to quiz format
         quiz_goal = map_frontend_goals_to_quiz_goal(goals)
-        
+
         # Validate quiz goal exists in our system
         if quiz_goal not in GOAL_CATEGORIES:
             print(f"⚠️ Unknown goal '{quiz_goal}', using default")
             quiz_goal = 'Improve endurance'
-        
+
         print(f"\n🎯 Generating plans for:")
         print(f"   Skill: {skill_level}")
         print(f"   Goal: {quiz_goal}")
@@ -143,7 +151,7 @@ async def predict(request: PredictionRequest):
         print(f"   BMI: height={height_cm}cm, weight={weight_kg}kg")
         print(f"   Limitations: {limitations}")
         print(f"   Adaptive: {adaptive_adjustments}")
-        
+
         # Generate 3 truly different plan variations
         plans = generate_3_plan_variations(
             skill_level=skill_level,
@@ -155,7 +163,7 @@ async def predict(request: PredictionRequest):
             equipment=equipment,
             adaptive_adjustments=adaptive_adjustments
         )
-        
+
         # Convert to response format
         workout_plans = [
             WorkoutPlan(
@@ -170,23 +178,25 @@ async def predict(request: PredictionRequest):
             )
             for plan in plans
         ]
-        
+
         print(f"\n✅ Generated {len(workout_plans)} unique plans:")
         for i, plan in enumerate(workout_plans, 1):
             print(f"   {i}. {plan.planName} ({plan.durationMinutes} min)")
             print(f"      {plan.exercises[:100]}...")
-        
+
         return PredictionResponse(recommendedPlans=workout_plans)
-    
+
     except Exception as e:
         print(f"\n❌ Error generating plans: {str(e)}")
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Failed to generate plans: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate plans: {str(e)}")
 
 # ============================================================================
 # HEALTH CHECK
 # ============================================================================
+
 
 @app.get("/health")
 async def health_check():
@@ -205,6 +215,7 @@ async def health_check():
         ]
     }
 
+
 @app.get("/")
 async def root():
     """Root endpoint with API info"""
@@ -217,6 +228,7 @@ async def root():
         },
         "documentation": "/docs"
     }
+
 
 @app.get("/goals")
 async def list_goals():
@@ -251,5 +263,5 @@ if __name__ == "__main__":
     print("   - Adaptive learning from workout history")
     print("   - Generates 3 truly unique plan variations")
     print("\n" + "="*60 + "\n")
-    
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

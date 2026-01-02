@@ -1,6 +1,6 @@
-const admin = require('firebase-admin');
-const fs = require('fs');
-const path = require('path');
+const admin = require("firebase-admin");
+const fs = require("fs");
+const path = require("path");
 
 let initialized = false;
 
@@ -9,7 +9,7 @@ function init() {
   const keyPath = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (!keyPath) {
     // Try to find firebase-key.json in the backend root
-    const possiblePath = path.join(__dirname, '..', 'firebase-key.json');
+    const possiblePath = path.join(__dirname, "..", "firebase-key.json");
     if (fs.existsSync(possiblePath)) {
       try {
         const serviceAccount = require(possiblePath);
@@ -19,15 +19,20 @@ function init() {
         initialized = true;
         return;
       } catch (e) {
-        console.warn('Failed to initialize Firebase with firebase-key.json:', e.message);
+        console.warn(
+          "Failed to initialize Firebase with firebase-key.json:",
+          e.message
+        );
       }
     }
-    console.warn('FIREBASE_SERVICE_ACCOUNT not set; Firebase admin will be disabled.');
+    console.warn(
+      "FIREBASE_SERVICE_ACCOUNT not set; Firebase admin will be disabled."
+    );
     return;
   }
 
   if (!fs.existsSync(keyPath)) {
-    console.warn('FIREBASE_SERVICE_ACCOUNT points to a missing file:', keyPath);
+    console.warn("FIREBASE_SERVICE_ACCOUNT points to a missing file:", keyPath);
     return;
   }
 
@@ -44,5 +49,5 @@ module.exports = {
   isInitialized: () => initialized,
   auth: () => admin.auth(),
   firestore: () => admin.firestore(),
-  admin
+  admin,
 };

@@ -12,8 +12,8 @@ const app = express();
 app.use(helmet());
 app.use(morgan("combined"));
 app.use(cors());
-app.use(express.json({ limit: '10mb' })); // Increased for pose detection images
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: "10mb" })); // Increased for pose detection images
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Request logging middleware for debugging
 app.use((req, res, next) => {

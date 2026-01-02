@@ -19,7 +19,7 @@ class ApiError extends Error {
  * Not Found Error
  */
 class NotFoundError extends ApiError {
-  constructor(message = 'Resource not found') {
+  constructor(message = "Resource not found") {
     super(404, message);
   }
 }
@@ -28,7 +28,7 @@ class NotFoundError extends ApiError {
  * Validation Error
  */
 class ValidationError extends ApiError {
-  constructor(message = 'Validation failed', details = null) {
+  constructor(message = "Validation failed", details = null) {
     super(400, message, details);
   }
 }
@@ -37,7 +37,7 @@ class ValidationError extends ApiError {
  * Unauthorized Error
  */
 class UnauthorizedError extends ApiError {
-  constructor(message = 'Unauthorized') {
+  constructor(message = "Unauthorized") {
     super(401, message);
   }
 }
@@ -46,7 +46,7 @@ class UnauthorizedError extends ApiError {
  * Forbidden Error
  */
 class ForbiddenError extends ApiError {
-  constructor(message = 'Forbidden') {
+  constructor(message = "Forbidden") {
     super(403, message);
   }
 }
@@ -55,38 +55,38 @@ class ForbiddenError extends ApiError {
  * Global error handler middleware
  */
 function errorHandler(err, req, res, next) {
-  console.error('[ErrorHandler] Error occurred:', err);
-  
+  console.error("[ErrorHandler] Error occurred:", err);
+
   // Default error values
   let statusCode = err.statusCode || 500;
-  let message = err.message || 'Internal server error';
+  let message = err.message || "Internal server error";
   let details = err.details || null;
-  
+
   // Handle specific error types
-  if (err.name === 'ValidationError') {
+  if (err.name === "ValidationError") {
     statusCode = 400;
-    message = 'Validation error';
-  } else if (err.name === 'CastError') {
+    message = "Validation error";
+  } else if (err.name === "CastError") {
     statusCode = 400;
-    message = 'Invalid ID format';
-  } else if (err.code === 'USER_EXISTS') {
+    message = "Invalid ID format";
+  } else if (err.code === "USER_EXISTS") {
     statusCode = 409;
-    message = 'User already exists';
-  } else if (err.name === 'JsonWebTokenError') {
+    message = "User already exists";
+  } else if (err.name === "JsonWebTokenError") {
     statusCode = 401;
-    message = 'Invalid token';
-  } else if (err.name === 'TokenExpiredError') {
+    message = "Invalid token";
+  } else if (err.name === "TokenExpiredError") {
     statusCode = 401;
-    message = 'Token expired';
+    message = "Token expired";
   }
-  
+
   // Build error response
   const errorResponse = {
     error: message,
     ...(details && { details }),
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
+    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
   };
-  
+
   res.status(statusCode).json(errorResponse);
 }
 
@@ -103,7 +103,7 @@ function asyncHandler(fn) {
  * 404 handler for unknown routes
  */
 function notFoundHandler(req, res, next) {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({ error: "Route not found" });
 }
 
 module.exports = {
@@ -114,5 +114,5 @@ module.exports = {
   ForbiddenError,
   errorHandler,
   asyncHandler,
-  notFoundHandler
+  notFoundHandler,
 };

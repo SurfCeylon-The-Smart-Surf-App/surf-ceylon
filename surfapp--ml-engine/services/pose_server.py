@@ -22,10 +22,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class PoseDetectionRequest(BaseModel):
     image: str  # Base64 encoded image
     drillId: Optional[str] = None  # Optional drill ID for context
-    sessionId: Optional[str] = None  # Optional session ID for velocity tracking
+    # Optional session ID for velocity tracking
+    sessionId: Optional[str] = None
+
 
 class PoseDetectionResponse(BaseModel):
     success: bool
@@ -45,6 +48,7 @@ class PoseDetectionResponse(BaseModel):
     velocity: Optional[dict] = None
     landmark_count: int = 0
 
+
 @app.get('/health')
 def health():
     """Health check endpoint"""
@@ -54,31 +58,34 @@ def health():
         "model": "MediaPipe Pose"
     }
 
+
 @app.post('/detect', response_model=PoseDetectionResponse)
 def detect_pose(request: PoseDetectionRequest):
     """
     Detect pose landmarks from base64 encoded image
-    
+
     Args:
         request: Contains base64 image and optional drillId
-        
+
     Returns:
         PoseDetectionResponse with landmarks or error
     """
     try:
         if not request.image:
             raise HTTPException(status_code=400, detail="Image is required")
-        
+
         # Detect pose (pass session_id for velocity tracking)
-        result = detect_pose_from_base64(request.image, session_id=request.sessionId)
-        
+        result = detect_pose_from_base64(
+            request.image, session_id=request.sessionId)
+
         return PoseDetectionResponse(**result)
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Pose detection failed: {str(e)}"
         )
+
 
 if __name__ == "__main__":
     uvicorn.run(
@@ -88,4 +95,3 @@ if __name__ == "__main__":
         reload=True,
         log_level="info"
     )
-

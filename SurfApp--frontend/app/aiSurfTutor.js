@@ -18,7 +18,8 @@ export default function AITutorHome() {
     {
       id: 1,
       title: "Cardio Plans",
-      description: "Get personalized AI-generated cardio workout recommendations",
+      description:
+        "Get personalized AI-generated cardio workout recommendations",
       icon: "fitness",
       color: "#FF6B6B",
       screen: "CardioPlans",
@@ -67,7 +68,9 @@ export default function AITutorHome() {
             <TouchableOpacity onPress={() => router.back()} className="mr-3">
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-            <Text className="text-white text-2xl font-bold">🏄 AI Surf Tutor</Text>
+            <Text className="text-white text-2xl font-bold">
+              🏄 AI Surf Tutor
+            </Text>
           </View>
           <Text className="text-blue-100 text-sm">
             Your Personal Surfing Coach
@@ -91,7 +94,11 @@ export default function AITutorHome() {
                   className="w-14 h-14 rounded-lg items-center justify-center mr-4"
                   style={{ backgroundColor: `${feature.color}20` }}
                 >
-                  <Ionicons name={feature.icon} size={28} color={feature.color} />
+                  <Ionicons
+                    name={feature.icon}
+                    size={28}
+                    color={feature.color}
+                  />
                 </View>
 
                 <View className="flex-1">

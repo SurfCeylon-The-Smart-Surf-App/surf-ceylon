@@ -1,6 +1,6 @@
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 
 /**
  * ============================================================
@@ -11,7 +11,7 @@ import { Platform } from 'react-native';
  * - iOS Simulator: localhost
  * - Physical Device: Your PC's IP
  */
-const API_HOST = Platform.OS === 'android' ? '10.0.2.2' : '192.168.8.101';
+const API_HOST = Platform.OS === "android" ? "10.0.2.2" : "192.168.8.101";
 const API_PORT = 3000;
 const API_BASE_URL = `http://${API_HOST}:${API_PORT}`;
 
@@ -23,7 +23,7 @@ console.log(`[API] Using backend: ${API_BASE_URL}`);
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   timeout: 30000,
 });
@@ -35,10 +35,10 @@ const api = axios.create({
  */
 export const checkBackendHealth = async () => {
   try {
-    const res = await api.get('/health', { timeout: 5000 });
+    const res = await api.get("/health", { timeout: 5000 });
     return res.status === 200;
   } catch (err) {
-    console.warn('[API] Backend health check failed');
+    console.warn("[API] Backend health check failed");
     return false;
   }
 };
@@ -51,8 +51,8 @@ export const checkBackendHealth = async () => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
-      console.warn('[API] Backend unreachable. Check IP / WiFi / Firewall');
+    if (error.code === "ECONNABORTED" || error.message === "Network Error") {
+      console.warn("[API] Backend unreachable. Check IP / WiFi / Firewall");
     }
     return Promise.reject(error);
   }
@@ -73,7 +73,7 @@ export const poseAPI = {
   },
 
   healthCheck: async () => {
-    return { status: 'ok', mode: 'native_edge_ai' };
+    return { status: "ok", mode: "native_edge_ai" };
   },
 };
 
@@ -94,13 +94,13 @@ export const cardioAPI = {
   ) => {
     const goalArray = Array.isArray(goal) ? goal : [goal];
 
-    const response = await api.post('/api/ai-tutor/recommend', {
+    const response = await api.post("/api/ai-tutor/recommend", {
       skillLevel,
       goal: goalArray,
       userDetails,
       durationRange,
       limitations,
-      equipment: equipment || 'None',
+      equipment: equipment || "None",
       adaptiveAdjustments,
     });
 
@@ -115,16 +115,17 @@ export const cardioAPI = {
  */
 export const progressAPI = {
   saveProgress: async (category, data, completedDrills, scores, badges) => {
-    const body = category && data
-      ? { category, data }
-      : { completedDrills, scores, badges };
+    const body =
+      category && data
+        ? { category, data }
+        : { completedDrills, scores, badges };
 
-    const response = await api.post('/api/ai-tutor/progress/save', body);
+    const response = await api.post("/api/ai-tutor/progress/save", body);
     return response.data;
   },
 
   loadProgress: async () => {
-    const response = await api.get('/api/ai-tutor/progress/load');
+    const response = await api.get("/api/ai-tutor/progress/load");
     return response.data;
   },
 };
@@ -136,7 +137,7 @@ export const progressAPI = {
  */
 export const gamificationAPI = {
   awardPoints: async (points, badge, streak) => {
-    const response = await api.post('/api/ai-tutor/gamification/award', {
+    const response = await api.post("/api/ai-tutor/gamification/award", {
       points,
       badge,
       streak,
@@ -145,7 +146,7 @@ export const gamificationAPI = {
   },
 
   getStats: async () => {
-    const response = await api.get('/api/ai-tutor/gamification/stats');
+    const response = await api.get("/api/ai-tutor/gamification/stats");
     return response.data;
   },
 };
@@ -157,9 +158,9 @@ export const gamificationAPI = {
  */
 export const sessionAPI = {
   saveSession: async (sessionData) => {
-    const userId = await AsyncStorage.getItem('userId');
+    const userId = await AsyncStorage.getItem("userId");
 
-    const response = await api.post('/api/sessions/save', {
+    const response = await api.post("/api/sessions/save", {
       userId,
       ...sessionData,
     });
@@ -168,7 +169,7 @@ export const sessionAPI = {
   },
 
   getSessions: async (options) => {
-    const response = await api.get('/api/sessions', { params: options });
+    const response = await api.get("/api/sessions", { params: options });
     return response.data;
   },
 

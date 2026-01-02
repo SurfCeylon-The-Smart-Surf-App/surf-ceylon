@@ -1,6 +1,7 @@
 # AI Surf Tutor Integration - Complete Documentation
 
 ## Overview
+
 This document outlines the complete integration of Sabri's AI Surf Tutor implementation into the original SurfCeylon project.
 
 ## What Was Integrated
@@ -8,6 +9,7 @@ This document outlines the complete integration of Sabri's AI Surf Tutor impleme
 ### 1. Backend Integration (`surfapp--backend`)
 
 #### New Files Added:
+
 - `config/aiConstants.js` - Configuration for AI Tutor features (ML model server URLs, pose detection server URLs, skill/goal mappings)
 - `config/firebaseAdmin.js` - Firebase admin SDK initialization for optional cloud features
 - `middlewares/errorHandler.js` - Centralized error handling middleware
@@ -18,10 +20,12 @@ This document outlines the complete integration of Sabri's AI Surf Tutor impleme
 - `routes/aiTutor.js` - Consolidated routes for all AI Tutor endpoints
 
 #### Modified Files:
+
 - `server.js` - Added AI Tutor routes (`/api/ai-tutor/*`), increased JSON payload limit to 10MB for pose detection images
 - `package.json` - Added dependencies: `firebase-admin`, `node-fetch`
 
 #### New API Endpoints:
+
 ```
 POST   /api/ai-tutor/gamification/award              - Award points/badges
 GET    /api/ai-tutor/gamification/stats              - Get gamification stats
@@ -44,14 +48,17 @@ POST   /api/ai-tutor/recommend                       - Get workout recommendatio
 ### 2. Frontend Integration (`SurfApp--frontend`)
 
 #### New Files Added:
+
 - `app/aiSurfTutor.js` - Main AI Surf Tutor entry screen
 - `services/aiTutorAPI.js` - API client for all AI Tutor backend endpoints
 
 #### Modified Files:
+
 - `app/(tabs)/dashboard.js` - Added navigation to AI Surf Tutor (item.id === 4)
 - `package.json` - Added dependency: `react-native-vector-icons`
 
 #### Features Available:
+
 1. **Cardio Plans** - AI-generated personalized cardio workout plans
 2. **Sea Drills (AR)** - AR visualization of surfing techniques
 3. **Land Drills** - Real-time pose detection and coaching
@@ -60,6 +67,7 @@ POST   /api/ai-tutor/recommend                       - Get workout recommendatio
 ### 3. ML Engine Integration (`surfapp--ml-engine`)
 
 #### New Files Added:
+
 - `services/model_server.py` - FastAPI server for workout recommendations (port 8000)
 - `services/pose_server.py` - FastAPI server for pose detection using MediaPipe (port 8001)
 - `services/pose_detection.py` - MediaPipe pose detection implementation
@@ -70,10 +78,13 @@ POST   /api/ai-tutor/recommend                       - Get workout recommendatio
 - `models/*.joblib` - ML model artifacts (encoders)
 
 #### Modified Files:
+
 - `requirements.txt` - Added dependencies: `fastapi`, `uvicorn`, `pydantic`, `opencv-python`, `mediapipe`
 
 #### ML Services:
+
 1. **Model Server** (Port 8000)
+
    - Endpoint: `POST /predict`
    - Features: Smart template-based workout generation, BMI-based personalization, equipment/limitation filtering, adaptive learning
 
@@ -86,12 +97,14 @@ POST   /api/ai-tutor/recommend                       - Get workout recommendatio
 ### Backend Setup
 
 1. Install dependencies:
+
 ```bash
 cd surfapp--backend
 npm install
 ```
 
 2. Configure environment variables in `.env`:
+
 ```env
 PORT=5001
 MONGODB_URI=your_mongodb_connection_string
@@ -101,6 +114,7 @@ FIREBASE_SERVICE_ACCOUNT=/path/to/firebase-key.json  # Optional
 ```
 
 3. Start the backend:
+
 ```bash
 npm start
 ```
@@ -108,12 +122,14 @@ npm start
 ### ML Engine Setup
 
 1. Install Python dependencies:
+
 ```bash
 cd surfapp--ml-engine
 pip install -r requirements.txt
 ```
 
 2. Start both ML services:
+
 ```bash
 # Start all services together
 python start_all_services.py
@@ -126,17 +142,20 @@ python start_pose_server.py     # Pose server on port 8001
 ### Frontend Setup
 
 1. Install dependencies:
+
 ```bash
 cd SurfApp--frontend
 npm install
 ```
 
 2. Update API base URL in `utils/networkConfig.js`:
+
 ```javascript
-export const API_BASE_URL = 'http://YOUR_IP:5001';
+export const API_BASE_URL = "http://YOUR_IP:5001";
 ```
 
 3. Start the app:
+
 ```bash
 npm start
 ```
@@ -144,21 +163,25 @@ npm start
 ## Testing the Integration
 
 ### 1. Test Backend Health
+
 ```bash
 curl http://localhost:5001/api/health
 ```
 
 ### 2. Test ML Model Server
+
 ```bash
 curl http://localhost:8000/health
 ```
 
 ### 3. Test Pose Detection Server
+
 ```bash
 curl http://localhost:8001/health
 ```
 
 ### 4. Test AI Tutor Endpoints
+
 ```bash
 # Get workout recommendations
 curl -X POST http://localhost:5001/api/ai-tutor/recommend \
@@ -209,6 +232,7 @@ curl http://localhost:5001/api/ai-tutor/gamification/stats
 ## Key Features
 
 ### Gamification System
+
 - Points and XP system
 - Badge system (Bronze, Silver, Gold)
 - Workout streaks
@@ -216,6 +240,7 @@ curl http://localhost:5001/api/ai-tutor/gamification/stats
 - Achievement tracking
 
 ### Pose Detection
+
 - Real-time pose detection using MediaPipe
 - 33 landmark points tracking
 - Stability scoring
@@ -223,6 +248,7 @@ curl http://localhost:5001/api/ai-tutor/gamification/stats
 - Support for various drill types
 
 ### Workout Recommendations
+
 - AI-powered workout plan generation
 - 3 unique plan variations per request
 - BMI-based personalization
@@ -232,6 +258,7 @@ curl http://localhost:5001/api/ai-tutor/gamification/stats
 - Duration-based planning (5-10, 10-20, 20+ minutes)
 
 ### Progress Tracking
+
 - Completed drills tracking
 - Score history
 - Badge collection
@@ -249,6 +276,7 @@ curl http://localhost:5001/api/ai-tutor/gamification/stats
 ## Future Enhancements
 
 1. Full screen implementations for:
+
    - Cardio Plans screen with quiz
    - AR Visualization screen
    - Land Drills practice screen
@@ -264,21 +292,25 @@ curl http://localhost:5001/api/ai-tutor/gamification/stats
 ## Troubleshooting
 
 ### Backend won't start
+
 - Check if port 5001 is available
 - Verify MongoDB connection string
 - Check node_modules are installed
 
 ### ML servers won't start
+
 - Verify Python 3.8+ is installed
 - Check if ports 8000 and 8001 are available
 - Ensure all Python dependencies are installed: `pip install -r requirements.txt`
 
 ### Frontend can't connect
+
 - Verify API_BASE_URL in networkConfig.js matches your backend IP
 - Check that backend and ML servers are running
 - Ensure phone and PC are on same WiFi network
 
 ### Pose detection not working
+
 - Verify pose_server.py is running on port 8001
 - Check mediapipe is properly installed
 - Ensure camera permissions are granted on mobile device
