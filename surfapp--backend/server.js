@@ -12,8 +12,8 @@ const app = express();
 app.use(helmet());
 app.use(morgan("combined"));
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // Increased for pose detection images
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging middleware for debugging
 app.use((req, res, next) => {
@@ -54,6 +54,9 @@ app.use("/api/spots", require("./routes/spots"));
 app.use("/api/sessions", require("./routes/sessions"));
 app.use("/api/forecast", require("./routes/forecast"));
 app.use("/api/health", require("./routes/health"));
+
+// AI Surf Tutor routes (from Sabri's implementation)
+app.use("/api/ai-tutor", require("./routes/aiTutor"));
 
 // Default route
 app.get("/", (req, res) => {

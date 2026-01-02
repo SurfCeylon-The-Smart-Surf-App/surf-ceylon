@@ -1,156 +1,181 @@
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getStaticApiBaseUrl } from "../utils/networkConfig";
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
-const API_BASE_URL = getStaticApiBaseUrl();
+/**
+ * ============================================================
+ * API BASE URL (DYNAMIC CONFIGURATION)
+ * ============================================================
+ * Automatically detects the correct host based on platform:
+ * - Android Emulator: 10.0.2.2
+ * - iOS Simulator: localhost
+ * - Physical Device: Your PC's IP
+ */
+const API_HOST = Platform.OS === 'android' ? '10.0.2.2' : '192.168.8.101';
+const API_PORT = 3000;
+const API_BASE_URL = `http://${API_HOST}:${API_PORT}`;
 
-// Create axios instance
+console.log(`[API] Using backend: ${API_BASE_URL}`);
+
+/**
+ * Axios instance
+ */
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
+  timeout: 30000,
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  async (config) => {
-    try {
-      const token = await AsyncStorage.getItem("userToken");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch (error) {
-      console.error("Error getting token:", error);
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+/**
+ * ============================================================
+ * HEALTH CHECK
+ * ============================================================
+ */
+export const checkBackendHealth = async () => {
+  try {
+    const res = await api.get('/health', { timeout: 5000 });
+    return res.status === 200;
+  } catch (err) {
+    console.warn('[API] Backend health check failed');
+    return false;
   }
-);
+};
 
-// Response interceptor to handle errors
+/**
+ * ============================================================
+ * RESPONSE INTERCEPTOR (LIGHT LOGGING)
+ * ============================================================
+ */
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid, remove it
-      await AsyncStorage.removeItem("userToken");
-      await AsyncStorage.removeItem("userData");
+  (error) => {
+    if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
+      console.warn('[API] Backend unreachable. Check IP / WiFi / Firewall');
     }
     return Promise.reject(error);
   }
 );
 
-// Auth APIs
-export const authAPI = {
-  register: (userData) => api.post("/auth/register", userData),
-  login: (credentials) => api.post("/auth/login", credentials),
-  getCurrentUser: () => api.get("/auth/me"),
-  updatePreferences: (preferences) => api.put("/auth/preferences", preferences),
-  changePassword: (passwords) => api.put("/auth/password", passwords),
-};
-
-// User APIs
-export const userAPI = {
-  getProfile: () => api.get("/users/profile"),
-  updateProfile: (userData) => {
-    // Check if userData is FormData (for file uploads)
-    if (userData instanceof FormData) {
-      return api.put("/users/profile", userData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-    }
-    return api.put("/users/profile", userData);
+/**
+ * ============================================================
+ * POSE API (NATIVE EDGE AI – STUB)
+ * ============================================================
+ */
+export const poseAPI = {
+  detectPose: async () => {
+    return {
+      success: true,
+      personDetected: false,
+      landmarks: null,
+    };
   },
-  getUsers: (params) => api.get("/users", { params }),
-  searchUsers: (query) =>
-    api.get(`/users/search?q=${encodeURIComponent(query)}`),
-  getUserById: (userId) => api.get(`/users/${userId}`),
-  followUser: (userId) => api.post(`/users/${userId}/follow`),
-  unfollowUser: (userId) => api.delete(`/users/${userId}/follow`),
+
+  healthCheck: async () => {
+    return { status: 'ok', mode: 'native_edge_ai' };
+  },
 };
 
-// Posts APIs
-export const postsAPI = {
-  getFeed: (params) => api.get("/posts/feed", { params }),
-  getPostById: (postId) => api.get(`/posts/${postId}`),
-  getUserPosts: (userId, params) =>
-    api.get(`/posts/user/${userId}`, { params }),
-  createPost: (postData) => api.post("/posts", postData),
-  createPostWithMedia: (formData) =>
-    api.post("/posts/with-media", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
-  likePost: (postId) => api.post(`/posts/${postId}/like`),
-  sharePost: (postId) => api.post(`/posts/${postId}/share`),
-  addComment: (postId, comment) =>
-    api.post(`/posts/${postId}/comments`, comment),
-  getComments: (postId, params) =>
-    api.get(`/posts/${postId}/comments`, { params }),
-  updateComment: (commentId, data) =>
-    api.put(`/posts/comments/${commentId}`, data),
-  deleteComment: (commentId) => api.delete(`/posts/comments/${commentId}`),
-  updatePost: (postId, postData) => api.put(`/posts/${postId}`, postData),
-  deletePost: (postId) => api.delete(`/posts/${postId}`),
+/**
+ * ============================================================
+ * CARDIO PLANS API
+ * ============================================================
+ */
+export const cardioAPI = {
+  getRecommendations: async (
+    skillLevel,
+    goal,
+    userDetails,
+    durationRange,
+    limitations,
+    equipment,
+    adaptiveAdjustments
+  ) => {
+    const goalArray = Array.isArray(goal) ? goal : [goal];
+
+    const response = await api.post('/api/ai-tutor/recommend', {
+      skillLevel,
+      goal: goalArray,
+      userDetails,
+      durationRange,
+      limitations,
+      equipment: equipment || 'None',
+      adaptiveAdjustments,
+    });
+
+    return response.data;
+  },
 };
 
-// Follow APIs
-export const followAPI = {
-  followUser: (userId) => api.post(`/follow/${userId}`),
-  unfollowUser: (userId) => api.delete(`/follow/${userId}`),
-  getFollowers: (userId, params) =>
-    api.get(`/follow/${userId}/followers`, { params }),
-  getFollowing: (userId, params) =>
-    api.get(`/follow/${userId}/following`, { params }),
-  getFollowRequests: (params) => api.get("/follow/requests", { params }),
-  acceptFollowRequest: (requestId) =>
-    api.post(`/follow/requests/${requestId}/accept`),
-  rejectFollowRequest: (requestId) =>
-    api.post(`/follow/requests/${requestId}/reject`),
+/**
+ * ============================================================
+ * PROGRESS API
+ * ============================================================
+ */
+export const progressAPI = {
+  saveProgress: async (category, data, completedDrills, scores, badges) => {
+    const body = category && data
+      ? { category, data }
+      : { completedDrills, scores, badges };
+
+    const response = await api.post('/api/ai-tutor/progress/save', body);
+    return response.data;
+  },
+
+  loadProgress: async () => {
+    const response = await api.get('/api/ai-tutor/progress/load');
+    return response.data;
+  },
 };
 
-// Messages APIs
-export const messagesAPI = {
-  getConversations: (params) => api.get("/messages/conversations", { params }),
-  createConversation: (data) => api.post("/messages/conversations", data),
-  getMessages: (conversationId, params) =>
-    api.get(`/messages/conversations/${conversationId}`, { params }),
-  sendMessage: (conversationId, message) =>
-    api.post(`/messages/conversations/${conversationId}`, message),
-  markAsRead: (messageId) => api.post(`/messages/${messageId}/read`),
-  deleteMessage: (messageId) => api.delete(`/messages/${messageId}`),
+/**
+ * ============================================================
+ * GAMIFICATION API
+ * ============================================================
+ */
+export const gamificationAPI = {
+  awardPoints: async (points, badge, streak) => {
+    const response = await api.post('/api/ai-tutor/gamification/award', {
+      points,
+      badge,
+      streak,
+    });
+    return response.data;
+  },
+
+  getStats: async () => {
+    const response = await api.get('/api/ai-tutor/gamification/stats');
+    return response.data;
+  },
 };
 
-// Surf Spots APIs
-export const spotsAPI = {
-  getSpots: (params) => api.get("/spots", { params }),
-  getSpotById: (spotId) => api.get(`/spots/${spotId}`),
-  getForecast: (spotId, viewMode = "daily") =>
-    api.get(`/forecast`, { params: { spotId, viewMode } }),
-};
+/**
+ * ============================================================
+ * SESSION API
+ * ============================================================
+ */
+export const sessionAPI = {
+  saveSession: async (sessionData) => {
+    const userId = await AsyncStorage.getItem('userId');
 
-// Surf Sessions APIs
-export const sessionsAPI = {
-  getSessions: (params) => api.get("/sessions", { params }),
-  getSessionById: (sessionId) => api.get(`/sessions/${sessionId}`),
-  createSession: (sessionData) => api.post("/sessions", sessionData),
-  updateSession: (sessionId, sessionData) =>
-    api.put(`/sessions/${sessionId}`, sessionData),
-  endSession: (sessionId, sessionData) =>
-    api.put(`/sessions/${sessionId}/end`, sessionData),
-  deleteSession: (sessionId) => api.delete(`/sessions/${sessionId}`),
-};
+    const response = await api.post('/api/sessions/save', {
+      userId,
+      ...sessionData,
+    });
 
-// Health check API
-export const healthAPI = {
-  check: () => api.get("/health"),
+    return response.data;
+  },
+
+  getSessions: async (options) => {
+    const response = await api.get('/api/sessions', { params: options });
+    return response.data;
+  },
+
+  getSession: async (sessionId) => {
+    const response = await api.get(`/api/sessions/${sessionId}`);
+    return response.data;
+  },
 };
 
 export default api;
