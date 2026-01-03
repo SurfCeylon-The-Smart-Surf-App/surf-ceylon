@@ -1,3 +1,41 @@
 surfapp--ml-engine-thilina
 surfapp--backend-thilina
 SurfApp--frontend-thilina
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Expo
+.expo/
+.expo-shared/
+
+# Build outputs
+dist/
+build/
+*.log

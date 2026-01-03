@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import Constants from "expo-constants";
+import { getApiUrl } from "../data/config";
 
 // Dynamic network configuration for development
 // Automatically detects the dev server IP from Expo

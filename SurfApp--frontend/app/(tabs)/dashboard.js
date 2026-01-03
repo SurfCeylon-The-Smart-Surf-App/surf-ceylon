@@ -20,6 +20,9 @@ export default function DashboardScreen() {
     if (item.id === 1) {
       // Navigate to market tab
       router.push("/market");
+    } else if (item.id === 2) {
+      // Navigate to Risk Analyzer
+      router.push("/riskAnalyzer");
     } else {
       // Other features not implemented yet
       console.log(`Feature "${item.title}" not yet implemented`);

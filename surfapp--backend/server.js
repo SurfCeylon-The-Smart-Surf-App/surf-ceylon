@@ -55,6 +55,11 @@ app.use("/api/sessions", require("./routes/sessions"));
 app.use("/api/forecast", require("./routes/forecast"));
 app.use("/api/health", require("./routes/health"));
 
+// Risk Analyzer routes (integrated from surfapp--backend-my)
+app.use("/api/surfSpots", require("./routes/surfSpots"));
+app.use("/api/hazardReports", require("./routes/hazardReports"));
+app.use("/api/incidents", require("./routes/incidents"));
+
 // Default route
 app.get("/", (req, res) => {
   res.json({
