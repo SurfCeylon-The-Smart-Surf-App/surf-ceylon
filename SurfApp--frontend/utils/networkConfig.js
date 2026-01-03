@@ -13,24 +13,19 @@ const getDevServerHost = () => {
   return null;
 };
 
-// Fallback to manual configuration if Expo host detection fails
-const MANUAL_HOST = "172.20.10.5"; // Update this if your IP changes
+// Using PC's actual IP for physical device testing
+const MANUAL_HOST = "172.24.130.182"; // Your PC's IP on local network
 
-const API_HOST =
-  Platform.OS === "android"
-    ? "10.0.2.2" // Android emulator special IP to reach host machine
-    : Platform.OS === "web"
-    ? "localhost"
-    : getDevServerHost() || MANUAL_HOST; // iOS/physical devices: auto-detect or fallback
+const API_HOST = "172.24.130.182"; // Fixed IP for physical device testing
 
 const API_PORT = 3000;
 
 console.log("Platform.OS:", Platform.OS);
 console.log("API_HOST:", API_HOST);
 
-// Get API base URL
+// Get API base URL (without /api suffix - routes already include it)
 export const getStaticApiBaseUrl = () => {
-  const url = `http://${API_HOST}:${API_PORT}/api`;
+  const url = `http://${API_HOST}:${API_PORT}`;
   console.log("Generated API URL:", url);
   return url;
 };

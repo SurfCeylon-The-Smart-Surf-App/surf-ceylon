@@ -6,12 +6,11 @@ import { Platform } from "react-native";
  * ============================================================
  * API BASE URL (DYNAMIC CONFIGURATION)
  * ============================================================
- * Automatically detects the correct host based on platform:
- * - Android Emulator: 10.0.2.2
- * - iOS Simulator: localhost
- * - Physical Device: Your PC's IP
+ * Using PC's network IP for physical device testing
+ * - Physical Device: 172.24.130.182 (your PC's IP on local network)
+ * - Backend Port: 3000
  */
-const API_HOST = Platform.OS === "android" ? "10.0.2.2" : "192.168.8.101";
+const API_HOST = "172.24.130.182";
 const API_PORT = 3000;
 const API_BASE_URL = `http://${API_HOST}:${API_PORT}`;
 

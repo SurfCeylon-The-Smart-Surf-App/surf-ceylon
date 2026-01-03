@@ -131,14 +131,21 @@ const AnimatedHistoryCard = ({ plan, index, onRepeat, onDelete }) => {
       {plan.exercises.length > 0 && (
         <View style={styles.exercisesPreview}>
           <Text style={styles.exercisesTitle}>Exercises:</Text>
-          {plan.exercises.slice(0, 3).map((exercise, idx) => (
-            <View key={idx} style={styles.exerciseRow}>
-              <View style={styles.exerciseDot} />
-              <Text style={styles.exerciseName} numberOfLines={1}>
-                {exercise}
-              </Text>
-            </View>
-          ))}
+          {plan.exercises.slice(0, 3).map((exercise, idx) => {
+            // Handle both string and object exercises from ML server
+            const exerciseName = typeof exercise === 'object' && exercise !== null
+              ? (exercise.name || exercise.exercise || String(exercise))
+              : String(exercise || '');
+            
+            return (
+              <View key={idx} style={styles.exerciseRow}>
+                <View style={styles.exerciseDot} />
+                <Text style={styles.exerciseName} numberOfLines={1}>
+                  {exerciseName}
+                </Text>
+              </View>
+            );
+          })}
           {plan.exercises.length > 3 && (
             <Text style={styles.moreExercises}>
               +{plan.exercises.length - 3} more
@@ -378,35 +385,35 @@ const styles = StyleSheet.create({
   headerGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 14,
     paddingHorizontal: 20,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
   headerContent: {
     flex: 1,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '700',
     color: '#fff',
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: 'rgba(255, 255, 255, 0.9)',
     marginTop: 2,
   },
   clearAllButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',

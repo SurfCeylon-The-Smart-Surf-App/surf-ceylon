@@ -409,41 +409,54 @@ export default function CardioQuizScreen({ onComplete }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* ✅ VERY COMPACT HEADER - Moved up */}
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <View style={styles.topBarContent}>
-          <Text style={styles.topBarTitle}>Fitness Quiz</Text>
-          <Text style={styles.topBarSubtitle}>Step {currentStep + 1}/{steps.length}</Text>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Premium Header with Gradient */}
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.headerGradient}
+      >
+        {/* Top Row: Back Button */}
+        <View style={styles.headerTopRow}>
+          <TouchableOpacity onPress={handleBack} style={styles.headerBackButton}>
+            <Icon name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>Fitness Quiz</Text>
+            <Text style={styles.headerStep}>Step {currentStep + 1} of {steps.length}</Text>
+          </View>
+          <View style={styles.headerPlaceholder} />
         </View>
-        <View style={styles.placeholder} />
-      </View>
 
-      {/* ✅ VERY COMPACT PROGRESS BAR */}
-      <View style={styles.progressContainer}>
-        <View style={styles.progressBar}>
-          <Animated.View
-            style={[
-              styles.progressFill,
-              {
-                width: progressAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0%', '100%'],
-                }),
-              },
-            ]}
-          />
+        {/* Progress Bar */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <Animated.View
+              style={[
+                styles.progressFill,
+                {
+                  width: progressAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                },
+              ]}
+            />
+          </View>
+          <Text style={styles.progressText}>
+            {Math.round(((currentStep + 1) / steps.length) * 100)}% Complete
+          </Text>
         </View>
-      </View>
 
-      {/* ✅ COMPACT QUESTION */}
-      <View style={styles.questionContainer}>
-        <Icon name={steps[currentStep].icon} size={20} color="#667eea" />
-        <Text style={styles.questionText}>{steps[currentStep].question}</Text>
-      </View>
+        {/* Question Section */}
+        <View style={styles.questionContainer}>
+          <View style={styles.questionIconContainer}>
+            <Icon name={steps[currentStep].icon} size={28} color="#fff" />
+          </View>
+          <Text style={styles.questionText}>{steps[currentStep].question}</Text>
+        </View>
+      </LinearGradient>
 
       {/* ✅ LARGE SCROLLABLE CONTENT AREA */}
       <ScrollView 
@@ -487,88 +500,106 @@ export default function CardioQuizScreen({ onComplete }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f5f7fa',
   },
   
-  // ✅ TOP BAR - Very compact
-  topBar: {
+  // Premium Header
+  headerGradient: {
+    paddingTop: 12,
+    paddingBottom: 18,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  headerTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    marginBottom: 12,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+  headerBackButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  topBarContent: {
+  headerCenter: {
     flex: 1,
     alignItems: 'center',
   },
-  topBarTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 0.3,
   },
-  topBarSubtitle: {
-    fontSize: 11,
-    color: '#999',
+  headerStep: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.9)',
     marginTop: 2,
   },
-  placeholder: {
-    width: 40,
+  headerPlaceholder: {
+    width: 36,
   },
   
-  // ✅ VERY COMPACT PROGRESS
+  // Progress Bar
   progressContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    backgroundColor: '#fff',
+    marginBottom: 12,
   },
   progressBar: {
     height: 4,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 2,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#667eea',
+    backgroundColor: '#fff',
     borderRadius: 2,
   },
+  progressText: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.95)',
+    marginTop: 4,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
   
-  // ✅ COMPACT QUESTION
+  // Question Section
   questionContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingTop: 4,
+  },
+  questionIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   questionText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
-    marginLeft: 8,
-    flex: 1,
+    color: '#fff',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   
-  // ✅ LARGE SCROLLABLE CONTENT
+  // Content Scroll
   contentScroll: {
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
+    padding: 20,
     paddingBottom: 32,
   },
   
@@ -578,132 +609,173 @@ const styles = StyleSheet.create({
   },
   optionCard: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderRadius: 14,
+    padding: 18,
+    borderWidth: 1.5,
+    borderColor: '#e8eaf0',
     alignItems: 'center',
     position: 'relative',
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
   optionCardSelected: {
     borderColor: '#667eea',
-    borderWidth: 3,
+    borderWidth: 2,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+    backgroundColor: '#f8f9ff',
   },
   optionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: '#333',
     marginTop: 8,
+    textAlign: 'center',
   },
   checkBadge: {
     position: 'absolute',
     top: 10,
     right: 10,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: '#667eea',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 3,
   },
   
   // Inputs
   inputContainer: {
-    gap: 12,
+    gap: 14,
   },
   inputCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 18,
+    padding: 18,
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   inputGroup: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 14,
   },
   inputLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: '#666',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   input: {
     backgroundColor: '#f8f9fa',
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 15,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
     color: '#333',
+    borderWidth: 1,
+    borderColor: '#e8eaf0',
   },
   infoBox: {
     flexDirection: 'row',
     backgroundColor: '#E3F2FD',
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 14,
+    padding: 14,
     alignItems: 'center',
   },
   infoText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#1976D2',
-    marginLeft: 8,
+    marginLeft: 10,
     flex: 1,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   
   // Limitations
   limitationsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
   limitationChip: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1.5,
+    borderColor: '#e8eaf0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   limitationChipSelected: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: '#f8f9ff',
     borderColor: '#667eea',
+    borderWidth: 2,
+    shadowColor: '#667eea',
+    shadowOpacity: 0.15,
   },
   limitationText: {
     fontSize: 13,
     color: '#666',
-    marginRight: 4,
+    marginRight: 6,
   },
   limitationTextSelected: {
     color: '#667eea',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   
-  // ✅ COMPACT NAVIGATION
+  // Navigation
   navigationContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
     backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: '#e8eaf0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 6,
   },
   nextButton: {
     borderRadius: 12,
     overflow: 'hidden',
+    shadowColor: '#667eea',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   nextButtonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   nextButtonText: {
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#fff',
-    marginRight: 6,
+    marginRight: 8,
+    letterSpacing: 0.2,
   },
 });
 

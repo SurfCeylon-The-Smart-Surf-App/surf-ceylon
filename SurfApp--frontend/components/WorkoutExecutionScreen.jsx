@@ -98,6 +98,17 @@ export default function WorkoutExecutionScreen({ workoutPlan, onComplete }) {
       : (typeof exercises === 'string' ? exercises.split(';').map(e => e.trim()) : []);
     
     return exerciseList.map(ex => {
+      // Handle if exercise is already an object (from ML server)
+      if (typeof ex === 'object' && ex !== null) {
+        return {
+          name: ex.name || ex.exercise || String(ex),
+          duration: ex.duration || 30,
+          rest: ex.rest || 15,
+          sets: ex.sets || 3,
+        };
+      }
+      
+      // Handle string exercises
       const exerciseData = getExerciseData(ex) || getDefaultExerciseData(ex);
       return {
         name: exerciseData.name,
@@ -827,15 +838,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
@@ -845,16 +856,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   topBarTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '700',
     color: '#333',
   },
   topBarSubtitle: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#999',
     marginTop: 2,
   },
-  placeholder: { width: 40 },
+  placeholder: { width: 36 },
   
   // Idle State
   idleContainer: { padding: 20 },
@@ -875,34 +886,34 @@ const styles = StyleSheet.create({
   
   // Countdown
   countdownContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
-  countdownText: { fontSize: 120, fontWeight: 'bold', color: '#667eea' },
-  countdownLabel: { fontSize: 24, color: '#666', marginTop: 20 },
-  countdownNext: { fontSize: 16, color: '#999', marginTop: 12 },
+  countdownText: { fontSize: 80, fontWeight: 'bold', color: '#667eea' },
+  countdownLabel: { fontSize: 18, color: '#666', marginTop: 16 },
+  countdownNext: { fontSize: 14, color: '#999', marginTop: 10 },
   
   // Ready State
-  readyContainer: { padding: 32, alignItems: 'center' },
-  readyTitle: { fontSize: 28, fontWeight: 'bold', color: '#333', marginTop: 16, textAlign: 'center' },
-  readyDescription: { fontSize: 15, color: '#666', textAlign: 'center', marginTop: 12, marginBottom: 32, lineHeight: 22 },
-  readyStats: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginBottom: 32 },
+  readyContainer: { padding: 28, alignItems: 'center' },
+  readyTitle: { fontSize: 22, fontWeight: '700', color: '#333', marginTop: 14, textAlign: 'center' },
+  readyDescription: { fontSize: 14, color: '#666', textAlign: 'center', marginTop: 10, marginBottom: 28, lineHeight: 20 },
+  readyStats: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginBottom: 28 },
   readyStat: { alignItems: 'center' },
-  readyStatValue: { fontSize: 22, fontWeight: 'bold', color: '#333', marginTop: 8 },
-  readyStatLabel: { fontSize: 12, color: '#999', marginTop: 4 },
-  readyStartButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#667eea', paddingHorizontal: 40, paddingVertical: 16, borderRadius: 12, marginBottom: 20 },
-  readyStartText: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginLeft: 8 },
-  readyActions: { flexDirection: 'row', gap: 12 },
-  readyActionButton: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: '#FFF3E0' },
-  readyActionButtonComplete: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, backgroundColor: '#E8F5E9' },
-  readyActionText: { fontSize: 14, color: '#FF9500', marginLeft: 6, fontWeight: '600' },
-  readyActionTextComplete: { fontSize: 14, color: '#4CAF50', marginLeft: 6, fontWeight: '600' },
+  readyStatValue: { fontSize: 20, fontWeight: 'bold', color: '#333', marginTop: 8 },
+  readyStatLabel: { fontSize: 11, color: '#999', marginTop: 4 },
+  readyStartButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#667eea', paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12, marginBottom: 16 },
+  readyStartText: { color: '#fff', fontSize: 16, fontWeight: '700', marginLeft: 8 },
+  readyActions: { flexDirection: 'row', gap: 10 },
+  readyActionButton: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, backgroundColor: '#FFF3E0' },
+  readyActionButtonComplete: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, backgroundColor: '#E8F5E9' },
+  readyActionText: { fontSize: 13, color: '#FF9500', marginLeft: 6, fontWeight: '600' },
+  readyActionTextComplete: { fontSize: 13, color: '#4CAF50', marginLeft: 6, fontWeight: '600' },
   
   // Active State
   workoutContainer: { padding: 16 },
-  progressContainer: { alignItems: 'center', marginBottom: 24, marginTop: 20 },
-  progressRing: { width: 260, height: 260, borderRadius: 130, borderWidth: 8, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
+  progressContainer: { alignItems: 'center', marginBottom: 20, marginTop: 16 },
+  progressRing: { width: 220, height: 220, borderRadius: 110, borderWidth: 6, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
   progressInner: { alignItems: 'center' },
-  timeText: { fontSize: 52, fontWeight: 'bold', color: '#333' },
-  activityName: { fontSize: 17, fontWeight: '600', color: '#333', textAlign: 'center', marginTop: 8, paddingHorizontal: 20 },
-  setText: { fontSize: 13, color: '#999', marginTop: 4 },
+  timeText: { fontSize: 42, fontWeight: 'bold', color: '#333' },
+  activityName: { fontSize: 15, fontWeight: '600', color: '#333', textAlign: 'center', marginTop: 8, paddingHorizontal: 20 },
+  setText: { fontSize: 12, color: '#999', marginTop: 4 },
   
   // ✅ Activity List - FIXED
   activityListContainer: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16 },
@@ -915,24 +926,24 @@ const styles = StyleSheet.create({
   miniCompleteButton: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#E8F5E9', justifyContent: 'center', alignItems: 'center' },
   
   // Controls
-  controlsContainer: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 16, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e0e0e0' },
+  controlsContainer: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 14, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e0e0e0' },
   controlButton: { alignItems: 'center' },
-  controlButtonPrimary: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#667eea', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8 },
-  controlButtonText: { fontSize: 12, color: '#666', marginTop: 4, fontWeight: '600' },
+  controlButtonPrimary: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#667eea', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 6 },
+  controlButtonText: { fontSize: 11, color: '#666', marginTop: 4, fontWeight: '600' },
   
   // Stats Footer
-  statsFooter: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: '#fff', padding: 16, borderRadius: 16, marginBottom: 16 },
+  statsFooter: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: '#fff', padding: 14, borderRadius: 14, marginBottom: 14 },
   statFooterItem: { flexDirection: 'row', alignItems: 'center' },
-  statFooterText: { fontSize: 13, fontWeight: '600', color: '#333', marginLeft: 6 },
+  statFooterText: { fontSize: 12, fontWeight: '600', color: '#333', marginLeft: 6 },
   
   // Completed
   completedContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
-  completedTitle: { fontSize: 28, fontWeight: 'bold', color: '#333', marginTop: 24, marginBottom: 32 },
-  completedStats: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginBottom: 32 },
+  completedTitle: { fontSize: 22, fontWeight: '700', color: '#333', marginTop: 20, marginBottom: 28 },
+  completedStats: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginBottom: 28 },
   completedStat: { alignItems: 'center' },
-  completedStatValue: { fontSize: 24, fontWeight: 'bold', color: '#333', marginTop: 12 },
-  completedStatLabel: { fontSize: 12, color: '#999', marginTop: 4 },
-  doneButton: { backgroundColor: '#667eea', paddingHorizontal: 48, paddingVertical: 16, borderRadius: 12 },
-  doneButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  completedStatValue: { fontSize: 20, fontWeight: 'bold', color: '#333', marginTop: 10 },
+  completedStatLabel: { fontSize: 11, color: '#999', marginTop: 4 },
+  doneButton: { backgroundColor: '#667eea', paddingHorizontal: 40, paddingVertical: 14, borderRadius: 12 },
+  doneButtonText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });
 

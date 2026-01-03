@@ -57,11 +57,8 @@ export default function SplashScreen() {
 
     if (!isLoading) {
       setTimeout(() => {
-        if (isAuthenticated) {
-          router.replace("/(tabs)");
-        } else {
-          router.replace("/(auth)/login");
-        }
+        // BYPASS AUTH: Go directly to home page
+        router.replace("/(tabs)");
       }, 2500); // Show splash for 2.5 seconds
     }
 

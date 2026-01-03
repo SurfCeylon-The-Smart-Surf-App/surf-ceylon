@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Surf Ceylon - Backend Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; }
+        .test-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .test-button:hover { background: #1d4ed8; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .info { background: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏄 Surf Ceylon - Backend Connection Test</h1>
+        <p>Test if your phone can reach the backend server:</p>
+        
+        <div>
+            <button class="test-button" onclick="testBackend()">Test Backend (Port 3000)</button>
+            <button class="test-button" onclick="testMLServer()">Test ML Server (Port 5001)</button>
+            <button class="test-button" onclick="testCardioAPI()">Test Cardio API</button>
+        </div>
+
+        <div id="result"></div>
+
+        <div style="margin-top: 30px; padding: 15px; background: #f9fafb; border-radius: 5px;">
+            <h3>📱 How to test from your phone:</h3>
+            <ol>
+                <li>Make sure you're on the same Wi-Fi network as your PC</li>
+                <li>On your phone browser, open: <strong>http://172.28.2.243:8081/TEST_BACKEND.html</strong></li>
+                <li>Click the test buttons</li>
+                <li>If all tests pass ✅, the network is configured correctly!</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const API_HOST = '172.28.2.243';
+        const BACKEND_PORT = 3000;
+        const ML_PORT = 5001;
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = message;
+        }
+
+        async function testBackend() {
+            showResult('Testing backend connection...', 'info');
+            try {
+                const response = await fetch(`http://${API_HOST}:${BACKEND_PORT}/`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                showResult(`✅ SUCCESS!<br><br>Backend Response:<br>${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult(`❌ FAILED!<br><br>Error: ${error.message}<br><br>Make sure:<br>1. Backend is running on port 3000<br>2. You're on the same Wi-Fi network<br>3. Windows Firewall allows port 3000`, 'error');
+            }
+        }
+
+        async function testMLServer() {
+            showResult('Testing ML server connection...', 'info');
+            try {
+                const response = await fetch(`http://${API_HOST}:${ML_PORT}/health`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                showResult(`✅ SUCCESS!<br><br>ML Server Response:<br>${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                showResult(`❌ FAILED!<br><br>Error: ${error.message}<br><br>Make sure ML server is running on port 5001`, 'error');
+            }
+        }
+
+        async function testCardioAPI() {
+            showResult('Testing Cardio API endpoint...', 'info');
+            try {
+                const testData = {
+                    skillLevel: 'Beginner',
+                    goal: ['Weight Loss'],
+                    userDetails: { height: 170, weight: 70 },
+                    durationRange: [20, 30],
+                    equipment: 'None',
+                    limitations: [],
+                    adaptiveAdjustments: {}
+                };
+                
+                const response = await fetch(`http://${API_HOST}:${BACKEND_PORT}/api/ai-tutor/recommend`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                showResult(`✅ SUCCESS!<br><br>Cardio API Response:<br>Received ${data.exercises?.length || 0} exercises<br><br>First exercise: ${data.exercises?.[0]?.Title || 'N/A'}`, 'success');
+            } catch (error) {
+                showResult(`❌ FAILED!<br><br>Error: ${error.message}<br><br>Check if backend can communicate with ML server`, 'error');
+            }
+        }
+
+        // Auto-test on page load
+        window.onload = () => {
+            showResult('Ready to test! Click a button above.', 'info');
+        };
+    </script>
+</body>
+</html>

@@ -4,7 +4,8 @@ let isMongoConnected = false;
 
 const connectDatabase = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+    const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/surf_ai";
+    const conn = await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,

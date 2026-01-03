@@ -8,17 +8,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
  * API endpoints for AI Surf Tutor features
  */
 
-// Get API base URL from network config or use default
-const getApiBaseUrl = () => {
-  try {
-    const networkConfig = require("./networkConfig");
-    return networkConfig.API_BASE_URL || "http://localhost:5001";
-  } catch (error) {
-    return "http://localhost:5001";
-  }
-};
+// Get API base URL - use backend server (which then calls ML server internally)
+const API_HOST = "172.24.130.182";
+const API_PORT = 3000;
+const API_BASE_URL = `http://${API_HOST}:${API_PORT}`;
 
-const API_BASE_URL = getApiBaseUrl();
+console.log(`[AI Tutor API] Using backend: ${API_BASE_URL}`);
 
 /**
  * Axios instance for AI Tutor

@@ -70,7 +70,9 @@ const AnimatedPlanCard = ({ plan, index, onStartWorkout, onExplain }) => {
     typeof plan.exercises === "string"
       ? plan.exercises.split(";").map((e) => e.trim())
       : Array.isArray(plan.exercises)
-      ? plan.exercises
+      ? plan.exercises.map((e) => 
+          typeof e === "object" && e !== null ? (e.name || e.exercise || String(e)) : String(e || '')
+        )
       : [];
 
   return (
@@ -322,7 +324,12 @@ export default function CardioPlansScreen() {
         Object.keys(adjustments).length > 0 ? adjustments : undefined
       );
 
-      if (
+      // Handle response - expecting {plans: [...]} from upgraded ML server
+      if (response.plans && Array.isArray(response.plans)) {
+        console.log(`✅ Received ${response.plans.length} diverse workout plans from ML server`);
+        setRecommendations(response.plans);
+        await savePlanToHistory(response.plans);
+      } else if (
         response.recommendedPlans &&
         Array.isArray(response.recommendedPlans)
       ) {
@@ -422,19 +429,9 @@ export default function CardioPlansScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Back Button */}
-        <View style={styles.backButtonContainer}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Icon name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
-        {/* ✅ Animated Header */}
+        {/* ✅ Animated Header with Integrated Back Button */}
         <Animated.View
           style={[
             styles.headerSection,
@@ -457,27 +454,36 @@ export default function CardioPlansScreen() {
             end={{ x: 1, y: 1 }}
             style={styles.headerGradient}
           >
-            <View style={styles.headerContent}>
-              <View>
-                <Text style={styles.headerTitle}>Cardio Plans</Text>
-                <Text style={styles.headerSubtitle}>
-                  Personalized workouts designed for you
-                </Text>
-              </View>
+            {/* Top Row: Back Button + Action Buttons */}
+            <View style={styles.headerTopRow}>
+              <TouchableOpacity
+                style={styles.headerBackButton}
+                onPress={() => router.back()}
+              >
+                <Icon name="arrow-back" size={24} color="#fff" />
+              </TouchableOpacity>
               <View style={styles.headerActions}>
                 <TouchableOpacity
                   style={styles.headerActionButton}
                   onPress={() => router.push("/cardio-history")}
                 >
-                  <Icon name="history" size={24} color="#fff" />
+                  <Icon name="history" size={22} color="#fff" />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.headerActionButton}
                   onPress={() => setShowQuiz(true)}
                 >
-                  <Icon name="refresh" size={24} color="#fff" />
+                  <Icon name="refresh" size={22} color="#fff" />
                 </TouchableOpacity>
               </View>
+            </View>
+            
+            {/* Title Section */}
+            <View style={styles.headerTitleContainer}>
+              <Text style={styles.headerTitle}>Cardio Plans</Text>
+              <Text style={styles.headerSubtitle}>
+                Personalized workouts designed for you
+              </Text>
             </View>
           </SafeLinearGradient>
         </Animated.View>
@@ -574,30 +580,10 @@ export default function CardioPlansScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
-  },
-  backButtonContainer: {
-    position: "absolute",
-    top: 16,
-    left: 16,
-    zIndex: 1000,
-    backgroundColor: "rgba(102, 126, 234, 0.9)",
-    borderRadius: 20,
-    padding: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#f5f7fa",
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 24,
   },
   loadingContainer: {
     flex: 1,
@@ -622,50 +608,67 @@ const styles = StyleSheet.create({
     color: "#999",
   },
   headerSection: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   headerGradient: {
-    paddingVertical: 24,
+    paddingTop: 12,
+    paddingBottom: 20,
     paddingHorizontal: 20,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
   },
-  headerContent: {
+  headerTopRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 12,
+  },
+  headerBackButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitleContainer: {
+    marginTop: 4,
   },
   headerTitle: {
-    fontSize: 32,
-    fontWeight: "bold",
+    fontSize: 24,
+    fontWeight: "700",
     color: "#fff",
-    marginBottom: 4,
+    letterSpacing: 0.3,
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: "rgba(255, 255, 255, 0.9)",
+    lineHeight: 18,
   },
   headerActions: {
     flexDirection: "row",
-    gap: 12,
+    gap: 8,
   },
   headerActionButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
     justifyContent: "center",
     alignItems: "center",
   },
   profileCard: {
     backgroundColor: "#fff",
     marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 16,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    marginBottom: 24,
+    marginTop: 4,
+    padding: 18,
+    borderRadius: 18,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 5,
   },
   profileHeader: {
     flexDirection: "row",
@@ -716,27 +719,27 @@ const styles = StyleSheet.create({
   },
   planCard: {
     backgroundColor: "#fff",
-    borderRadius: 20,
-    marginBottom: 20,
+    borderRadius: 16,
+    marginBottom: 14,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
   },
   planGradient: {
-    padding: 20,
+    padding: 16,
   },
   planHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   planName: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "700",
     color: "#fff",
     flex: 1,
   },
@@ -851,31 +854,37 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: "center",
     padding: 40,
-    marginTop: 60,
+    marginTop: 40,
   },
   emptyStateTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: "700",
     color: "#333",
     marginTop: 20,
     marginBottom: 8,
   },
   emptyStateText: {
     fontSize: 14,
-    color: "#999",
+    color: "#666",
     textAlign: "center",
     marginBottom: 24,
     paddingHorizontal: 20,
+    lineHeight: 20,
   },
   emptyStateButton: {
     backgroundColor: "#667eea",
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 12,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   emptyStateButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "700",
     color: "#fff",
   },
 });

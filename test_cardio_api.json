@@ -1,0 +1,11 @@
+{
+  "skillLevel": "Beginner",
+  "goal": ["Warmup"],
+  "durationRange": "5-10",
+  "userDetails": {
+    "height": 170,
+    "weight": 70
+  },
+  "equipment": "None",
+  "limitations": []
+}
