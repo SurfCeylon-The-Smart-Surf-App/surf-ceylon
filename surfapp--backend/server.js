@@ -6,6 +6,17 @@ const morgan = require("morgan");
 const path = require("path");
 require("dotenv").config();
 
+// Catch unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Catch uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
+});
+
 const app = express();
 
 // Middleware

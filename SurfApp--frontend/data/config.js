@@ -1,7 +1,17 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
+// 🔧 CONFIGURE THIS FOR PHYSICAL DEVICE TESTING
+// Use the same IP as your computer (same as in riskAnalyzerConstants.js)
+const DEVICE_API_URL = 'http://10.114.160.168:3000/api';
+
 const getApiUrl = () => {
+  // If testing on physical device, use the configured URL
+  if (DEVICE_API_URL) {
+    console.log('📱 Using device API URL:', DEVICE_API_URL);
+    return DEVICE_API_URL;
+  }
+
   // Default to localhost for web or if detection fails
   let host = '127.0.0.1';
 
@@ -25,4 +35,5 @@ const getApiUrl = () => {
   return `http://${host}:3000/api`;
 };
 
+export { getApiUrl };
 export const API_URL = getApiUrl();

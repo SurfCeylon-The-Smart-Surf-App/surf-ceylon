@@ -11,8 +11,8 @@ import { Platform } from 'react-native';
 
 // 🔧 CONFIGURE THIS FOR PHYSICAL DEVICE TESTING
 // Find your computer's IP from backend startup logs
-// Example: const DEVICE_API_URL = 'http://192.168.1.100:5000';
-const DEVICE_API_URL = 'http://192.168.1.152:5000'; // Leave empty for emulator/simulator
+// Example: const DEVICE_API_URL = 'http://192.168.1.100:3000';
+const DEVICE_API_URL = 'http://10.114.160.168:3000'; // Your computer's IP address
 
 /**
  * Get the API base URL based on platform
@@ -26,14 +26,14 @@ const getApiBaseUrl = () => {
 
   // Auto-detect for emulator/simulator
   if (Platform.OS === 'android') {
-    console.log('🤖 Android emulator detected, using 10.0.2.2:5000');
-    return 'http://10.0.2.2:5000';
+    console.log('🤖 Android emulator detected, using 10.0.2.2:3000');
+    return 'http://10.0.2.2:3000';
   } else if (Platform.OS === 'ios') {
-    console.log('🍎 iOS simulator detected, using localhost:5000');
-    return 'http://localhost:5000';
+    console.log('🍎 iOS simulator detected, using localhost:3000');
+    return 'http://localhost:3000';
   } else {
-    console.log('🌐 Web platform detected, using localhost:5000');
-    return 'http://localhost:5000';
+    console.log('🌐 Web platform detected, using localhost:3000');
+    return 'http://localhost:3000';
   }
 };
 
