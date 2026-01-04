@@ -17,7 +17,8 @@ STORMGLASS_API_KEY = os.getenv("STORMGLASS_API_KEY")
 # New model name for the multi-output model
 MODEL_FILENAME = 'surf_forecast_model.joblib'
 # Save to models directory
-MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'models', MODEL_FILENAME)
+MODEL_PATH = os.path.join(os.path.dirname(
+    __file__), '..', 'models', MODEL_FILENAME)
 
 # --- Features & Targets Definition ---
 # These are the inputs the model will learn from.
