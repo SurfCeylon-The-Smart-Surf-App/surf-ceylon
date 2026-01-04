@@ -31,10 +31,10 @@ import matplotlib.pyplot as plt
 # Configuration
 DATA_X_FILE = '../artifacts/timeseries_X_multioutput.npy'
 DATA_Y_FILE = '../artifacts/timeseries_y_multioutput.npy'
-MODEL_FILE = '../wave_forecast_multioutput_lstm.keras'  # Save to root (production file)
-SCALER_X_FILE = '../wave_forecast_scaler_X_multioutput.joblib'  # Save to root (production file)
-SCALER_Y_FILE = '../wave_forecast_scaler_y_multioutput.joblib'  # Save to root (production file)
-FEATURE_NAMES_FILE = '../wave_forecast_feature_names.joblib'  # Save to root (production file)
+MODEL_FILE = '../models/wave_forecast_multioutput_lstm.keras'  # Save to models directory
+SCALER_X_FILE = '../models/wave_forecast_scaler_X_multioutput.joblib'  # Save to models directory
+SCALER_Y_FILE = '../models/wave_forecast_scaler_y_multioutput.joblib'  # Save to models directory
+FEATURE_NAMES_FILE = '../models/wave_forecast_feature_names.joblib'  # Save to models directory
 
 FEATURE_NAMES = ['Wave Height (m)', 'Wave Period (s)', 'Swell Height (m)', 
                  'Swell Period (s)', 'Wind Speed (m/s)', 'Wind Direction (°)']
