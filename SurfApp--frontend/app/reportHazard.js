@@ -9,7 +9,11 @@ import {
   ActivityIndicator,
   Image,
   StyleSheet,
+  StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -183,18 +187,46 @@ export default function ReportHazardScreen() {
   if (loadingSpots) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#0891b2" />
+        <ActivityIndicator size="large" color="#2563eb" />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.wrapper}>
+      <StatusBar barStyle="light-content" />
+      
+      {/* Header with Gradient */}
+      <LinearGradient
+        colors={["#2563eb", "#1d4ed8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <SafeAreaView edges={["top"]} style={styles.headerContainer}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>Report Hazard</Text>
+            <Text style={styles.headerSubtitle}>
+              Help keep the community safe
+            </Text>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+
+      <ScrollView style={styles.container}>
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.alertBox}>
-          <Text style={styles.alertTitle}>⚠️ Report Current Hazards</Text>
-          <Text style={styles.alertText}>Help keep the surfing community safe</Text>
+          <View style={styles.alertIconContainer}>
+            <Text style={styles.alertIcon}>⚠️</Text>
+          </View>
+          <Text style={styles.alertTitle}>Report Current Hazards</Text>
+          <Text style={styles.alertText}>Help keep the surfing community safe by reporting hazards</Text>
         </View>
 
         {/* Reporter Name (Optional) */}
@@ -243,15 +275,16 @@ export default function ReportHazardScreen() {
           <Text style={styles.label}>Severity Level *</Text>
           <View style={styles.severityButtons}>
             {[
-              { value: 'low', label: 'Low', color: '#10b981' },
-              { value: 'medium', label: 'Medium', color: '#f59e0b' },
-              { value: 'high', label: 'High', color: '#ef4444' }
+              { value: 'low', label: '🟢 Low Risk', color: '#10b981', bgColor: '#d1fae5' },
+              { value: 'medium', label: '🟡 Medium Risk', color: '#f59e0b', bgColor: '#fef3c7' },
+              { value: 'high', label: '🔴 High Risk', color: '#ef4444', bgColor: '#fee2e2' }
             ].map((level) => (
               <TouchableOpacity
                 key={level.value}
                 style={[
                   styles.severityButton,
-                  formData.severity === level.value && styles.severityButtonActive
+                  { borderColor: level.color },
+                  formData.severity === level.value && { backgroundColor: level.bgColor, borderWidth: 3 }
                 ]}
                 onPress={() => setFormData({...formData, severity: level.value})}
               >
@@ -259,7 +292,7 @@ export default function ReportHazardScreen() {
                   style={[
                     styles.severityButtonText,
                     { color: level.color },
-                    formData.severity === level.value && styles.severityButtonTextActive
+                    formData.severity === level.value && { fontWeight: '700' }
                   ]}
                 >
                   {level.label}
@@ -285,11 +318,15 @@ export default function ReportHazardScreen() {
 
         {/* Media Upload */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Photos/Videos *</Text>
-          <Text style={styles.helpText}>Visual evidence is required to verify the hazard</Text>
+          <Text style={styles.label}>📸 Photos/Videos *</Text>
+          <Text style={styles.helpText}>Visual evidence required to verify the hazard</Text>
 
           <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
-            <Text style={styles.uploadButtonText}>📷 Add Media {mediaFiles.length > 0 ? `(${mediaFiles.length}/5)` : ''}</Text>
+            <Text style={styles.uploadIcon}>📷</Text>
+            <Text style={styles.uploadButtonText}>
+              {mediaFiles.length > 0 ? `${mediaFiles.length} file(s) added` : 'Add Media (Required)'}
+            </Text>
+            <Text style={styles.uploadButtonSubtext}>Max 5 files</Text>
           </TouchableOpacity>
 
           {/* Media Preview */}
@@ -312,57 +349,344 @@ export default function ReportHazardScreen() {
 
         {/* Submit Button */}
         <TouchableOpacity
-          style={styles.submitButton}
+          style={[styles.submitButton, loading && styles.submitButtonDisabled]}
           onPress={handleSubmit}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text style={styles.submitButtonText}>Submit Hazard Report</Text>
+            <>
+              <Text style={styles.submitButtonIcon}>✓</Text>
+              <Text style={styles.submitButtonText}>Submit Hazard Report</Text>
+            </>
           )}
         </TouchableOpacity>
 
         {/* Info Box */}
         <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>ℹ️ Reporting Guidelines</Text>
-          <Text style={styles.infoText}>• Reports are analyzed within 24 hours</Text>
-          <Text style={styles.infoText}>• Risk scores update daily based on reports</Text>
-          <Text style={styles.infoText}>• Clear photos help verify hazards faster</Text>
+          <View style={styles.infoHeader}>
+            <View style={styles.infoIconContainer}>
+              <Text style={styles.infoIcon}>ℹ️</Text>
+            </View>
+            <Text style={styles.infoTitle}>Reporting Guidelines</Text>
+          </View>
+          <View style={styles.infoContent}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoBullet}>•</Text>
+              <Text style={styles.infoText}>Reports are analyzed within 24 hours</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoBullet}>•</Text>
+              <Text style={styles.infoText}>Risk scores update daily based on reports</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoBullet}>•</Text>
+              <Text style={styles.infoText}>Clear photos help verify hazards faster</Text>
+            </View>
+          </View>
         </View>
       </View>
     </ScrollView>
+  </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  content: { padding: 16 },
-  alertBox: { backgroundColor: '#fee2e2', borderRadius: 12, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#fca5a5' },
-  alertTitle: { fontSize: 16, fontWeight: '600', color: '#991b1b', textAlign: 'center' },
-  alertText: { fontSize: 14, color: '#991b1b', textAlign: 'center', marginTop: 4 },
-  inputGroup: { backgroundColor: 'white', borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
-  label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 8 },
-  helpText: { fontSize: 12, color: '#6b7280', marginBottom: 8 },
-  input: { backgroundColor: '#f9fafb', borderRadius: 8, padding: 12, fontSize: 14 },
-  pickerContainer: { backgroundColor: '#f9fafb', borderRadius: 8, overflow: 'hidden' },
-  textArea: { backgroundColor: '#f9fafb', borderRadius: 8, padding: 12, fontSize: 14, minHeight: 120 },
-  severityButtons: { flexDirection: 'row', justifyContent: 'space-between' },
-  severityButton: { flex: 1, marginHorizontal: 4, paddingVertical: 12, borderRadius: 8, borderWidth: 2, borderColor: '#e5e7eb', backgroundColor: 'white', alignItems: 'center' },
-  severityButtonActive: { borderColor: '#0891b2', backgroundColor: '#e0f2fe' },
-  severityButtonText: { fontSize: 14, fontWeight: '600' },
-  severityButtonTextActive: { color: '#0891b2' },
-  uploadButton: { backgroundColor: '#e0f2fe', borderWidth: 2, borderColor: '#0891b2', borderStyle: 'dashed', borderRadius: 8, padding: 16, alignItems: 'center' },
-  uploadButtonText: { color: '#0891b2', fontSize: 15, fontWeight: '600' },
-  mediaPreview: { marginTop: 12 },
-  mediaItem: { marginRight: 12, position: 'relative' },
-  mediaImage: { width: 100, height: 100, borderRadius: 8 },
-  removeButton: { position: 'absolute', top: -8, right: -8, backgroundColor: '#ef4444', width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  removeButtonText: { color: 'white', fontSize: 18, fontWeight: 'bold' },
-  submitButton: { backgroundColor: '#ef4444', borderRadius: 12, padding: 16, alignItems: 'center', marginBottom: 16 },
-  submitButtonText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
-  infoBox: { backgroundColor: '#dbeafe', borderRadius: 12, padding: 16, borderLeftWidth: 4, borderLeftColor: '#3b82f6' },
-  infoTitle: { fontSize: 14, fontWeight: '600', color: '#1e40af', marginBottom: 8 },
-  infoText: { fontSize: 12, color: '#1e40af', marginBottom: 4 },
+  wrapper: { flex: 1, backgroundColor: '#f3f4f6' },
+  
+  // Header Styles
+  headerContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 12,
+    padding: 4,
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    color: '#bfdbfe',
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: -0.1,
+  },
+
+  container: { flex: 1, backgroundColor: '#f3f4f6' },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f3f4f6' },
+  content: { padding: 16, paddingBottom: 32 },
+  
+  // Alert Box
+  alertBox: { 
+    backgroundColor: '#eff6ff', 
+    borderRadius: 16, 
+    padding: 20, 
+    marginBottom: 20, 
+    borderWidth: 1, 
+    borderColor: '#bfdbfe',
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  alertIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#2563eb',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  alertIcon: {
+    fontSize: 28,
+  },
+  alertTitle: { 
+    fontSize: 20, 
+    fontWeight: '700', 
+    color: '#1e40af', 
+    textAlign: 'center',
+    marginBottom: 8,
+    letterSpacing: -0.3,
+  },
+  alertText: { 
+    fontSize: 14, 
+    color: '#1e3a8a', 
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  
+  // Input Groups
+  inputGroup: { 
+    backgroundColor: 'white', 
+    borderRadius: 12, 
+    padding: 16, 
+    marginBottom: 16, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.06, 
+    shadowRadius: 4, 
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#f3f4f6',
+  },
+  label: { 
+    fontSize: 15, 
+    fontWeight: '700', 
+    color: '#1f2937', 
+    marginBottom: 10,
+    letterSpacing: -0.2,
+  },
+  helpText: { 
+    fontSize: 13, 
+    color: '#6b7280', 
+    marginBottom: 10,
+    lineHeight: 18,
+  },
+  input: { 
+    backgroundColor: '#f9fafb', 
+    borderRadius: 10, 
+    padding: 14, 
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    color: '#1f2937',
+  },
+  pickerContainer: { 
+    backgroundColor: '#f9fafb', 
+    borderRadius: 10, 
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  textArea: { 
+    backgroundColor: '#f9fafb', 
+    borderRadius: 10, 
+    padding: 14, 
+    fontSize: 15, 
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    color: '#1f2937',
+  },
+  
+  // Severity Buttons
+  severityButtons: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  severityButton: { 
+    flex: 1, 
+    paddingVertical: 14, 
+    borderRadius: 10, 
+    borderWidth: 2, 
+    backgroundColor: 'white', 
+    alignItems: 'center',
+  },
+  severityButtonText: { 
+    fontSize: 13, 
+    fontWeight: '600',
+    letterSpacing: -0.1,
+  },
+  
+  // Upload Button
+  uploadButton: { 
+    backgroundColor: '#eff6ff', 
+    borderWidth: 2, 
+    borderColor: '#2563eb', 
+    borderStyle: 'dashed', 
+    borderRadius: 12, 
+    padding: 20, 
+    alignItems: 'center',
+    gap: 4,
+  },
+  uploadIcon: {
+    fontSize: 32,
+    marginBottom: 4,
+  },
+  uploadButtonText: { 
+    color: '#2563eb', 
+    fontSize: 16, 
+    fontWeight: '700',
+    letterSpacing: -0.2,
+  },
+  uploadButtonSubtext: {
+    color: '#6b7280',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  
+  // Media Preview
+  mediaPreview: { marginTop: 16 },
+  mediaItem: { 
+    marginRight: 12, 
+    position: 'relative',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  mediaImage: { 
+    width: 100, 
+    height: 100, 
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+  },
+  removeButton: { 
+    position: 'absolute', 
+    top: -8, 
+    right: -8, 
+    backgroundColor: '#ef4444', 
+    width: 28, 
+    height: 28, 
+    borderRadius: 14, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#ef4444',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  removeButtonText: { 
+    color: 'white', 
+    fontSize: 20, 
+    fontWeight: 'bold',
+    marginTop: -2,
+  },
+  
+  // Submit Button
+  submitButton: { 
+    backgroundColor: '#2563eb', 
+    borderRadius: 12, 
+    padding: 18, 
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    elevation: 4,
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    gap: 8,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  submitButtonIcon: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  submitButtonText: { 
+    color: 'white', 
+    fontSize: 17, 
+    fontWeight: '700',
+    letterSpacing: -0.3,
+  },
+  
+  // Info Box
+  infoBox: { 
+    backgroundColor: '#eff6ff', 
+    borderRadius: 12, 
+    padding: 16, 
+    borderLeftWidth: 4, 
+    borderLeftColor: '#2563eb',
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  infoIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#2563eb',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  infoIcon: {
+    fontSize: 14,
+  },
+  infoTitle: { 
+    fontSize: 15, 
+    fontWeight: '700', 
+    color: '#1e40af',
+    letterSpacing: -0.2,
+  },
+  infoContent: {
+    gap: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  infoBullet: {
+    fontSize: 16,
+    color: '#2563eb',
+    marginRight: 8,
+    fontWeight: 'bold',
+  },
+  infoText: { 
+    fontSize: 13, 
+    color: '#1e3a8a',
+    flex: 1,
+    lineHeight: 18,
+  },
 });

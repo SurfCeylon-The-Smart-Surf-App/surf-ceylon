@@ -8,7 +8,11 @@ import {
   RefreshControl,
   Alert,
   StyleSheet,
+  StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 import { getSurfSpots } from '../services/riskAnalyzerAPI';
@@ -61,7 +65,7 @@ export default function RiskAnalyzerScreen() {
   if (loading && !refreshing) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#0891b2" />
+        <ActivityIndicator size="large" color="#2563eb" />
         <Text style={styles.loadingText}>Loading surf spots...</Text>
       </View>
     );
@@ -83,6 +87,22 @@ export default function RiskAnalyzerScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      {/* Header with Gradient */}
+      <LinearGradient
+        colors={["#2563eb", "#1d4ed8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <SafeAreaView edges={["top"]} style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>Surf Risk Analyzer</Text>
+          <Text style={styles.headerSubtitle}>
+            Risk assessment for surf spots
+          </Text>
+        </SafeAreaView>
+      </LinearGradient>
+
       {/* Skill Level Tabs */}
       <SkillLevelTabs
         selectedSkillLevel={selectedSkillLevel}
@@ -102,7 +122,7 @@ export default function RiskAnalyzerScreen() {
           onPress={() => setViewMode('map')}
         >
           <Text style={[styles.toggleText, viewMode === 'map' && styles.toggleTextActive]}>
-            🗺️ Map
+            🗺️ Map View
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -110,7 +130,7 @@ export default function RiskAnalyzerScreen() {
           onPress={() => setViewMode('list')}
         >
           <Text style={[styles.toggleText, viewMode === 'list' && styles.toggleTextActive]}>
-            📋 List
+            📋 List View
           </Text>
         </TouchableOpacity>
       </View>
@@ -118,12 +138,11 @@ export default function RiskAnalyzerScreen() {
       {/* Map or List View */}
       {viewMode === 'map' ? renderMapView() : renderListView()}
 
-      {/* Bottom Info Banner */}
-      <View style={styles.bottomBanner}>
-        <Text style={styles.bottomBannerTitle}>Surf Risk Analyzer</Text>
-        <Text style={styles.bottomBannerText}>
+      {/* Bottom Safety Notice */}
+      <View style={styles.bottomSafetyNotice}>
+        <Text style={styles.bottomSafetyTitle}>Surf Risk Analyzer</Text>
+        <Text style={styles.bottomSafetyText}>
           Risk scores updated daily based on historical incidents and current hazard reports.
-      
         </Text>
       </View>
 
@@ -133,7 +152,7 @@ export default function RiskAnalyzerScreen() {
         onPress={() => router.push('/reportHazard')}
       >
         <Text style={styles.fabIcon}>⚠️</Text>
-        <Text style={styles.fabText}>Report</Text>
+        <Text style={styles.fabText}>Report Hazard</Text>
       </TouchableOpacity>
     </View>
   );
@@ -143,26 +162,32 @@ export default function RiskAnalyzerScreen() {
     const skillInfo = getSkillLevelInfo(selectedSkillLevel);
 
     return (
-      <View style={[styles.thresholdBanner, { backgroundColor: skillInfo.color + '15' }]}>
-        <Text style={[styles.thresholdTitle, { color: skillInfo.color }]}>
-          {skillInfo.icon} {skillInfo.label} Risk Thresholds
+      <View style={styles.thresholdBanner}>
+        <Text style={styles.thresholdTitle}>
+          {skillInfo.icon} Risk Levels for {skillInfo.label}
         </Text>
         <View style={styles.thresholdRow}>
           <View style={styles.thresholdItem}>
-            <Text style={styles.thresholdEmoji}>{thresholds.low.emoji}</Text>
-            <Text style={styles.thresholdLabel}>Low</Text>
+            <View style={[styles.thresholdIconCircle, { backgroundColor: '#dcfce7' }]}>
+              <Text style={styles.thresholdEmoji}>{thresholds.low.emoji}</Text>
+            </View>
+            <Text style={styles.thresholdLabel}>Low Risk</Text>
             <Text style={styles.thresholdRange}>{thresholds.low.label}</Text>
           </View>
           <View style={styles.thresholdDivider} />
           <View style={styles.thresholdItem}>
-            <Text style={styles.thresholdEmoji}>{thresholds.medium.emoji}</Text>
-            <Text style={styles.thresholdLabel}>Medium</Text>
+            <View style={[styles.thresholdIconCircle, { backgroundColor: '#fef3c7' }]}>
+              <Text style={styles.thresholdEmoji}>{thresholds.medium.emoji}</Text>
+            </View>
+            <Text style={styles.thresholdLabel}>Medium Risk</Text>
             <Text style={styles.thresholdRange}>{thresholds.medium.label}</Text>
           </View>
           <View style={styles.thresholdDivider} />
           <View style={styles.thresholdItem}>
-            <Text style={styles.thresholdEmoji}>{thresholds.high.emoji}</Text>
-            <Text style={styles.thresholdLabel}>High</Text>
+            <View style={[styles.thresholdIconCircle, { backgroundColor: '#fee2e2' }]}>
+              <Text style={styles.thresholdEmoji}>{thresholds.high.emoji}</Text>
+            </View>
+            <Text style={styles.thresholdLabel}>High Risk</Text>
             <Text style={styles.thresholdRange}>{thresholds.high.label}</Text>
           </View>
         </View>
@@ -170,7 +195,7 @@ export default function RiskAnalyzerScreen() {
     );
   }
 
-  // NEW: Safety Notice Component
+  // Safety Notice Component
   function renderSafetyNotice() {
     return (
       <View style={styles.safetyNotice}>
@@ -178,11 +203,13 @@ export default function RiskAnalyzerScreen() {
           <View style={styles.safetyIconContainer}>
             <Text style={styles.safetyIcon}>ℹ️</Text>
           </View>
-          <Text style={styles.safetyNoticeTitle}>Safety Notice</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.safetyNoticeTitle}>Safety First</Text>
+            <Text style={styles.safetyNoticeText}>
+              Always check current conditions before surfing. Risk scores are based on historical incidents (Rip current, Sea Urchins, Drowning, etc.) data.
+            </Text>
+          </View>
         </View>
-        <Text style={styles.safetyNoticeText}>
-          Always check current conditions before surfing. Risk scores are based on historical data.
-        </Text>
       </View>
     );
   }
@@ -219,27 +246,34 @@ export default function RiskAnalyzerScreen() {
           return (
             <TouchableOpacity
               key={spot._id}
-              style={[styles.spotCard, { borderLeftColor: riskLevel.color }]}
+              style={styles.spotCard}
               onPress={() => {
                 setSelectedSpot(spot);
                 setViewMode('map');
               }}
             >
-              <View style={styles.spotCardContent}>
-                <View style={styles.spotInfo}>
+              <View style={styles.spotCardHeader}>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.spotName}>{spot.name}</Text>
-                  <Text style={styles.spotLocation}>📍 {spot.location}</Text>
-                  <View style={[styles.riskBadge, { backgroundColor: riskLevel.bgColor }]}>
-                    <Text style={[styles.riskBadgeText, { color: riskLevel.textColor }]}>
-                      {riskLevel.emoji} {riskLevel.level} Risk
+                  <View style={styles.spotLocationRow}>
+                    <Text style={styles.spotLocationIcon}>📍</Text>
+                    <Text style={styles.spotLocation}>{spot.location}</Text>
+                  </View>
+                </View>
+                <View style={styles.spotScoreContainer}>
+                  <View style={[styles.scoreCircle, { backgroundColor: riskLevel.color + '20', borderColor: riskLevel.color }]}>
+                    <Text style={[styles.scoreValue, { color: riskLevel.color }]}>
+                      {riskData.score.toFixed(1)}
                     </Text>
                   </View>
                 </View>
-                <View style={styles.spotScore}>
-                  <Text style={[styles.scoreValue, { color: riskLevel.color }]}>
-                    {riskData.score.toFixed(1)}
+              </View>
+              
+              <View style={styles.spotCardFooter}>
+                <View style={[styles.riskBadge, { backgroundColor: riskLevel.bgColor }]}>
+                  <Text style={[styles.riskBadgeText, { color: riskLevel.textColor }]}>
+                    {riskLevel.emoji} {riskLevel.level} Risk
                   </Text>
-                  <Text style={styles.scoreLabel}>/10</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -252,105 +286,262 @@ export default function RiskAnalyzerScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  container: { flex: 1, backgroundColor: '#f3f4f6' },
+  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#f3f4f6' },
   
-  loadingText: { marginTop: 16, fontSize: 16, fontWeight: '600', color: '#374151' },
+  // Header Styles
+  headerContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    color: '#bfdbfe',
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: -0.1,
+  },
+
+  loadingText: { marginTop: 16, fontSize: 16, fontWeight: '600', color: '#1f2937' },
   errorEmoji: { fontSize: 64, marginBottom: 16 },
   errorTitle: { fontSize: 20, fontWeight: 'bold', color: '#ef4444', marginBottom: 8 },
   errorMessage: { fontSize: 14, color: '#6b7280', textAlign: 'center', marginBottom: 24 },
-  retryButton: { backgroundColor: '#0891b2', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8 },
+  retryButton: { 
+    backgroundColor: '#2563eb', 
+    paddingVertical: 14, 
+    paddingHorizontal: 32, 
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
   retryButtonText: { color: 'white', fontSize: 15, fontWeight: '600' },
 
-  thresholdBanner: { paddingVertical: 12, paddingHorizontal: 16, borderBottomWidth: 1, borderColor: '#e5e7eb' },
-  thresholdTitle: { fontSize: 13, fontWeight: '700', textAlign: 'center', marginBottom: 12 },
+  // Threshold Banner
+  thresholdBanner: { 
+    backgroundColor: 'white',
+    paddingVertical: 16, 
+    paddingHorizontal: 16, 
+    borderBottomWidth: 1, 
+    borderColor: '#e5e7eb',
+    elevation: 1,
+  },
+  thresholdTitle: { 
+    fontSize: 14, 
+    fontWeight: '700', 
+    color: '#1f2937',
+    textAlign: 'center', 
+    marginBottom: 14 
+  },
   thresholdRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' },
   thresholdItem: { alignItems: 'center', flex: 1 },
-  thresholdEmoji: { fontSize: 20, marginBottom: 4 },
-  thresholdLabel: { fontSize: 11, fontWeight: '600', color: '#374151', marginBottom: 2 },
-  thresholdRange: { fontSize: 10, color: '#6b7280' },
-  thresholdDivider: { width: 1, height: 40, backgroundColor: '#e5e7eb' },
+  thresholdIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  thresholdEmoji: { fontSize: 24 },
+  thresholdLabel: { fontSize: 12, fontWeight: '600', color: '#374151', marginBottom: 4 },
+  thresholdRange: { fontSize: 11, color: '#6b7280', fontWeight: '500' },
+  thresholdDivider: { width: 1, height: 50, backgroundColor: '#e5e7eb', marginHorizontal: 4 },
 
-  // NEW: Safety Notice Styles
+  // Safety Notice
   safetyNotice: {
-    backgroundColor: '#dbeafe',
-    borderLeftWidth: 4,
-    borderLeftColor: '#3b82f6',
-    paddingVertical: 12,
+    backgroundColor: '#eff6ff',
+    paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#bfdbfe',
+    borderBottomColor: '#dbeafe',
   },
   safetyNoticeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
   },
   safetyIconContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#3b82f6',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#2563eb',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
+    marginRight: 12,
   },
   safetyIcon: {
-    fontSize: 14,
+    fontSize: 16,
   },
   safetyNoticeTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: '#1e40af',
+    marginBottom: 4,
   },
   safetyNoticeText: {
     fontSize: 12,
     color: '#1e3a8a',
     lineHeight: 18,
-    paddingLeft: 32,
   },
 
-  viewToggle: { flexDirection: 'row', padding: 12, backgroundColor: 'white', borderBottomWidth: 1, borderColor: '#e5e7eb' },
-  toggleButton: { flex: 1, paddingVertical: 10, paddingHorizontal: 16, marginHorizontal: 4, borderRadius: 8, backgroundColor: '#f3f4f6', alignItems: 'center' },
-  toggleButtonActive: { backgroundColor: '#0891b2' },
+  // View Toggle
+  viewToggle: { 
+    flexDirection: 'row', 
+    padding: 12, 
+    backgroundColor: 'white', 
+    borderBottomWidth: 1, 
+    borderColor: '#e5e7eb',
+    gap: 8,
+  },
+  toggleButton: { 
+    flex: 1, 
+    paddingVertical: 12, 
+    paddingHorizontal: 16, 
+    borderRadius: 8, 
+    backgroundColor: '#f3f4f6', 
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  toggleButtonActive: { 
+    backgroundColor: '#2563eb',
+    borderColor: '#2563eb',
+  },
   toggleText: { fontSize: 14, fontWeight: '600', color: '#6b7280' },
   toggleTextActive: { color: 'white' },
 
+  // List View
   listContainer: { flex: 1, padding: 16 },
-  spotCard: { backgroundColor: 'white', borderRadius: 12, padding: 16, marginBottom: 12, borderLeftWidth: 4, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 3 },
-  spotCardContent: { flexDirection: 'row', justifyContent: 'space-between' },
-  spotInfo: { flex: 1, paddingRight: 12 },
-  spotName: { fontSize: 17, fontWeight: 'bold', color: '#111827', marginBottom: 4 },
-  spotLocation: { fontSize: 13, color: '#6b7280', marginBottom: 8 },
-  riskBadge: { alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
-  riskBadgeText: { fontSize: 12, fontWeight: '700' },
-  spotScore: { alignItems: 'center', paddingLeft: 12, borderLeftWidth: 1, borderColor: '#e5e7eb' },
-  scoreValue: { fontSize: 32, fontWeight: 'bold', lineHeight: 36 },
-  scoreLabel: { fontSize: 12, color: '#9ca3af', marginTop: -4 },
+  spotCard: { 
+    backgroundColor: 'white', 
+    borderRadius: 12, 
+    padding: 16, 
+    marginBottom: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#f3f4f6',
+  },
+  spotCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  spotName: { 
+    fontSize: 18, 
+    fontWeight: '700', 
+    color: '#111827', 
+    marginBottom: 6,
+    letterSpacing: -0.3,
+  },
+  spotLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  spotLocationIcon: {
+    fontSize: 14,
+    marginRight: 4,
+  },
+  spotLocation: { 
+    fontSize: 14, 
+    color: '#6b7280',
+    fontWeight: '500',
+  },
+  spotScoreContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scoreCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scoreValue: { 
+    fontSize: 22, 
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  spotCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  riskBadge: { 
+    paddingHorizontal: 12, 
+    paddingVertical: 6, 
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  riskBadgeText: { 
+    fontSize: 13, 
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
 
-  fabButton: { position: 'absolute', bottom: 84, right: 24, backgroundColor: '#ef4444', width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center', elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 5 },
-  fabIcon: { fontSize: 24 },
-  fabText: { color: 'white', fontSize: 10, fontWeight: '600', marginTop: 2 },
-
-  // Bottom Banner Styles
-  bottomBanner: {
-    backgroundColor: '#f3f4f6',
+  // Bottom Safety Notice
+  bottomSafetyNotice: {
+    backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
     paddingVertical: 12,
     paddingHorizontal: 16,
     alignItems: 'center',
   },
-  bottomBannerTitle: {
+  bottomSafetyTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#374151',
+    color: '#1f2937',
     marginBottom: 4,
+    letterSpacing: -0.2,
   },
-  bottomBannerText: {
+  bottomSafetyText: {
     fontSize: 11,
     color: '#6b7280',
     textAlign: 'center',
     lineHeight: 16,
+  },
+
+  // Floating Action Button
+  fabButton: { 
+    position: 'absolute', 
+    bottom: 80, 
+    right: 24, 
+    backgroundColor: '#2563eb', 
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 28, 
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 8, 
+    shadowColor: '#2563eb', 
+    shadowOffset: { width: 0, height: 4 }, 
+    shadowOpacity: 0.4, 
+    shadowRadius: 8,
+    gap: 8,
+  },
+  fabIcon: { fontSize: 20 },
+  fabText: { 
+    color: 'white', 
+    fontSize: 14, 
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });

@@ -90,7 +90,7 @@ export const dummyDashboardFeatures = [
     id: 2,
     title: "Risk Analyzer",
     description:
-      "Assess potential risks at a surf spot, including weather and wave conditions.",
+      "Assess potential risks at a surf spot, according to historical incidents.",
     icon: "❤️",
     color: "bg-red-500",
   },
