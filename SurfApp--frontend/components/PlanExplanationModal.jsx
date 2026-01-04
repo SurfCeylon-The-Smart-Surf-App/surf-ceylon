@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
   overviewLabel: { fontSize: 14, color: '#666', marginLeft: 12, flex: 1 },
   overviewValue: { fontSize: 16, fontWeight: 'bold', color: '#333' },
   
-  closeModalButton: { backgroundColor: '#007AFF', marginHorizontal: 20, marginBottom: 20, paddingVertical: 16, borderRadius: 12, alignItems: 'center' },
+  closeModalButton: { backgroundColor: '#4169E1', marginHorizontal: 20, marginBottom: 20, paddingVertical: 16, borderRadius: 12, alignItems: 'center', shadowColor: '#4169E1', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 5 },
   closeModalButtonText: { color: '#fff', fontSize: 18, fontWeight: '600' },
 });
 

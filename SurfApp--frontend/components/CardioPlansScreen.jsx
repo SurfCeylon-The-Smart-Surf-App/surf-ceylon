@@ -9,8 +9,10 @@ import {
   Alert,
   Animated,
   Dimensions,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import SafeLinearGradient from "./SafeLinearGradient.jsx";
 import { cardioAPI } from "../services/api.js";
@@ -86,7 +88,7 @@ const AnimatedPlanCard = ({ plan, index, onStartWorkout, onExplain }) => {
       ]}
     >
       <SafeLinearGradient
-        colors={["#667eea", "#764ba2"]}
+        colors={["#4169E1", "#5B8DEF"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.planGradient}
@@ -429,70 +431,49 @@ export default function CardioPlansScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* ✅ Animated Header with Integrated Back Button */}
-        <Animated.View
-          style={[
-            styles.headerSection,
-            {
-              opacity: headerAnim,
-              transform: [
-                {
-                  translateY: headerAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-20, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
+    <View className="flex-1">
+      <StatusBar barStyle="light-content" />
+      {/* Header with gradient extending to notch */}
+      <LinearGradient
+        colors={["#2563eb", "#1d4ed8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+      >
+        <SafeAreaView edges={["top"]} className="px-6 pb-4 flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            <TouchableOpacity
+              className="mr-4 w-9 h-9 rounded-full bg-white/20 items-center justify-center"
+              onPress={() => router.back()}
+            >
+              <Icon name="arrow-back" size={22} color="#fff" />
+            </TouchableOpacity>
+            <View>
+              <Text className="text-white text-2xl font-bold">Cardio Plans</Text>
+              <Text className="text-blue-100 text-sm">Personalized workouts for you</Text>
+            </View>
+          </View>
+          <View className="flex-row space-x-3">
+            <TouchableOpacity onPress={() => router.push("/cardio-history")}>
+              <Icon name="history" size={24} color="#ffffff" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowQuiz(true)}>
+              <Icon name="refresh" size={24} color="#ffffff" />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+
+      <View className="flex-1 bg-gray-50">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingBottom: 24 }}
         >
-          <SafeLinearGradient
-            colors={["#667eea", "#764ba2"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.headerGradient}
-          >
-            {/* Top Row: Back Button + Action Buttons */}
-            <View style={styles.headerTopRow}>
-              <TouchableOpacity
-                style={styles.headerBackButton}
-                onPress={() => router.back()}
-              >
-                <Icon name="arrow-back" size={24} color="#fff" />
-              </TouchableOpacity>
-              <View style={styles.headerActions}>
-                <TouchableOpacity
-                  style={styles.headerActionButton}
-                  onPress={() => router.push("/cardio-history")}
-                >
-                  <Icon name="history" size={22} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.headerActionButton}
-                  onPress={() => setShowQuiz(true)}
-                >
-                  <Icon name="refresh" size={22} color="#fff" />
-                </TouchableOpacity>
-              </View>
-            </View>
-            
-            {/* Title Section */}
-            <View style={styles.headerTitleContainer}>
-              <Text style={styles.headerTitle}>Cardio Plans</Text>
-              <Text style={styles.headerSubtitle}>
-                Personalized workouts designed for you
-              </Text>
-            </View>
-          </SafeLinearGradient>
-        </Animated.View>
 
         {/* Profile Info Card */}
         {profile && (
           <View style={styles.profileCard}>
             <View style={styles.profileHeader}>
-              <Icon name="person" size={32} color="#667eea" />
+              <Icon name="person" size={32} color="#4169E1" />
               <View style={styles.profileInfo}>
                 <Text style={styles.profileName}>Your Profile</Text>
                 <Text style={styles.profileLevel}>{profile.fitnessLevel}</Text>
@@ -524,7 +505,7 @@ export default function CardioPlansScreen() {
         {/* Recommendations */}
         {loading ? (
           <View style={styles.loadingSection}>
-            <ActivityIndicator size="large" color="#667eea" />
+            <ActivityIndicator size="large" color="#4169E1" />
             <Text style={styles.loadingText}>
               Generating your personalized plans...
             </Text>
@@ -562,7 +543,8 @@ export default function CardioPlansScreen() {
             </TouchableOpacity>
           </View>
         )}
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       {explanationPlan && profile && (
         <PlanExplanationModal
@@ -573,14 +555,14 @@ export default function CardioPlansScreen() {
           onClose={() => setExplanationPlan(null)}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
+    backgroundColor: "#f5f5f5",
   },
   scrollContent: {
     paddingBottom: 24,
@@ -614,8 +596,6 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
   },
   headerTopRow: {
     flexDirection: "row",
@@ -659,16 +639,16 @@ const styles = StyleSheet.create({
   },
   profileCard: {
     backgroundColor: "#fff",
-    marginHorizontal: 20,
-    marginBottom: 24,
+    marginHorizontal: 16,
+    marginBottom: 16,
     marginTop: 4,
-    padding: 18,
-    borderRadius: 18,
-    shadowColor: "#667eea",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 5,
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   profileHeader: {
     flexDirection: "row",
@@ -709,7 +689,7 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   recommendationsSection: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   sectionTitle: {
     fontSize: 20,
@@ -719,14 +699,14 @@ const styles = StyleSheet.create({
   },
   planCard: {
     backgroundColor: "#fff",
-    borderRadius: 16,
-    marginBottom: 14,
+    borderRadius: 12,
+    marginBottom: 12,
     overflow: "hidden",
-    shadowColor: "#667eea",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   planGradient: {
     padding: 16,

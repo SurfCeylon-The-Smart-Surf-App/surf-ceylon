@@ -10,8 +10,10 @@ import {
   Easing,
   Vibration,
   ScrollView,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -829,7 +831,7 @@ export default function WorkoutExecutionScreen({ workoutPlan, onComplete }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa' },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
   scrollView: { flex: 1 },
   
   // ✅ Top Bar with Back Button
@@ -881,12 +883,12 @@ const styles = StyleSheet.create({
   previewItemText: { fontSize: 15, fontWeight: '600', color: '#333', marginBottom: 4 },
   previewItemDetails: { fontSize: 12, color: '#999' },
   idleFooter: { padding: 20, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e0e0e0' },
-  startButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#667eea', paddingVertical: 16, borderRadius: 12 },
+  startButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#4169E1', paddingVertical: 16, borderRadius: 12 },
   startButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginLeft: 8 },
   
   // Countdown
   countdownContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
-  countdownText: { fontSize: 80, fontWeight: 'bold', color: '#667eea' },
+  countdownText: { fontSize: 80, fontWeight: 'bold', color: '#4169E1' },
   countdownLabel: { fontSize: 18, color: '#666', marginTop: 16 },
   countdownNext: { fontSize: 14, color: '#999', marginTop: 10 },
   
@@ -898,7 +900,7 @@ const styles = StyleSheet.create({
   readyStat: { alignItems: 'center' },
   readyStatValue: { fontSize: 20, fontWeight: 'bold', color: '#333', marginTop: 8 },
   readyStatLabel: { fontSize: 11, color: '#999', marginTop: 4 },
-  readyStartButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#667eea', paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12, marginBottom: 16 },
+  readyStartButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#4169E1', paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12, marginBottom: 16 },
   readyStartText: { color: '#fff', fontSize: 16, fontWeight: '700', marginLeft: 8 },
   readyActions: { flexDirection: 'row', gap: 10 },
   readyActionButton: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, backgroundColor: '#FFF3E0' },
@@ -909,7 +911,7 @@ const styles = StyleSheet.create({
   // Active State
   workoutContainer: { padding: 16 },
   progressContainer: { alignItems: 'center', marginBottom: 20, marginTop: 16 },
-  progressRing: { width: 220, height: 220, borderRadius: 110, borderWidth: 6, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
+  progressRing: { width: 220, height: 220, borderRadius: 110, borderWidth: 6, borderColor: '#4169E1', justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
   progressInner: { alignItems: 'center' },
   timeText: { fontSize: 42, fontWeight: 'bold', color: '#333' },
   activityName: { fontSize: 15, fontWeight: '600', color: '#333', textAlign: 'center', marginTop: 8, paddingHorizontal: 20 },
@@ -928,7 +930,7 @@ const styles = StyleSheet.create({
   // Controls
   controlsContainer: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 14, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e0e0e0' },
   controlButton: { alignItems: 'center' },
-  controlButtonPrimary: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#667eea', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 6 },
+  controlButtonPrimary: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#4169E1', justifyContent: 'center', alignItems: 'center', shadowColor: '#4169E1', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 },
   controlButtonText: { fontSize: 11, color: '#666', marginTop: 4, fontWeight: '600' },
   
   // Stats Footer
@@ -943,7 +945,7 @@ const styles = StyleSheet.create({
   completedStat: { alignItems: 'center' },
   completedStatValue: { fontSize: 20, fontWeight: 'bold', color: '#333', marginTop: 10 },
   completedStatLabel: { fontSize: 11, color: '#999', marginTop: 4 },
-  doneButton: { backgroundColor: '#667eea', paddingHorizontal: 40, paddingVertical: 14, borderRadius: 12 },
+  doneButton: { backgroundColor: '#4169E1', paddingHorizontal: 40, paddingVertical: 14, borderRadius: 12, shadowColor: '#4169E1', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 5 },
   doneButtonText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 });
 

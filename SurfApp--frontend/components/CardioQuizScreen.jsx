@@ -9,6 +9,7 @@ import {
   Alert,
   Animated,
   Dimensions,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -409,98 +410,102 @@ export default function CardioQuizScreen({ onComplete }) {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Premium Header with Gradient */}
+    <View className="flex-1">
+      <StatusBar barStyle="light-content" />
+      {/* Header with gradient extending to notch */}
       <LinearGradient
-        colors={['#667eea', '#764ba2']}
+        colors={["#2563eb", "#1d4ed8"]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.headerGradient}
+        end={{ x: 1, y: 0 }}
       >
-        {/* Top Row: Back Button */}
-        <View style={styles.headerTopRow}>
-          <TouchableOpacity onPress={handleBack} style={styles.headerBackButton}>
-            <Icon name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Fitness Quiz</Text>
-            <Text style={styles.headerStep}>Step {currentStep + 1} of {steps.length}</Text>
+        <SafeAreaView edges={["top"]} className="px-6 pb-4">
+          <View className="flex-row items-center mb-3">
+            <TouchableOpacity
+              className="mr-4 w-9 h-9 rounded-full bg-white/20 items-center justify-center"
+              onPress={handleBack}
+            >
+              <Icon name="arrow-back" size={22} color="#fff" />
+            </TouchableOpacity>
+            <View className="flex-1">
+              <Text className="text-white text-2xl font-bold">Fitness Quiz</Text>
+              <Text className="text-blue-100 text-sm">Step {currentStep + 1} of {steps.length}</Text>
+            </View>
           </View>
-          <View style={styles.headerPlaceholder} />
-        </View>
 
-        {/* Progress Bar */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <Animated.View
-              style={[
-                styles.progressFill,
-                {
+          {/* Progress Bar */}
+          <View className="mb-3">
+            <View className="h-1 bg-white/30 rounded-full overflow-hidden">
+              <Animated.View
+                className="h-full bg-white rounded-full"
+                style={{
                   width: progressAnim.interpolate({
                     inputRange: [0, 1],
                     outputRange: ['0%', '100%'],
                   }),
-                },
-              ]}
-            />
+                }}
+              />
+            </View>
+            <Text className="text-white/90 text-xs mt-1 text-center font-semibold">
+              {Math.round(((currentStep + 1) / steps.length) * 100)}% Complete
+            </Text>
           </View>
-          <Text style={styles.progressText}>
-            {Math.round(((currentStep + 1) / steps.length) * 100)}% Complete
-          </Text>
-        </View>
 
-        {/* Question Section */}
-        <View style={styles.questionContainer}>
-          <View style={styles.questionIconContainer}>
-            <Icon name={steps[currentStep].icon} size={28} color="#fff" />
+          {/* Question Section */}
+          <View className="items-center pt-1">
+            <View className="w-11 h-11 rounded-full bg-white/25 items-center justify-center mb-2">
+              <Icon name={steps[currentStep].icon} size={24} color="#fff" />
+            </View>
+            <Text className="text-white text-base font-semibold text-center leading-5">
+              {steps[currentStep].question}
+            </Text>
           </View>
-          <Text style={styles.questionText}>{steps[currentStep].question}</Text>
-        </View>
+        </SafeAreaView>
       </LinearGradient>
 
-      {/* ✅ LARGE SCROLLABLE CONTENT AREA */}
-      <ScrollView 
-        style={styles.contentScroll}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View
+      {/* Content Area */}
+      <View className="flex-1 bg-gray-50">
+        <ScrollView 
+          className="flex-1 px-6 py-6"
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View
+            style={{
+              opacity: fadeAnim,
+              transform: [{ translateX: slideAnim }],
+            }}
+          >
+            {renderStepContent()}
+          </Animated.View>
+        </ScrollView>
+      </View>
+
+      {/* Navigation */}
+      <View className="px-6 py-4 bg-white border-t border-gray-100">
+        <TouchableOpacity
+          className="bg-blue-600 rounded-lg py-4 items-center justify-center flex-row"
+          onPress={handleNext}
           style={{
-            opacity: fadeAnim,
-            transform: [{ translateX: slideAnim }],
+            shadowColor: '#2563eb',
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5,
           }}
         >
-          {renderStepContent()}
-        </Animated.View>
-      </ScrollView>
-
-      {/* ✅ COMPACT NAVIGATION */}
-      <View style={styles.navigationContainer}>
-        <TouchableOpacity
-          style={styles.nextButton}
-          onPress={handleNext}
-        >
-          <LinearGradient
-            colors={['#667eea', '#764ba2']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.nextButtonGradient}
-          >
-            <Text style={styles.nextButtonText}>
-              {currentStep === steps.length - 1 ? 'Complete Quiz' : 'Next'}
-            </Text>
-            <Icon name={currentStep === steps.length - 1 ? 'check' : 'arrow-forward'} size={20} color="#fff" />
-          </LinearGradient>
+          <Text className="text-white text-base font-bold mr-2">
+            {currentStep === steps.length - 1 ? 'Complete Quiz' : 'Next'}
+          </Text>
+          <Icon name={currentStep === steps.length - 1 ? 'check' : 'arrow-forward'} size={20} color="#fff" />
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7fa',
+    backgroundColor: '#f5f5f5',
   },
   
   // Premium Header
@@ -508,13 +513,12 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 18,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
-    shadowColor: "#667eea",
-    shadowOffset: { width: 0, height: 3 },
+    backgroundColor: '#4169E1',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
-    elevation: 6,
+    elevation: 5,
   },
   headerTopRow: {
     flexDirection: 'row',
@@ -609,25 +613,24 @@ const styles = StyleSheet.create({
   },
   optionCard: {
     backgroundColor: '#fff',
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 18,
     borderWidth: 1.5,
-    borderColor: '#e8eaf0',
+    borderColor: '#e0e0e0',
     alignItems: 'center',
     position: 'relative',
-    shadowColor: '#667eea',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 2,
   },
   optionCardSelected: {
-    borderColor: '#667eea',
+    borderColor: '#4169E1',
     borderWidth: 2,
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
+    shadowOpacity: 0.15,
     elevation: 4,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: '#fff',
   },
   optionTitle: {
     fontSize: 15,
@@ -643,10 +646,10 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: '#667eea',
+    backgroundColor: '#4169E1',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#667eea',
+    shadowColor: '#4169E1',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3,
@@ -725,10 +728,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   limitationChipSelected: {
-    backgroundColor: '#f8f9ff',
-    borderColor: '#667eea',
+    backgroundColor: '#E3F2FD',
+    borderColor: '#4169E1',
     borderWidth: 2,
-    shadowColor: '#667eea',
+    shadowColor: '#4169E1',
     shadowOpacity: 0.15,
   },
   limitationText: {
@@ -737,7 +740,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   limitationTextSelected: {
-    color: '#667eea',
+    color: '#4169E1',
     fontWeight: '700',
   },
   
@@ -757,11 +760,12 @@ const styles = StyleSheet.create({
   nextButton: {
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#667eea',
+    backgroundColor: '#4169E1',
+    shadowColor: '#4169E1',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   nextButtonGradient: {
     flexDirection: 'row',
@@ -769,6 +773,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 14,
     paddingHorizontal: 24,
+    backgroundColor: 'transparent',
   },
   nextButtonText: {
     fontSize: 15,

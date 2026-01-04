@@ -8,8 +8,10 @@ import {
   ActivityIndicator,
   RefreshControl,
   Animated,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
@@ -215,23 +217,37 @@ export default function ProgressScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+    <View className="flex-1">
+      <StatusBar barStyle="light-content" />
+      {/* Header with gradient extending to notch */}
+      <LinearGradient
+        colors={["#2563eb", "#1d4ed8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
       >
-        <View style={styles.backButtonContainer}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Icon name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+        <SafeAreaView edges={["top"]} className="px-6 pb-4 flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            <TouchableOpacity
+              className="mr-4 w-9 h-9 rounded-full bg-white/20 items-center justify-center"
+              onPress={() => router.back()}
+            >
+              <Icon name="arrow-back" size={22} color="#fff" />
+            </TouchableOpacity>
+            <View>
+              <Text className="text-white text-2xl font-bold">Progress</Text>
+              <Text className="text-blue-100 text-sm">Track your fitness journey</Text>
+            </View>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
 
-        <Text style={styles.title}>Progress</Text>
+      <View className="flex-1 bg-gray-50">
+        <ScrollView
+          className="flex-1 px-6 py-6"
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
 
         {/* Tab Navigation */}
         <ScrollView
@@ -721,7 +737,7 @@ export default function ProgressScreen() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View></View>
   );
 }
 
@@ -806,13 +822,13 @@ const styles = StyleSheet.create({
     top: 16,
     left: 16,
     zIndex: 1000,
-    backgroundColor: "rgba(102, 126, 234, 0.9)",
+    backgroundColor: "rgba(65, 105, 225, 0.9)",
     borderRadius: 20,
     padding: 8,
-    shadowColor: "#000",
+    shadowColor: "#4169E1",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
     elevation: 5,
   },
   backButton: {
@@ -847,7 +863,7 @@ const styles = StyleSheet.create({
     gap: 6,
     minWidth: 80,
   },
-  tabActive: { backgroundColor: "#667eea" },
+  tabActive: { backgroundColor: '#4169E1' },
   tabText: { fontSize: 13, fontWeight: "600", color: "#666" },
   tabTextActive: { color: "#fff" },
 

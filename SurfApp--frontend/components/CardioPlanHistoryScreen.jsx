@@ -8,8 +8,10 @@ import {
   Alert,
   Animated,
   Dimensions,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import SafeLinearGradient from './SafeLinearGradient.jsx';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -87,7 +89,7 @@ const AnimatedHistoryCard = ({ plan, index, onRepeat, onDelete }) => {
       <View style={styles.planCardHeader}>
         <View style={styles.planIconContainer}>
           <SafeLinearGradient
-            colors={['#667eea', '#764ba2']}
+            colors={['#4169E1', '#5B8DEF']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.planIconGradient}
@@ -110,19 +112,19 @@ const AnimatedHistoryCard = ({ plan, index, onRepeat, onDelete }) => {
 
       <View style={styles.planStats}>
         <View style={styles.statBox}>
-          <Icon name="schedule" size={18} color="#667eea" />
+          <Icon name="schedule" size={18} color="#4169E1" />
           <Text style={styles.statValue}>{plan.durationMinutes}</Text>
           <Text style={styles.statLabel}>minutes</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statBox}>
-          <Icon name="list" size={18} color="#667eea" />
+          <Icon name="list" size={18} color="#4169E1" />
           <Text style={styles.statValue}>{plan.exercises.length}</Text>
           <Text style={styles.statLabel}>exercises</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statBox}>
-          <Icon name="trending-up" size={18} color="#667eea" />
+          <Icon name="trending-up" size={18} color="#4169E1" />
           <Text style={styles.statValue}>{plan.skillLevel}</Text>
           <Text style={styles.statLabel}>level</Text>
         </View>
@@ -156,7 +158,7 @@ const AnimatedHistoryCard = ({ plan, index, onRepeat, onDelete }) => {
 
       <TouchableOpacity style={styles.repeatButton} onPress={onRepeat}>
         <SafeLinearGradient
-          colors={['#667eea', '#764ba2']}
+          colors={['#4169E1', '#5B8DEF']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.repeatButtonGradient}
@@ -281,54 +283,42 @@ export default function CardioPlanHistoryScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* ✅ Animated Header */}
-      <Animated.View
-        style={[
-          styles.headerSection,
-          {
-            opacity: headerAnim,
-            transform: [
-              {
-                translateY: headerAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-20, 0],
-                }),
-              },
-            ],
-          },
-        ]}
+    <View className="flex-1">
+      <StatusBar barStyle="light-content" />
+      {/* Header with gradient extending to notch */}
+      <LinearGradient
+        colors={["#2563eb", "#1d4ed8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
       >
-        <SafeLinearGradient
-          colors={['#667eea', '#764ba2']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.headerGradient}
-        >
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Icon name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>My Cardio Plans</Text>
-            <Text style={styles.headerSubtitle}>
-              {savedPlans.length} {savedPlans.length === 1 ? 'plan' : 'plans'} saved
-            </Text>
+        <SafeAreaView edges={["top"]} className="px-6 pb-4 flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            <TouchableOpacity
+              className="mr-4 w-9 h-9 rounded-full bg-white/20 items-center justify-center"
+              onPress={() => router.back()}
+            >
+              <Icon name="arrow-back" size={22} color="#fff" />
+            </TouchableOpacity>
+            <View>
+              <Text className="text-white text-2xl font-bold">My Cardio Plans</Text>
+              <Text className="text-blue-100 text-sm">
+                {savedPlans.length} {savedPlans.length === 1 ? 'plan' : 'plans'} saved
+              </Text>
+            </View>
           </View>
-
           {savedPlans.length > 0 && (
-            <TouchableOpacity onPress={handleClearAllPlans} style={styles.clearAllButton}>
-              <Icon name="delete-sweep" size={24} color="#fff" />
+            <TouchableOpacity onPress={handleClearAllPlans}>
+              <Icon name="delete-sweep" size={24} color="#ffffff" />
             </TouchableOpacity>
           )}
-        </SafeLinearGradient>
-      </Animated.View>
+        </SafeAreaView>
+      </LinearGradient>
 
-      <ScrollView 
-        style={styles.scrollView} 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <View className="flex-1 bg-gray-50">
+        <ScrollView 
+          className="flex-1 px-6 py-6"
+          showsVerticalScrollIndicator={false}
+        >
         {savedPlans.length === 0 ? (
           <View style={styles.emptyState}>
             <SafeLinearGradient
@@ -369,8 +359,9 @@ export default function CardioPlanHistoryScreen() {
             />
           ))
         )}
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </View>
+    </View>
   );
 }
 
@@ -517,7 +508,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#667eea',
+    backgroundColor: '#4169E1',
     marginRight: 10,
   },
   exerciseName: {
