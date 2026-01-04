@@ -7,8 +7,7 @@ import numpy as np
 # Load model
 print("Loading model...")
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-model_path = os.path.join(BASE_DIR, 'surf_forecast_model.joblib')
+model_path = 'models/surf_forecast_model.joblib'
 model_data = joblib.load(model_path)
 model = model_data['model']
 print(f"✅ Model loaded from: {model_path}")
