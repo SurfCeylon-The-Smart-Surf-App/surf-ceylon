@@ -190,7 +190,7 @@ if __name__ == '__main__':
     
     # Load both datasets
     dfs = []
-    for file_name in ['../data/weligama_historical_data_fixed.json', '../data/arugam_bay_historical_data_fixed.json']:
+    for file_name in ['data/weligama_historical_data_fixed.json', 'data/arugam_bay_historical_data_fixed.json']:
         df = load_historical_data(file_name)
         if df is not None:
             dfs.append(df)

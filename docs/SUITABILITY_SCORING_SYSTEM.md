@@ -1,6 +1,7 @@
 # 🏄‍♂️ SurfCeylon Suitability Scoring System - Complete Documentation
 
 ## Table of Contents
+
 1. [System Architecture Overview](#1-system-architecture-overview)
 2. [Random Forest ML Model - Deep Dive](#2-random-forest-ml-model---deep-dive)
 3. [Enhanced Suitability Calculation](#3-enhanced-suitability-calculation)
@@ -8,6 +9,9 @@
 5. [Complete Flow Diagram](#5-complete-flow-diagram)
 6. [Key Benefits](#6-key-benefits-of-this-system)
 7. [Technical Highlights](#7-technical-highlights)
+8. [Model Files & Configuration](#8-model-files--configuration)
+9. [Training & Retraining Guide](#9-training--retraining-guide)
+10. [Performance Monitoring](#10-performance-monitoring)
 
 ---
 
@@ -16,17 +20,22 @@
 The suitability scoring system uses a **hybrid ML + rules-based approach** with three main components:
 
 ### A. Machine Learning Layer (Random Forest Model)
+
 - **Purpose**: Predicts surf conditions from weather data
 - **Location**: `surfapp--ml-engine/` (Python microservice)
 - **Model Type**: Multi-output Random Forest Regressor (scikit-learn)
-- **Model File**: `surf_forecast_model.joblib`
+- **Model File**: `models/surf_forecast_model.joblib`
+- **Training Script**: `training/train_model.py`
+- **Wrapper Module**: `models/random_forest.py`
 
 ### B. Enhanced Scoring Engine
+
 - **Purpose**: Calculates suitability scores from ML predictions
 - **Location**: `surfapp--backend/controllers/EnhancedSuitabilityCalculator.js`
 - **Approach**: Skill-adaptive weighted scoring with session learning
 
 ### C. Session Learning System
+
 - **Purpose**: Learns user preferences from surf history
 - **Location**: `surfapp--backend/models/Session.js` + `spotsController.js`
 - **Mechanism**: Analyzes 4-5 star sessions to personalize scores
@@ -42,6 +51,7 @@ The model was trained on historical surf data from StormGlass API using data fro
 #### Input Features (15 total)
 
 **Base Features (10)** - Raw weather data from StormGlass API:
+
 ```javascript
 1. swellHeight          // Primary swell height (meters)
 2. swellPeriod          // Primary swell period (seconds)
@@ -56,6 +66,7 @@ The model was trained on historical surf data from StormGlass API using data fro
 ```
 
 **Engineered Features (5)** - Calculated physics-based features:
+
 ```python
 1. swellEnergy = swellHeight² × swellPeriod
    # Wave energy (higher = more powerful waves)
@@ -74,6 +85,7 @@ The model was trained on historical surf data from StormGlass API using data fro
 ```
 
 #### Prediction Targets (4)
+
 ```javascript
 1. waveHeight      // Predicted wave face height (meters)
 2. wavePeriod      // Predicted wave period (seconds)
@@ -98,18 +110,21 @@ RandomForestRegressor(
 ### How Random Forest Works
 
 #### 1. Training Phase
+
 - Creates 200 decision trees
 - Each tree trained on random subset of data (bootstrap sampling)
 - Each split uses random subset of features
 - Trees learn patterns: "If swellPeriod > 10s AND windSpeed < 15 → waveHeight = 1.5m"
 
 #### 2. Prediction Phase
+
 - All 200 trees make predictions independently
 - Final prediction = average of all trees
 - Reduces overfitting, more accurate than single tree
 - Provides robust predictions even with noisy input data
 
 #### 3. Why Random Forest?
+
 - ✅ Handles non-linear relationships (wave physics is complex)
 - ✅ Robust to outliers (bad weather data doesn't break it)
 - ✅ Feature importance analysis (identifies key factors)
@@ -118,6 +133,7 @@ RandomForestRegressor(
 - ✅ Provides confidence through variance
 
 ### Model Performance
+
 ```
 Overall R² Score: ~0.85-0.90
 MAE (Mean Absolute Error): ~0.2m for wave height
@@ -300,7 +316,7 @@ score = Math.min(score, 100);
 ### Weighted Score Calculation
 
 ```javascript
-weightedScore = 
+weightedScore =
   (waveScore × weights.wave) +
   (windScore × weights.wind) +
   (safetyScore × weights.safety) +
@@ -340,26 +356,26 @@ Session.create({
   spotId: "1",
   spotName: "Weligama",
   spotRegion: "South Coast",
-  
+
   // Weather conditions during session
   conditions: {
-    waveHeight: 1.2,      // meters
-    wavePeriod: 10,       // seconds
-    windSpeed: 15,        // km/h
-    windDirection: 280,   // degrees
-    tide: "Mid"
+    waveHeight: 1.2, // meters
+    wavePeriod: 10, // seconds
+    windSpeed: 15, // km/h
+    windDirection: 280, // degrees
+    tide: "Mid",
   },
-  
+
   // User feedback
-  rating: 5,              // 1-5 stars
-  wouldReturn: true,      // yes/no
+  rating: 5, // 1-5 stars
+  wouldReturn: true, // yes/no
   comments: "Epic session! Perfect conditions.",
-  
+
   // Automatically tracked
   startTime: "2025-12-23T08:00:00Z",
   endTime: "2025-12-23T09:30:00Z",
-  duration: 90,           // minutes (calculated)
-  enjoyment: 100          // 0-100 (calculated from duration)
+  duration: 90, // minutes (calculated)
+  enjoyment: 100, // 0-100 (calculated from duration)
 });
 ```
 
@@ -374,16 +390,16 @@ const sessions = await Session.find({ userId })
   .limit(50);
 
 // Filter high-rated sessions (4-5 stars only)
-const highRatedSessions = sessions.filter(s => s.rating >= 4);
+const highRatedSessions = sessions.filter((s) => s.rating >= 4);
 
 // ────────────────────────────────────────────
 // Learn Preferred Wave Height
 // ────────────────────────────────────────────
 const waveHeights = highRatedSessions
-  .map(s => s.conditions?.waveHeight)
-  .filter(h => h != null && h > 0);
+  .map((s) => s.conditions?.waveHeight)
+  .filter((h) => h != null && h > 0);
 
-const learnedWaveHeight = 
+const learnedWaveHeight =
   waveHeights.reduce((a, b) => a + b, 0) / waveHeights.length;
 
 // Example: [1.0, 1.2, 1.3, 1.1, 1.0] → Average: 1.12m
@@ -392,10 +408,10 @@ const learnedWaveHeight =
 // Learn Preferred Wind Speed
 // ────────────────────────────────────────────
 const windSpeeds = highRatedSessions
-  .map(s => s.conditions?.windSpeed)
-  .filter(w => w != null && w > 0);
+  .map((s) => s.conditions?.windSpeed)
+  .filter((w) => w != null && w > 0);
 
-const learnedWindSpeed = 
+const learnedWindSpeed =
   windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length;
 
 // Example: [10, 15, 12, 18, 13] → Average: 13.6 km/h
@@ -406,21 +422,22 @@ const learnedWindSpeed =
 const spotCounts = {};
 const spotRatings = {};
 
-sessions.forEach(s => {
+sessions.forEach((s) => {
   const spotName = s.spotName;
   spotCounts[spotName] = (spotCounts[spotName] || 0) + 1;
-  
+
   if (!spotRatings[spotName]) spotRatings[spotName] = [];
   if (s.rating) spotRatings[spotName].push(s.rating);
 });
 
 // Sort by visit count and average rating
 const favoriteSpots = Object.keys(spotCounts)
-  .map(spotName => ({
+  .map((spotName) => ({
     name: spotName,
     visitCount: spotCounts[spotName],
-    avgRating: spotRatings[spotName].reduce((a, b) => a + b) / 
-               spotRatings[spotName].length
+    avgRating:
+      spotRatings[spotName].reduce((a, b) => a + b) /
+      spotRatings[spotName].length,
   }))
   .sort((a, b) => {
     // Sort by visits first, then rating
@@ -429,8 +446,8 @@ const favoriteSpots = Object.keys(spotCounts)
     }
     return b.avgRating - a.avgRating;
   })
-  .slice(0, 5)  // Top 5 favorites
-  .map(s => s.name);
+  .slice(0, 5) // Top 5 favorites
+  .map((s) => s.name);
 
 // Example: ["Weligama", "Midigama", "Hiriketiya"]
 ```
@@ -440,7 +457,7 @@ const favoriteSpots = Object.keys(spotCounts)
 When calculating future suitability scores:
 
 ```javascript
-let normalizedScore = weightedScore;  // Base score
+let normalizedScore = weightedScore; // Base score
 const sessionBonuses = [];
 
 // ────────────────────────────────────────────
@@ -451,7 +468,7 @@ if (userPreferences.favoriteSpots?.includes(spot.name)) {
   sessionBonuses.push({
     type: "favorite_spot",
     points: 15,
-    message: "⭐ One of your favorite spots!"
+    message: "⭐ One of your favorite spots!",
   });
 }
 
@@ -462,13 +479,16 @@ if (userPreferences.learnedWaveHeight) {
   const waveDiff = Math.abs(
     currentWaveHeight - userPreferences.learnedWaveHeight
   );
-  
-  if (waveDiff <= 0.3) {  // Within 30cm
+
+  if (waveDiff <= 0.3) {
+    // Within 30cm
     normalizedScore += 10;
     sessionBonuses.push({
       type: "wave_match",
       points: 10,
-      message: `🌊 Waves match your preferred ${userPreferences.learnedWaveHeight.toFixed(1)}m conditions!`
+      message: `🌊 Waves match your preferred ${userPreferences.learnedWaveHeight.toFixed(
+        1
+      )}m conditions!`,
     });
   }
 }
@@ -480,13 +500,16 @@ if (userPreferences.learnedWindSpeed) {
   const windDiff = Math.abs(
     currentWindSpeed - userPreferences.learnedWindSpeed
   );
-  
-  if (windDiff <= 5) {  // Within 5 km/h
+
+  if (windDiff <= 5) {
+    // Within 5 km/h
     normalizedScore += 5;
     sessionBonuses.push({
       type: "wind_match",
       points: 5,
-      message: `💨 Wind matches your preferred ${userPreferences.learnedWindSpeed.toFixed(0)} km/h conditions!`
+      message: `💨 Wind matches your preferred ${userPreferences.learnedWindSpeed.toFixed(
+        0
+      )} km/h conditions!`,
     });
   }
 }
@@ -500,6 +523,7 @@ normalizedScore = Math.min(normalizedScore, 100);
 **User: Sarah (Intermediate Surfer)**
 
 **Session History:**
+
 ```
 Session 1: Weligama, 1.0m waves, 12 km/h wind → Rating: 5⭐
 Session 2: Midigama, 1.5m waves, 20 km/h wind → Rating: 3⭐
@@ -511,6 +535,7 @@ Session 7: Weligama, 0.9m waves, 13 km/h wind → Rating: 4⭐
 ```
 
 **Learned Preferences (from 4-5⭐ sessions only):**
+
 ```javascript
 High-rated sessions: 1, 3, 4, 5, 7
 
@@ -520,6 +545,7 @@ favoriteSpots = ["Weligama"] (4 visits, 3 were 4-5⭐)
 ```
 
 **Current Conditions at Weligama:**
+
 ```
 Wave Height: 1.1m
 Wave Period: 10s
@@ -531,6 +557,7 @@ Tide: Mid
 **Scoring Calculation:**
 
 **Without Session Learning:**
+
 ```
 Factor Scores:
 ├─ Wave: 90 (close to intermediate ideal of 1.5m)
@@ -544,6 +571,7 @@ Suitability: "Excellent"
 ```
 
 **With Session Learning:**
+
 ```
 Base Score: 90
 
@@ -565,6 +593,7 @@ Recommendations:
 ```
 
 **Impact:**
+
 - Without learning: 90/100 (excellent, but generic)
 - With learning: 100/100 (perfect match for Sarah's preferences!)
 - The app now knows Sarah prefers smaller waves than typical intermediate surfers
@@ -577,12 +606,12 @@ await session.save();
 
 // Update user stats
 user.stats.totalSessions += 1;
-user.stats.totalHours += (session.duration / 60);
+user.stats.totalHours += session.duration / 60;
 
 // Re-learn preferences every 5 sessions
 if (user.stats.totalSessions % 5 === 0) {
   await user.updateLearnedPreferences();
-  console.log('✅ User preferences updated from session history');
+  console.log("✅ User preferences updated from session history");
 }
 ```
 
@@ -775,35 +804,41 @@ if (user.stats.totalSessions % 5 === 0) {
 ## 6. Key Benefits of This System
 
 ### ✅ **Personalized**
+
 - Learns from **your actual surf history**
 - Adapts to **your unique preferences**
 - Bonus points for **your favorite spots**
 - Matches **your preferred conditions** (wave height, wind speed)
 
 ### ✅ **Adaptive**
+
 - Changes weights based on **skill level**
   - Beginners prioritize safety (35%)
   - Advanced prioritize performance (40% wave quality)
 - Adjusts ideal wave heights per skill
 
 ### ✅ **Accurate**
+
 - ML model trained on **real historical data**
 - 200 decision trees for robust predictions
 - Physics-based feature engineering
 - ±0.2m wave height accuracy
 
 ### ✅ **Real-time**
+
 - Updates with **current weather conditions**
 - Recalculates when conditions change
 - Uses latest session insights
 
 ### ✅ **Transparent**
+
 - Shows **breakdown** of each factor
 - Explains **why** a spot scored high/low
 - Lists specific recommendations
 - Visual radar chart for quick understanding
 
 ### ✅ **Smart**
+
 - Recommends **favorite spots** when conditions match
 - Identifies patterns in your surf history
 - Learns preferred conditions automatically
@@ -816,35 +851,41 @@ if (user.stats.totalSessions % 5 === 0) {
 ### Why This Design is Excellent
 
 #### 1. **Separation of Concerns**
+
 ```
 ML Layer (Python) ←→ Scoring Engine (Node.js) ←→ Frontend (React Native)
      │                      │                           │
   Predictions         Calculations               Visualization
 ```
+
 - Python for ML (scikit-learn, pandas)
 - Node.js for business logic (Express)
 - React Native for UI (cross-platform)
 - Clean API boundaries
 
 #### 2. **Feature Engineering**
+
 - Encodes domain knowledge into ML
 - 5 engineered features from 10 base features
 - Captures wave physics (energy, wind effects)
 - Critical for model accuracy
 
 #### 3. **Ensemble Learning**
+
 - Random Forest = 200 trees voting
 - More robust than single model
 - Handles noisy data gracefully
 - Provides confidence intervals
 
 #### 4. **Adaptive Scoring**
+
 - Different weights per skill level
 - Beginner: Safety 35% (most important)
 - Advanced: Wave Quality 40% (most important)
 - Matches real-world priorities
 
 #### 5. **Session Learning**
+
 - Analyzes 4-5⭐ sessions only (quality filter)
 - Learns preferred wave height (±0.3m tolerance)
 - Learns preferred wind speed (±5 km/h tolerance)
@@ -852,6 +893,7 @@ ML Layer (Python) ←→ Scoring Engine (Node.js) ←→ Frontend (React Native)
 - Updates every 5 sessions (not too frequent)
 
 #### 6. **Caching Strategy**
+
 ```javascript
 // Cache ML predictions for 15 minutes
 const cachedData = getCachedData();
@@ -860,11 +902,13 @@ if (cachedData && cacheNotExpired) {
   // But skip expensive ML prediction
 }
 ```
+
 - Reduces StormGlass API calls (rate limited)
 - Faster response times
 - Still personalizes with session bonuses
 
 #### 7. **Graceful Degradation**
+
 ```javascript
 // If MongoDB down
 if (!req.isMongoConnected) {
@@ -882,15 +926,17 @@ if (!forecastData) {
 ```
 
 #### 8. **Data Validation**
+
 ```javascript
 // Sanitize ML predictions
 const sanitizeNumber = (value) => {
   if (isNaN(value) || !isFinite(value)) {
-    return 0;  // Replace NaN/Infinity with 0
+    return 0; // Replace NaN/Infinity with 0
   }
   return value;
 };
 ```
+
 - Prevents NaN propagation
 - Handles missing data
 - Ensures valid JSON responses
@@ -919,6 +965,7 @@ SurfApp--frontend/
 ```
 
 #### 10. **Testing Strategy**
+
 ```
 ML Model Testing:
 ├─ training/train_model.py → Outputs R², MAE, RMSE
@@ -939,31 +986,37 @@ Frontend Testing:
 ### Potential Improvements
 
 #### 1. **Advanced ML Models**
+
 - LSTM for 7-day forecasts (already implemented, not integrated)
 - Neural networks for spot-specific predictions
 - Transfer learning from global surf data
 
 #### 2. **Collaborative Filtering**
+
 - "Users similar to you also liked..."
 - Community-based recommendations
 - Spot popularity trends
 
 #### 3. **Real-time Updates**
+
 - WebSocket connections for live scores
 - Push notifications when conditions improve
 - "Your favorite spot is firing!"
 
 #### 4. **Photo Recognition**
+
 - ML model to verify wave conditions
 - User-uploaded photos vs predictions
 - Improve model with real observations
 
 #### 5. **Weather Forecast Integration**
+
 - 3-7 day predictions
 - Best times to surf forecast
 - Trip planning features
 
 #### 6. **Social Learning**
+
 - Learn from community session ratings
 - "10 people rated this spot 5⭐ today"
 - Collective intelligence
@@ -973,6 +1026,7 @@ Frontend Testing:
 ## 9. Glossary
 
 ### Surf Terms
+
 - **Swell**: Ocean waves generated by distant storms
 - **Period**: Time between waves (seconds)
 - **Offshore Wind**: Wind blowing from land to sea (clean waves)
@@ -982,6 +1036,7 @@ Frontend Testing:
 - **Glassy**: Calm, smooth water surface (no wind)
 
 ### ML Terms
+
 - **Random Forest**: Ensemble of decision trees
 - **Feature Engineering**: Creating new features from raw data
 - **R² Score**: Model accuracy (0-1, higher = better)
@@ -989,6 +1044,7 @@ Frontend Testing:
 - **Overfitting**: Model learns noise, not patterns
 
 ### System Terms
+
 - **Suitability Score**: 0-100 rating of surf spot quality
 - **Session Bonus**: Extra points from learned preferences
 - **Skill-Adaptive**: Changes behavior based on user skill level
@@ -1003,6 +1059,7 @@ Frontend Testing:
 **Endpoint:** `GET /api/spots`
 
 **Query Parameters:**
+
 ```
 userId          (optional)  User ID for personalization
 skillLevel      (optional)  Beginner | Intermediate | Advanced
@@ -1014,6 +1071,7 @@ tidePreference  (optional)  Low | Mid | High | Any
 ```
 
 **Response:**
+
 ```json
 {
   "spots": [
@@ -1063,6 +1121,7 @@ python training/train_model.py
 ```
 
 This will:
+
 1. Fetch historical data from StormGlass API
 2. Calculate engineered features
 3. Train Random Forest model
@@ -1074,11 +1133,13 @@ This will:
 To add a new scoring factor:
 
 1. Update `EnhancedSuitabilityCalculator.js`:
+
    - Add new factor calculation method
    - Update `getAdaptiveWeights()` to include new factor
    - Update weighted score calculation
 
 2. Update frontend components:
+
    - Add to `SuitabilityRadarChart.js` factors array
    - Add to `ScoreBreakdown.js` rendering
    - Update angles for balanced chart
@@ -1092,24 +1153,480 @@ To add a new scoring factor:
 ### Common Issues
 
 **Issue: Scores seem wrong**
+
 - Check ML prediction output in logs
 - Verify feature engineering calculations
 - Ensure weights sum to 1.0
 
 **Issue: Session bonuses not applying**
+
 - Verify user has 5+ sessions
 - Check sessions have ratings
 - Confirm MongoDB connection
 
 **Issue: ML predictions fail**
+
 - Check Python dependencies installed
 - Verify model file exists
 - Check StormGlass API key valid
 
 **Issue: Caching stale data**
+
 - Clear cache: `clearSpotsCache()`
 - Check cache expiry time (15 min default)
 - Restart backend server
+
+---
+
+## 8. Model Files & Configuration
+
+### Model Artifact Locations
+
+All Random Forest model files are stored in `surfapp--ml-engine/models/`:
+
+| File                         | Size    | Description                                |
+| ---------------------------- | ------- | ------------------------------------------ |
+| `surf_forecast_model.joblib` | ~2-5 MB | Trained Random Forest model with 200 trees |
+
+### Model Structure
+
+The saved model file contains a dictionary with these keys:
+
+```python
+{
+    'model': RandomForestRegressor,  # The trained scikit-learn model
+    'feature_names': [...],          # List of 15 feature names
+    'target_names': [...],           # List of 4 target names
+    'engineered_features': [...]     # List of 5 engineered features
+}
+```
+
+### Loading the Model
+
+```python
+# From models/random_forest.py
+import joblib
+
+model_data = joblib.load('models/surf_forecast_model.joblib')
+model = model_data['model']
+feature_names = model_data['feature_names']
+target_names = model_data['target_names']
+
+# Make predictions
+predictions = model.predict(features_dataframe)
+# Returns: [[waveHeight, wavePeriod, windSpeed, windDirection], ...]
+```
+
+### Configuration Files
+
+**Feature Definitions**: `config/features.py`
+
+```python
+# Base features from StormGlass API
+RANDOM_FOREST_BASE_FEATURES = [
+    'swellHeight', 'swellPeriod', 'swellDirection',
+    'windSpeed', 'windDirection', 'seaLevel', 'gust',
+    'secondarySwellHeight', 'secondarySwellPeriod',
+    'secondarySwellDirection'
+]
+
+# Engineered features (calculated)
+RANDOM_FOREST_ENGINEERED_FEATURES = [
+    'swellEnergy',            # height² × period
+    'offshoreWind',           # windSpeed × cos(windDir - 270°)
+    'totalSwellHeight',       # primary + secondary swell
+    'windSwellInteraction',   # windSpeed × swellHeight
+    'periodRatio'             # swellPeriod / (secondaryPeriod + 1)
+]
+
+# Prediction targets
+RANDOM_FOREST_TARGETS = [
+    'waveHeight',      # Predicted wave height (m)
+    'wavePeriod',      # Predicted wave period (s)
+    'windSpeed',       # Predicted wind speed (m/s)
+    'windDirection'    # Predicted wind direction (°)
+]
+```
+
+**Model Paths**: `config/model_paths.py`
+
+```python
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RANDOM_FOREST_MODEL = os.path.join(BASE_DIR, 'models', 'surf_forecast_model.joblib')
+
+def validate_model_exists(model_path, model_name):
+    """Check if model file exists and warn if not found"""
+    if not os.path.exists(model_path):
+        print(f"⚠️ {model_name} not found at {model_path}")
+        return False
+    return True
+```
+
+---
+
+## 9. Training & Retraining Guide
+
+### When to Retrain
+
+Retrain the Random Forest model when:
+
+- ✅ New historical data is available (quarterly recommended)
+- ✅ Model accuracy degrades below 85% R²
+- ✅ Adding new surf spots to the system
+- ✅ Updating to new scikit-learn version
+- ✅ Expanding to new geographic regions
+
+### Training Data Requirements
+
+**Minimum Requirements:**
+
+- At least 500 hourly observations
+- Mix of different wave conditions (0.5m - 3.0m)
+- Various wind conditions (0-40 km/h)
+- All tide states represented
+- Multiple seasons covered
+
+**Data Sources:**
+
+1. **StormGlass API** (primary):
+   - Historical weather data
+   - 10 base parameters
+   - Hourly resolution
+2. **Local JSON Files** (backup):
+   - `data/weligama_historical_data_fixed.json`
+   - `data/arugam_bay_historical_data_fixed.json`
+
+### Training Process
+
+#### Step 1: Prepare Environment
+
+```bash
+cd surfapp--ml-engine
+
+# Ensure dependencies installed
+pip install scikit-learn pandas numpy joblib requests python-dotenv
+
+# Set API key
+echo "STORMGLASS_API_KEY=your_key_here" > .env
+```
+
+#### Step 2: Run Training Script
+
+```bash
+python training/train_model.py
+```
+
+This script performs:
+
+1. **Data Loading**
+
+   - Attempts local files first
+   - Falls back to API if needed
+   - Validates all required parameters present
+
+2. **Data Preprocessing**
+
+   ```python
+   - Remove duplicates
+   - Handle missing values (fill with median)
+   - Remove outliers using IQR method
+   - Validate data ranges
+   ```
+
+3. **Feature Engineering**
+
+   ```python
+   - Calculate swellEnergy
+   - Calculate offshoreWind
+   - Calculate totalSwellHeight
+   - Calculate windSwellInteraction
+   - Calculate periodRatio
+   ```
+
+4. **Model Training**
+
+   ```python
+   RandomForestRegressor(
+       n_estimators=200,
+       max_depth=15,
+       min_samples_split=5,
+       min_samples_leaf=2,
+       max_features='sqrt',
+       random_state=42
+   )
+   ```
+
+5. **Evaluation**
+
+   - Calculate R², MAE, RMSE per target
+   - Display feature importance
+   - Show top 10 influential features
+
+6. **Save Model**
+   - Save to `models/surf_forecast_model.joblib`
+   - Save feature list to `data/model_features.txt`
+
+#### Step 3: Verify Training Output
+
+Look for these metrics in the console:
+
+```
+MODEL PERFORMANCE
+======================================================================
+
+waveHeight:
+  R² Score:  0.8923
+  MAE:       0.1842
+  RMSE:      0.2764
+
+wavePeriod:
+  R² Score:  0.8756
+  MAE:       0.8234
+  RMSE:      1.1245
+
+windSpeed:
+  R² Score:  0.8645
+  MAE:       1.2341
+  RMSE:      1.8923
+
+windDirection:
+  R² Score:  0.8112
+  MAE:       12.345
+  RMSE:      18.234
+
+Overall R² Score: 0.8659
+
+FEATURE IMPORTANCE (Top 10)
+======================================================================
+  swellEnergy                    | 0.1845 ██████████████████
+  swellHeight                    | 0.1523 ███████████████
+  totalSwellHeight               | 0.1234 ████████████
+  swellPeriod                    | 0.1156 ███████████
+  windSpeed                      | 0.0923 █████████
+  offshoreWind                   | 0.0876 ████████
+  windSwellInteraction           | 0.0734 ███████
+  secondarySwellHeight           | 0.0645 ██████
+  windDirection                  | 0.0587 █████
+  seaLevel                       | 0.0477 ████
+
+✅ Model saved successfully to '.../models/surf_forecast_model.joblib'
+```
+
+**Good Performance Indicators:**
+
+- R² Score > 0.85 for all targets
+- MAE < 0.2m for wave height
+- MAE < 1.5s for wave period
+- swellEnergy is top feature (indicates good engineering)
+
+---
+
+## 10. Performance Monitoring
+
+### Key Metrics to Track
+
+#### Model Accuracy Metrics
+
+```javascript
+// Track prediction accuracy over time
+const metrics = {
+  // R² Score (0-1, higher is better)
+  r2_waveHeight: 0.89,
+  r2_wavePeriod: 0.88,
+  r2_windSpeed: 0.86,
+  r2_windDirection: 0.81,
+
+  // Mean Absolute Error (lower is better)
+  mae_waveHeight: 0.18, // meters
+  mae_wavePeriod: 0.82, // seconds
+  mae_windSpeed: 1.23, // m/s
+  mae_windDirection: 12.3, // degrees
+
+  // Overall performance
+  overall_r2: 0.87,
+
+  // Last trained
+  lastTraining: "2026-01-04",
+  trainingSamples: 2847,
+};
+```
+
+#### Production Metrics
+
+Monitor in your backend logs:
+
+```javascript
+// Prediction success rate
+const predictionMetrics = {
+  totalPredictions: 10000,
+  successfulPredictions: 9875,
+  failedPredictions: 125,
+  successRate: 0.9875,
+
+  // API health
+  stormglassApiCalls: 1234,
+  stormglassApiErrors: 23,
+  apiSuccessRate: 0.9814,
+
+  // Cache efficiency
+  cacheHits: 8756,
+  cacheMisses: 1244,
+  cacheHitRate: 0.8756,
+
+  // Model load time
+  avgModelLoadTime: "1.2s",
+  avgPredictionTime: "0.05s",
+};
+```
+
+#### Session Learning Metrics
+
+```javascript
+// Track user learning effectiveness
+const sessionMetrics = {
+  // User base
+  totalUsers: 1245,
+  usersWithSessions: 876,
+  usersWithLearning: 342, // 5+ sessions
+
+  // Session quality
+  avgSessionsPerUser: 8.3,
+  avgSessionDuration: 67, // minutes
+  avgSessionRating: 4.2,
+
+  // Learning effectiveness
+  avgBonusApplied: 18, // points
+  favoriteSpotsIdentified: 342,
+  wavePreferencesLearned: 298,
+  windPreferencesLearned: 287,
+
+  // Impact on scores
+  avgScoreWithoutLearning: 78,
+  avgScoreWithLearning: 88,
+  avgScoreImprovement: 10, // points
+};
+```
+
+### Logging Best Practices
+
+#### ML Service Logs
+
+```python
+# In services/spot_predictor.py
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Log model loading
+logger.info(f"Loading Random Forest model from {MODEL_PATH}")
+logger.info(f"✅ Model loaded: {model.n_estimators} trees")
+
+# Log predictions
+logger.info(f"Processing {len(spots)} surf spots...")
+logger.info(f"Successfully generated data for {len(results)} spots")
+
+# Log errors
+logger.error(f"❌ Model prediction failed: {error}")
+```
+
+#### Backend Logs
+
+```javascript
+// In controllers/spotsController.js
+console.log(`[${new Date().toISOString()}] - GET /api/spots?userId=${userId}`);
+console.log("User preferences:", userPreferences);
+console.log("Cache status:", cache.isStale ? "stale" : "fresh");
+console.log(`✅ Received ${spots.length} spots from API`);
+console.log(`Applied session bonuses to ${bonusCount} spots`);
+```
+
+### Health Check Endpoint
+
+Add this to your backend:
+
+```javascript
+// routes/health.js
+router.get("/health/ml", async (req, res) => {
+  const health = {
+    status: "unknown",
+    timestamp: new Date().toISOString(),
+    checks: {
+      modelLoaded: false,
+      apiConnectivity: false,
+      mongodbConnection: false,
+      cacheHealth: false,
+    },
+    metrics: {},
+  };
+
+  try {
+    // Check if model file exists
+    const modelPath = path.join(
+      __dirname,
+      "../../surfapp--ml-engine/models/surf_forecast_model.joblib"
+    );
+    health.checks.modelLoaded = fs.existsSync(modelPath);
+
+    // Check StormGlass API
+    const testResponse = await fetch(
+      "https://api.stormglass.io/v2/weather/point?lat=5.972&lng=80.426",
+      {
+        headers: { Authorization: process.env.STORMGLASS_API_KEY },
+      }
+    );
+    health.checks.apiConnectivity = testResponse.ok;
+
+    // Check MongoDB
+    health.checks.mongodbConnection = mongoose.connection.readyState === 1;
+
+    // Check cache
+    const cacheAge = getCacheAge();
+    health.checks.cacheHealth = cacheAge < 900000; // < 15 min
+
+    // Overall status
+    const allHealthy = Object.values(health.checks).every((v) => v === true);
+    health.status = allHealthy ? "healthy" : "degraded";
+
+    res.json(health);
+  } catch (error) {
+    health.status = "unhealthy";
+    health.error = error.message;
+    res.status(500).json(health);
+  }
+});
+```
+
+### Alert Thresholds
+
+Set up alerts for these conditions:
+
+```javascript
+const ALERT_THRESHOLDS = {
+  // Model performance
+  min_r2_score: 0.8, // Alert if R² drops below 80%
+  max_mae_wave_height: 0.3, // Alert if MAE > 0.3m
+
+  // Production health
+  min_prediction_success: 0.95, // Alert if success rate < 95%
+  max_model_load_time: 5000, // Alert if load time > 5s
+  max_prediction_time: 500, // Alert if prediction > 0.5s
+
+  // API health
+  min_api_success_rate: 0.9, // Alert if API success < 90%
+  max_api_error_rate: 0.1, // Alert if errors > 10%
+
+  // Session learning
+  min_users_with_learning: 100, // Alert if < 100 users have 5+ sessions
+  min_avg_session_rating: 3.5, // Alert if avg rating < 3.5
+
+  // Cache
+  min_cache_hit_rate: 0.7, // Alert if hit rate < 70%
+  max_cache_age: 1800000, // Alert if cache > 30 min old
+};
+```
 
 ---
 
@@ -1118,8 +1635,8 @@ To add a new scoring factor:
 **Developed by:** SurfCeylon Team  
 **ML Model:** scikit-learn Random Forest  
 **Weather Data:** StormGlass API  
-**Location Data:** Sri Lankan surf spots database  
+**Location Data:** Sri Lankan surf spots database
 
 ---
 
-*Last Updated: December 23, 2025*
+_Last Updated: December 23, 2025_

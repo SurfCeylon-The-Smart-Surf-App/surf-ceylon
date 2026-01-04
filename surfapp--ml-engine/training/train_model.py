@@ -17,8 +17,7 @@ STORMGLASS_API_KEY = os.getenv("STORMGLASS_API_KEY")
 # New model name for the multi-output model
 MODEL_FILENAME = 'surf_forecast_model.joblib'
 # Save to models directory
-MODEL_PATH = os.path.join(os.path.dirname(
-    __file__), '..', 'models', MODEL_FILENAME)
+MODEL_PATH = os.path.join('models', MODEL_FILENAME)
 
 # --- Features & Targets Definition ---
 # These are the inputs the model will learn from.
@@ -114,8 +113,8 @@ def load_historical_data_from_files():
 
     all_records = []
     files = [
-        '../data/weligama_historical_data_fixed.json',
-        '../data/arugam_bay_historical_data_fixed.json'
+        'data/weligama_historical_data_fixed.json',
+        'data/arugam_bay_historical_data_fixed.json'
     ]
 
     for filepath in files:
@@ -351,8 +350,7 @@ def train_model(df):
     print(f"\n✅ Model saved successfully to '{MODEL_PATH}'", file=sys.stderr)
 
     # Save feature list for reference
-    feature_list_path = os.path.join(os.path.dirname(
-        __file__), '..', 'data', 'model_features.txt')
+    feature_list_path = os.path.join('data', 'model_features.txt')
     with open(feature_list_path, 'w') as f:
         f.write("ORIGINAL FEATURES:\n")
         for feat in FEATURE_NAMES:

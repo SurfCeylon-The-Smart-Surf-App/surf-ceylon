@@ -29,16 +29,16 @@ import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
 
 # Configuration
-DATA_X_FILE = '../artifacts/timeseries_X_multioutput.npy'
-DATA_Y_FILE = '../artifacts/timeseries_y_multioutput.npy'
+DATA_X_FILE = 'artifacts/timeseries_X_multioutput.npy'
+DATA_Y_FILE = 'artifacts/timeseries_y_multioutput.npy'
 # Save to models directory
-MODEL_FILE = '../models/wave_forecast_multioutput_lstm.keras'
+MODEL_FILE = 'models/wave_forecast_multioutput_lstm.keras'
 # Save to models directory
-SCALER_X_FILE = '../models/wave_forecast_scaler_X_multioutput.joblib'
+SCALER_X_FILE = 'models/wave_forecast_scaler_X_multioutput.joblib'
 # Save to models directory
-SCALER_Y_FILE = '../models/wave_forecast_scaler_y_multioutput.joblib'
+SCALER_Y_FILE = 'models/wave_forecast_scaler_y_multioutput.joblib'
 # Save to models directory
-FEATURE_NAMES_FILE = '../models/wave_forecast_feature_names.joblib'
+FEATURE_NAMES_FILE = 'models/wave_forecast_feature_names.joblib'
 
 FEATURE_NAMES = ['Wave Height (m)', 'Wave Period (s)', 'Swell Height (m)',
                  'Swell Period (s)', 'Wind Speed (m/s)', 'Wind Direction (°)']
@@ -323,9 +323,9 @@ def plot_training_history(history):
     ax2.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('../artifacts/training_history_multioutput.png',
+    plt.savefig('artifacts/training_history_multioutput.png',
                 dpi=150, bbox_inches='tight')
-    print("✅ Saved: ../artifacts/training_history_multioutput.png")
+    print("✅ Saved: artifacts/training_history_multioutput.png")
 
 
 def plot_sample_predictions(y_pred, y_true):
@@ -350,9 +350,9 @@ def plot_sample_predictions(y_pred, y_true):
         ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('../artifacts/sample_predictions.png',
+    plt.savefig('artifacts/sample_predictions.png',
                 dpi=150, bbox_inches='tight')
-    print("✅ Saved: ../artifacts/sample_predictions.png")
+    print("✅ Saved: artifacts/sample_predictions.png")
 
 
 def main():
@@ -453,8 +453,8 @@ def main():
     print(f"  📁 {SCALER_X_FILE}")
     print(f"  📁 {SCALER_Y_FILE}")
     print(f"  📁 {FEATURE_NAMES_FILE}")
-    print(f"  📊 ../artifacts/training_history_multioutput.png")
-    print(f"  📊 ../artifacts/sample_predictions.png")
+    print(f"  📊 artifacts/training_history_multioutput.png")
+    print(f"  📊 artifacts/sample_predictions.png")
     print(f"\nNext step: Use forecast_7day_service.py to generate predictions")
 
 
