@@ -25,7 +25,7 @@ The suitability scoring system uses a **hybrid ML + rules-based approach** with 
 - **Location**: `surfapp--ml-engine/` (Python microservice)
 - **Model Type**: Multi-output Random Forest Regressor (scikit-learn)
 - **Model File**: `models/surf_forecast_model.joblib`
-- **Training Script**: `training/train_model.py`
+- **Training Script**: `training/train_random_forest_model.py`
 - **Wrapper Module**: `models/random_forest.py`
 
 ### B. Enhanced Scoring Engine
@@ -968,7 +968,7 @@ SurfApp--frontend/
 
 ```
 ML Model Testing:
-├─ training/train_model.py → Outputs R², MAE, RMSE
+├─ training/train_random_forest_model.py → Outputs R², MAE, RMSE
 ├─ testing/test_model1.py → Validates predictions
 └─ testing/validate_features.py → Checks correlations
 
@@ -1117,12 +1117,12 @@ To retrain the Random Forest model:
 
 ```bash
 cd surfapp--ml-engine
-python training/train_model.py
+python training/train_random_forest_model.py
 ```
 
 This will:
 
-1. Fetch historical data from StormGlass API
+1. Load historical data from local JSON files
 2. Calculate engineered features
 3. Train Random Forest model
 4. Output performance metrics
@@ -1315,14 +1315,14 @@ echo "STORMGLASS_API_KEY=your_key_here" > .env
 #### Step 2: Run Training Script
 
 ```bash
-python training/train_model.py
+python training/train_random_forest_model.py
 ```
 
 This script performs:
 
 1. **Data Loading**
 
-   - Attempts local files first
+   - Loads from local JSON files
    - Falls back to API if needed
    - Validates all required parameters present
 
