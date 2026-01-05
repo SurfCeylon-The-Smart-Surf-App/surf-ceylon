@@ -12,7 +12,7 @@ import { Platform } from 'react-native';
 // 🔧 CONFIGURE THIS FOR PHYSICAL DEVICE TESTING
 // Find your computer's IP from backend startup logs
 // Example: const DEVICE_API_URL = 'http://192.168.1.100:3000';
-const DEVICE_API_URL = 'http://10.114.160.168:3000'; // Your computer's IP address
+const DEVICE_API_URL = 'http://10.18.46.168:3000'; // Your computer's IP address
 
 /**
  * Get the API base URL based on platform

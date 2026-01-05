@@ -96,9 +96,29 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on port ${PORT}`);
+const PORT = process.env.PORT || 3000;
+
+// Start server
+const server = app.listen(PORT, "0.0.0.0", (err) => {
+  if (err) {
+    console.error("❌ Failed to start server:", err);
+    process.exit(1);
+  }
+  console.log(`✅ Server is running on port ${PORT}`);
+  console.log(`📡 Backend accessible at http://0.0.0.0:${PORT}`);
+  console.log(`🌐 External access: http://10.18.46.168:${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+    mongoose.connection.close(false, () => {
+      console.log('MongoDB connection closed');
+      process.exit(0);
+    });
+  });
 });
 
 module.exports = app;
