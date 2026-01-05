@@ -36,9 +36,17 @@ const FORECAST_7DAY_SCRIPT = path.resolve(
   "surfapp--ml-engine",
   "forecast_7day_service.py"
 );
+const SURF_POSE_ANALYZER_SCRIPT = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  "surfapp--ml-engine",
+  "surf_pose_analyzer_service.py"
+);
 
 module.exports = {
   PYTHON_EXECUTABLE,
   SPOT_RECOMMENDER_SCRIPT,
   FORECAST_7DAY_SCRIPT,
+  SURF_POSE_ANALYZER_SCRIPT,
 };

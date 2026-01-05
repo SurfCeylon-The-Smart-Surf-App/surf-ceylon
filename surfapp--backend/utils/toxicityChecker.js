@@ -31,21 +31,43 @@ const checkToxicity = async (text) => {
       "check_toxicity_cli.py"
     );
 
-    const { stdout, stderr } = await execAsync(
-      `python "${scriptPath}" "${escapedText}"`,
-      { timeout: 5000 }
-    );
+    // Use exec with callback to handle stderr properly
+    const result = await new Promise((resolve, reject) => {
+      exec(
+        `python "${scriptPath}" "${escapedText}"`,
+        {
+          timeout: 5000,
+          maxBuffer: 10 * 1024 * 1024,
+        },
+        (error, stdout, stderr) => {
+          // Ignore stderr warnings, only fail on actual errors
+          if (error && !stdout) {
+            reject(error);
+            return;
+          }
 
-    if (stderr && !stderr.includes("InconsistentVersionWarning")) {
-      console.error("Python stderr:", stderr);
-    }
+          // Extract JSON from stdout
+          const lines = stdout.split("\n");
+          const jsonLine = lines.find((line) => line.trim().startsWith("{"));
 
-    const result = JSON.parse(stdout.trim());
+          if (!jsonLine) {
+            reject(new Error("No JSON output from toxicity checker"));
+            return;
+          }
+
+          try {
+            resolve(JSON.parse(jsonLine.trim()));
+          } catch (parseError) {
+            reject(parseError);
+          }
+        }
+      );
+    });
 
     if (result.success) {
       return {
         isToxic: result.is_toxic,
-        confidence: result.confidence,
+        confidence: result.toxic_probability || 0,
       };
     }
 

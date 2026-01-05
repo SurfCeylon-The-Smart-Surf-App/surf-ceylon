@@ -1,64 +1,40 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Simple toxicity checker that can be called directly from command line
-Usage: python check_toxicity_cli.py "text to check"
+Toxicity Checker Service (Refactored)
+Uses modular architecture with clean separation of concerns.
+
+This file maintains backward compatibility with Node.js backend.
+All business logic has been extracted to organized modules:
+- models/ - Toxicity detection model and TF-IDF vectorizer
+- services/ - Text analysis and classification
+
+Usage:
+    python check_toxicity_cli.py "<text_to_check>"
+    
+Output:
+    JSON with toxicity classification and probability scores
 """
+
+# Suppress all warnings before any imports
+import warnings
+warnings.filterwarnings('ignore')
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow warnings
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  # Disable oneDNN warnings
+
+# Import directly from module file, bypassing package __init__
 import sys
-import json
-import joblib
-import re
+import importlib.util
 from pathlib import Path
 
-def preprocess_text(text):
-    """Preprocess text for model prediction"""
-    text = text.lower()
-    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
-    text = re.sub(r'\s+', ' ', text).strip()
-    return text
+spec = importlib.util.spec_from_file_location(
+    "toxicity_detector",
+    Path(__file__).parent / "services" / "toxicity_detector.py"
+)
+toxicity_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(toxicity_module)
 
-def check_toxicity(text):
-    """Check if text is toxic"""
-    try:
-        # Validate input
-        if not text or not isinstance(text, str):
-            return {
-                'success': True,
-                'is_toxic': False,
-                'confidence': 0.0
-            }
-        
-        # Load model and vectorizer
-        model_path = Path(__file__).parent / 'models' / 'toxic_model.pkl'
-        vectorizer_path = Path(__file__).parent / 'models' / 'tfidf_vectorizer.pkl'
-        
-        model = joblib.load(model_path)
-        vectorizer = joblib.load(vectorizer_path)
-        
-        # Preprocess and predict
-        processed_text = preprocess_text(text)
-        text_vectorized = vectorizer.transform([processed_text])
-        prediction = model.predict(text_vectorized)[0]
-        probability = model.predict_proba(text_vectorized)[0]
-        
-        confidence = float(max(probability))
-        is_toxic = bool(prediction == 1)
-        
-        return {
-            'success': True,
-            'is_toxic': is_toxic,
-            'confidence': confidence
-        }
-    except Exception as e:
-        return {
-            'success': False,
-            'error': str(e)
-        }
+main = toxicity_module.main
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print(json.dumps({'success': False, 'error': 'No text provided'}))
-        sys.exit(1)
-    
-    text = sys.argv[1]
-    result = check_toxicity(text)
-    print(json.dumps(result))
+    main()
