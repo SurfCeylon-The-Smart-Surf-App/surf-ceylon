@@ -58,6 +58,9 @@ app.use("/api/health", require("./routes/health"));
 // AI Surf Tutor routes (from Sabri's implementation)
 app.use("/api/ai-tutor", require("./routes/aiTutor"));
 
+// AR Surfboard Recommendations (ML-powered)
+app.use("/api/ar", require("./routes/arRecommendations"));
+
 // Default route
 app.get("/", (req, res) => {
   res.json({

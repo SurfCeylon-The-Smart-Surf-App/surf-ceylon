@@ -1,0 +1,64 @@
+{
+  "model_type": "MultiOutputRegressor with RandomForest",
+  "training_date": "2026-01-05T11:35:16.956762",
+  "feature_names": [
+    "surfer_height_cm",
+    "surfer_weight",
+    "surfer_age",
+    "surfer_experience",
+    "surfer_gender",
+    "bmi",
+    "height_weight_ratio",
+    "age_group"
+  ],
+  "target_names": [
+    "board_length",
+    "board_volume",
+    "wave_height_mean"
+  ],
+  "metrics": {
+    "board_length": {
+      "train_r2": 0.8327203021949021,
+      "test_r2": 0.3757881604716726,
+      "cv_r2_mean": 0.12549284133644015,
+      "cv_r2_std": 0.05579499204560538,
+      "mae": 0.06760280920156934,
+      "rmse": 0.08668666689971333,
+      "mape": 3.7796846219952105,
+      "accuracy_percentage": 37.578816047167265
+    },
+    "board_volume": {
+      "train_r2": 0.8127636505468008,
+      "test_r2": 0.2564418358976972,
+      "cv_r2_mean": 0.12549284133644015,
+      "cv_r2_std": 0.05579499204560538,
+      "mae": 5.263991988590452,
+      "rmse": 10.343350633622784,
+      "mape": 16.317238057103296,
+      "accuracy_percentage": 25.64418358976972
+    },
+    "wave_height_mean": {
+      "train_r2": 0.8161743500865023,
+      "test_r2": 0.2202887080167235,
+      "cv_r2_mean": 0.12549284133644015,
+      "cv_r2_std": 0.05579499204560538,
+      "mae": 0.6853609602508008,
+      "rmse": 0.8158829443470109,
+      "mape": 17.592152990394887,
+      "accuracy_percentage": 22.02887080167235
+    }
+  },
+  "label_encoders": {
+    "surfer_experience": [
+      "Advanced",
+      "Beginner",
+      "First-timer",
+      "Intermediate",
+      "Pro"
+    ],
+    "surfer_gender": [
+      "Female",
+      "Male"
+    ]
+  }
+}

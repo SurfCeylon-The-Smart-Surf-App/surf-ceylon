@@ -26,20 +26,13 @@ export default function AITutorHome() {
     },
     {
       id: 2,
-      title: "Sea Drills (AR)",
-      description: "Visualize surfing techniques with AR in your environment",
+      title: "AI-Powered AR Coach",
+      description: "Personalized surfing recommendations and AR visualizations",
       icon: "cube-outline",
       color: "#4ECDC4",
       screen: "ARVisualization",
     },
-    {
-      id: 3,
-      title: "Land Drills",
-      description: "Practice poses with real-time AI coaching feedback",
-      icon: "camera",
-      color: "#45B7D1",
-      screen: "PosePractice",
-    },
+   
     {
       id: 4,
       title: "Progress",

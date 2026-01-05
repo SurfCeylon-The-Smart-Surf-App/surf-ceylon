@@ -59,23 +59,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.card}>
-          <TouchableOpacity
-            style={styles.cardButton}
-            onPress={() => router.push('/(tabs)/practice')}
-          >
-            <View style={[styles.iconContainer, { backgroundColor: '#45B7D120' }]}>
-              <Icon name="camera-alt" size={36} color="#45B7D1" />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Land Drills</Text>
-              <Text style={styles.cardDescription}>
-                Practice poses with real-time AI coaching feedback
-              </Text>
-            </View>
-            <Icon name="chevron-right" size={24} color="#ccc" />
-          </TouchableOpacity>
-        </View>
+
 
         <View style={styles.card}>
           <TouchableOpacity
