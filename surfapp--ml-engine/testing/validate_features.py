@@ -7,7 +7,7 @@ import os
 from scipy.stats import pearsonr
 import sys
 
-# Feature names (must match train_model.py)
+# Feature names (must match train_random_forest_model.py)
 FEATURE_NAMES = [
     'swellHeight', 'swellPeriod', 'swellDirection', 'windSpeed',
     'windDirection', 'seaLevel', 'gust', 'secondarySwellHeight',

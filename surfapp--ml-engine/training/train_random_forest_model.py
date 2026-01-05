@@ -1,19 +1,14 @@
 import pandas as pd
 import joblib
 import os
-import requests
 import sys
-import arrow
 import json
 import numpy as np
-from dotenv import load_dotenv
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 # --- Configuration ---
-load_dotenv()
-STORMGLASS_API_KEY = os.getenv("STORMGLASS_API_KEY")
 # New model name for the multi-output model
 MODEL_FILENAME = 'surf_forecast_model.joblib'
 # Save to models directory
@@ -32,10 +27,6 @@ TARGET_NAMES = ['waveHeight', 'wavePeriod', 'windSpeed', 'windDirection']
 # Engineered features will be added during preprocessing
 ENGINEERED_FEATURES = []
 
-# A single spot is used for this focused training example.
-SURF_SPOT = {'id': '2', 'name': 'Weligama', 'lat': 5.972, 'lng': 80.426}
-MAX_DAYS_PER_REQUEST = 10  # Stormglass historical data limit
-
 
 def _get_average_from_sources(source_dict):
     """
@@ -49,72 +40,19 @@ def _get_average_from_sources(source_dict):
     return sum(valid_values) / len(valid_values) if valid_values else None
 
 
-def fetch_historical_data_for_training():
-    """Fetches and processes historical data for both features and targets."""
-    if not STORMGLASS_API_KEY or STORMGLASS_API_KEY == 'your_api_key_here':
-        print("Error: STORMGLASS_API_KEY environment variable is not set or invalid.", file=sys.stderr)
-        return None
-
-    # Fetch the last 10 days of data for training.
-    start_date = arrow.utcnow().shift(days=-MAX_DAYS_PER_REQUEST)
-    end_date = arrow.utcnow()
-
-    # Request all parameters needed for both the features and the targets.
-    all_params = ','.join(list(set(FEATURE_NAMES + TARGET_NAMES)))
-
-    try:
-        response = requests.get(
-            'https://api.stormglass.io/v2/weather/point',
-            params={
-                'lat': SURF_SPOT['lat'],
-                'lng': SURF_SPOT['lng'],
-                'params': all_params,
-                'start': start_date.timestamp(),
-                'end': end_date.timestamp(),
-            },
-            headers={'Authorization': STORMGLASS_API_KEY}
-        )
-        response.raise_for_status()
-        data = response.json()
-
-        if 'hours' not in data or not data['hours']:
-            print("Warning: Stormglass API returned no historical data.",
-                  file=sys.stderr)
-            return None
-
-        print(
-            f"Successfully fetched {len(data['hours'])} hourly records for training.", file=sys.stderr)
-
-        # Process the raw hourly data into a clean list of records
-        processed_data = []
-        for hour in data['hours']:
-            record = {}
-            is_valid_record = True
-            for param in all_params.split(','):
-                value = _get_average_from_sources(hour.get(param, {}))
-                if value is None:
-                    is_valid_record = False
-                    break
-                record[param] = value
-            if is_valid_record:
-                processed_data.append(record)
-
-        return pd.DataFrame(processed_data)
-
-    except requests.exceptions.RequestException as e:
-        print(
-            f"CRITICAL API ERROR: Could not fetch training data from Stormglass. {e}", file=sys.stderr)
-        return None
-
-
 def load_historical_data_from_files():
-    """Load training data from collected JSON files instead of API."""
+    """Load training data from collected JSON files."""
     print("Loading historical data from local JSON files...", file=sys.stderr)
+
+    # Get absolute paths
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(script_dir)
+    data_dir = os.path.join(project_root, 'data')
 
     all_records = []
     files = [
-        'data/weligama_historical_data_fixed.json',
-        'data/arugam_bay_historical_data_fixed.json'
+        os.path.join(data_dir, 'weligama_historical_data_fixed.json'),
+        os.path.join(data_dir, 'arugam_bay_historical_data_fixed.json')
     ]
 
     for filepath in files:
@@ -369,13 +307,8 @@ if __name__ == '__main__':
     print("SURF FORECAST MODEL TRAINING")
     print("="*70 + "\n")
 
-    # Try to load from local files first, fall back to API if needed
+    # Load training data from local files
     training_df = load_historical_data_from_files()
-
-    if training_df is None or training_df.empty:
-        print("\nLocal files not found. Attempting to fetch from API...",
-              file=sys.stderr)
-        training_df = fetch_historical_data_for_training()
 
     # Train model if data is valid
     if training_df is not None and not training_df.empty:
@@ -384,5 +317,6 @@ if __name__ == '__main__':
         print("✅ TRAINING COMPLETE")
         print("="*70 + "\n")
     else:
-        print("\n❌ Training aborted due to lack of valid historical data.",
+        print("\n❌ Training aborted: No valid data found in local files.",
               file=sys.stderr)
+        sys.exit(1)
