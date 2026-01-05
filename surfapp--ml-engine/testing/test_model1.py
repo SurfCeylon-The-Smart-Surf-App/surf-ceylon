@@ -30,7 +30,7 @@ test_features = {
 # Create DataFrame
 df = pd.DataFrame([test_features])
 
-# Feature Engineering (matching train_model.py)
+# Feature Engineering (matching train_random_forest_model.py)
 print("\nApplying feature engineering...")
 df['swellEnergy'] = df['swellHeight']**2 * df['swellPeriod']
 df['offshoreWind'] = df['windSpeed'] * \
