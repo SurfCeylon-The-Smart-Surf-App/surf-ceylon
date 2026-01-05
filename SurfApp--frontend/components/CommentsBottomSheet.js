@@ -168,11 +168,25 @@ const CommentsBottomSheet = ({
         }
       }
     } catch (error) {
-      console.error("Error with comment:", error);
-      Alert.alert(
-        "Error",
-        editingComment ? "Failed to update comment" : "Failed to add comment"
-      );
+      // Check if it's a toxicity error (400 status)
+      if (
+        error.response?.status === 400 &&
+        error.response?.data?.message?.includes("inappropriate")
+      ) {
+        // Don't log toxicity errors as they're expected behavior
+        Alert.alert(
+          "Inappropriate Content",
+          "Your comment contains inappropriate language and cannot be posted. Please revise your message.",
+          [{ text: "OK" }]
+        );
+      } else {
+        // Log actual errors
+        console.error("Error with comment:", error);
+        Alert.alert(
+          "Error",
+          editingComment ? "Failed to update comment" : "Failed to add comment"
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
