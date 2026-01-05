@@ -307,7 +307,21 @@ const addComment = async (req, res) => {
       });
     }
 
-    // Create comment first
+    // Check for toxic content BEFORE posting
+    const toxicityCheck = await checkToxicity(content);
+
+    if (toxicityCheck.isToxic) {
+      return res.status(400).json({
+        status: "error",
+        message: "Comment contains inappropriate content and cannot be posted",
+        data: {
+          isToxic: true,
+          confidence: toxicityCheck.confidence,
+        },
+      });
+    }
+
+    // Create comment only if not toxic
     const comment = new Comment({
       content,
       author: req.user._id,
@@ -329,16 +343,11 @@ const addComment = async (req, res) => {
       });
     }
 
-    // Check for toxic content AFTER posting
-    const toxicityCheck = await checkToxicity(content);
-
     res.status(201).json({
       status: "success",
       message: "Comment added successfully",
       data: {
         comment,
-        isToxic: toxicityCheck.isToxic,
-        confidence: toxicityCheck.confidence,
       },
     });
   } catch (error) {
