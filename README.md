@@ -46,6 +46,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 ## 🚀 Key Features
 
 ### 1. **Real-time Surf Forecasting & Spot Recommender**
+
 - **LSTM Wave Forecasting**: 7-day hourly predictions (168 hours) for wave height, period, wind speed
 - **Random Forest Spot Scoring**: Intelligent suitability scoring (0-100) for all Sri Lankan surf spots
 - **Live Weather Integration**: StormGlass API with 19-key rotation for reliable data
@@ -53,6 +54,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 - **Performance**: 80% accuracy for spot recommendations, 8.8% error for wave height
 
 ### 2. **Surf Risk Analyzer**
+
 - **Skill-Based Assessment**: Different risk thresholds for Beginner/Intermediate/Advanced
 - **Historical Analysis**: Incident data analysis (drownings, reef cuts, rip currents)
 - **Interactive Maps**: Color-coded risk visualization (🟢 Green, 🟡 Yellow, 🔴 Red)
@@ -60,6 +62,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 - **Real-time Updates**: Dynamic risk calculation based on current conditions
 
 ### 3. **AI-Powered Training Features**
+
 - **AI Cardio Plans**: TensorFlow NCF model with 87% AUC accuracy
 - **AR Surfboard Coach**: Hybrid ML (Physics + Random Forest) for 15 surfing techniques
 - **Progress Tracking**: Gamification with Bronze → Diamond badge system
@@ -67,6 +70,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 - **Equipment Recommendations**: ML-based surfboard specs (length, volume, wave height)
 
 ### 4. **AI Video Analyzer**
+
 - **Pose Detection**: MediaPipe for real-time surfing technique analysis
 - **Technique Scoring**: AI evaluation of 15 key surfing maneuvers
 - **Progress Tracking**: Historical performance comparison
@@ -74,6 +78,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 - **Video Library**: Save and review analyzed sessions
 
 ### 5. **Surf Community Platform**
+
 - **Social Feed**: Posts with images, likes, comments
 - **Real-time Messaging**: Live chat with typing indicators
 - **User Profiles**: Follow system with activity feeds
@@ -139,6 +144,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React Native** with Expo (SDK 51+)
 - **Expo Router** for navigation
 - **NativeWind** (Tailwind CSS for React Native)
@@ -148,6 +154,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 - **Axios** for HTTP requests
 
 ### Backend
+
 - **Node.js** (v16+)
 - **Express.js** (v4.18+)
 - **MongoDB** with Mongoose ODM
@@ -157,6 +164,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 - **Bcrypt** for password hashing
 
 ### Machine Learning / AI
+
 - **Python** (3.8+)
 - **Flask** (3.0+) - REST API servers
 - **TensorFlow/Keras** (2.15+) - LSTM forecasting, NCF cardio model
@@ -167,6 +175,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 - **joblib** - Model serialization
 
 ### External APIs
+
 - **StormGlass API** - Weather and wave data
 - **Google Maps API** - Location services
 
@@ -291,6 +300,7 @@ npm run seed
 ## 1. Real-time Surf Forecasting & Spot Recommender
 
 ### Overview
+
 Machine learning-powered system that provides 7-day wave forecasts and intelligent spot recommendations for all surf spots in Sri Lanka.
 
 ### How It Works
@@ -298,6 +308,7 @@ Machine learning-powered system that provides 7-day wave forecasts and intellige
 #### **Random Forest Spot Recommender**
 
 **Step 1: Data Collection**
+
 - Fetches current weather from StormGlass API
 - Uses ensemble averaging (sg, noaa, meteo sources)
 - Rotates between 19 API keys for reliability
@@ -323,11 +334,13 @@ periodRatio = primaryPeriod / (secondaryPeriod + 1)
 ```
 
 **Step 3: Prediction**
+
 - 200 decision trees ensemble
 - 15 input features (10 base + 5 engineered)
 - Outputs: wave height, period, wind speed, wind direction
 
 **Step 4: Suitability Scoring**
+
 ```javascript
 Score (0-100) = Weighted Average:
 - Wave Height Match (25%)
@@ -340,6 +353,7 @@ Score (0-100) = Weighted Average:
 #### **LSTM Wave Forecaster**
 
 **Architecture: Sequence-to-Sequence**
+
 ```
 Input: Past 168 hours (7 days) × 6 features
   ↓
@@ -353,11 +367,13 @@ Output: Next 168 hours (7 days) × 6 features
 ```
 
 **Training Data:**
+
 - 33,000+ sequences from Weligama & Arugam Bay
 - Sliding window approach
 - 80/20 train/validation split
 
 **Performance:**
+
 - Wave Height: 8.8% MAPE (0.125m MAE)
 - Wave Period: 7.4% MAPE (0.464s MAE)
 - Training time: ~100 epochs, early stopping
@@ -405,6 +421,7 @@ Response: {
 ```
 
 ### Files Location
+
 ```
 surfapp--ml-engine/
 ├── models/
@@ -426,19 +443,21 @@ surfapp--ml-engine/
 ## 2. Surf Risk Analyzer
 
 ### Overview
+
 Intelligent risk assessment system that evaluates surf spots based on historical incidents, hazard reports, and skill-level-specific thresholds.
 
 ### Key Features
 
 **1. Skill-Based Risk Thresholds**
 
-| Skill Level | Low Risk | Medium Risk | High Risk |
-|-------------|----------|-------------|-----------|
-| Beginner | 0.0-5.0 | 5.0-6.5 | 6.5-10.0 |
-| Intermediate | 0.0-6.0 | 6.0-7.2 | 7.2-10.0 |
-| Advanced | 0.0-7.0 | 7.0-8.0 | 8.0-10.0 |
+| Skill Level  | Low Risk | Medium Risk | High Risk |
+| ------------ | -------- | ----------- | --------- |
+| Beginner     | 0.0-5.0  | 5.0-6.5     | 6.5-10.0  |
+| Intermediate | 0.0-6.0  | 6.0-7.2     | 7.2-10.0  |
+| Advanced     | 0.0-7.0  | 7.0-8.0     | 8.0-10.0  |
 
 **2. Risk Calculation**
+
 ```python
 Risk Score = (
     Historical_Incidents × 0.50 +
@@ -448,6 +467,7 @@ Risk Score = (
 ```
 
 **3. Interactive Map & List Views**
+
 - Color-coded markers (🟢 Green, 🟡 Yellow, 🔴 Red)
 - Real-time updates
 - Detailed incident breakdown
@@ -456,20 +476,24 @@ Risk Score = (
 ### How It Works
 
 **Step 1: Historical Analysis**
+
 - Fatal incidents: High weight
 - Severe injuries: Medium weight
 - Incident types: Drowning, reef cuts, rip currents, collisions
 
 **Step 2: Recent Hazards (24 hours)**
+
 - High severity: +2.0 points
 - Medium severity: +1.0 points
 - Low severity: +0.5 points
 
 **Step 3: Seasonal Adjustments**
+
 - Peak season indicator
 - Monthly incident patterns
 
 **Step 4: Skill-Specific Scoring**
+
 - Same spot, different scores per skill level
 - Personalized safety recommendations
 
@@ -510,6 +534,7 @@ Body: {
 ```
 
 ### Files Location
+
 ```
 surfapp--ml-engine/
 ├── calculate_skill_risk.py
@@ -535,6 +560,7 @@ SurfApp--frontend/
 ## 3. AI-Powered Training Features
 
 ### Overview
+
 Three integrated AI features for personalized surf training: Cardio Plans, AR Surfboard Coach, and Progress Tracking.
 
 ### 3.1 AI Cardio Plan Generation
@@ -542,6 +568,7 @@ Three integrated AI features for personalized surf training: Cardio Plans, AR Su
 **How It Works:**
 
 1. **User Quiz**
+
    - Height, weight (calculates BMI)
    - Skill level (Beginner/Intermediate/Advanced)
    - Goals (Endurance, Strength, Balance, Paddling Power)
@@ -549,6 +576,7 @@ Three integrated AI features for personalized surf training: Cardio Plans, AR Su
    - Physical limitations
 
 2. **AI Generation (TensorFlow NCF Model)**
+
    - Neural Collaborative Filtering
    - 211K parameters
    - Trained on 47K user-exercise pairs
@@ -561,6 +589,7 @@ Three integrated AI features for personalized surf training: Cardio Plans, AR Su
    - Total time estimation
 
 **API Usage:**
+
 ```javascript
 POST /api/ai-tutor/cardio-plan
 Body: {
@@ -589,6 +618,7 @@ Response: {
 ### 3.2 AR Surfboard AI Coach
 
 **15 Surfing Techniques Supported:**
+
 1. Paddling Technique & Posture
 2. The Pop-Up
 3. Surfing Stance & Balance
@@ -608,11 +638,13 @@ Response: {
 **How It Works:**
 
 **Step 1: User Input**
+
 - Height, weight, age, gender
 - Experience level
 - Selected technique
 
 **Step 2: Hybrid ML Calculation**
+
 ```python
 # Physics-based formulas
 board_length = height × 1.06  # (95% accuracy)
@@ -623,17 +655,20 @@ wave_height = random_forest.predict([height, weight, age, experience])
 ```
 
 **Step 3: Personalized Output**
+
 - Board specs (length, volume)
 - Ideal wave height
 - BMI analysis
 - Technique-specific coaching tips
 
 **Training Data:**
+
 - 150+ real surfer profiles
 - Kaggle doctoral research dataset
 - Features: height, weight, age, experience, board specs, wave conditions
 
 **API Usage:**
+
 ```javascript
 POST /api/ar/recommendations
 Body: {
@@ -667,6 +702,7 @@ Response: {
 ### 3.3 Progress Tracking & Gamification
 
 **Features:**
+
 - Total workouts completed
 - Total training time
 - Current streak tracking
@@ -676,23 +712,27 @@ Response: {
 **Badge Categories:**
 
 **Cardio Badges:**
+
 - 🥉 First Steps (1 workout)
 - 🥈 Dedicated (10 workouts)
 - 🥇 Committed (25 workouts)
 - 💎 Marathon Master (500+ minutes)
 
 **AR Badges:**
+
 - 🏄 First Session
 - 🎯 Technique Explorer (5 modules)
 - 🔥 Training Streak (7 days)
 - 💪 Master Trainer (all techniques)
 
 **Data Storage:**
+
 - AsyncStorage (local)
 - MongoDB (cloud sync)
 - Real-time progress updates
 
 ### Files Location
+
 ```
 surfapp--ml-engine/
 ├── services/
@@ -716,29 +756,34 @@ SurfApp--frontend/
 ## 4. AI Video Analyzer
 
 ### Overview
+
 AI-powered video analysis system that uses computer vision to analyze surfing techniques and provide feedback for improvement.
 
 ### Key Features
 
 **1. Real-time Pose Detection**
+
 - MediaPipe pose estimation
 - 33 body landmark tracking
 - Frame-by-frame analysis
 - 30 FPS processing
 
 **2. Technique Scoring**
+
 - Evaluates 15 key surfing maneuvers
 - Scores based on body positioning
 - Angle measurements (joints, stance)
 - Balance and stability metrics
 
 **3. Progress Tracking**
+
 - Historical performance comparison
 - Improvement trends
 - Technique mastery percentage
 - Session summaries
 
 **4. Feedback System**
+
 - Actionable improvement tips
 - Common mistake detection
 - Form correction suggestions
@@ -747,11 +792,13 @@ AI-powered video analysis system that uses computer vision to analyze surfing te
 ### How It Works
 
 **Step 1: Video Upload**
+
 - User records or uploads surf video
 - Supports MP4, MOV formats
 - Max 5 minutes length
 
 **Step 2: Pose Detection**
+
 ```python
 # MediaPipe processing
 pose = mp.solutions.pose.Pose()
@@ -762,12 +809,14 @@ landmarks = results.pose_landmarks.landmark
 ```
 
 **Step 3: Technique Analysis**
+
 - Stance width calculation
 - Body angle measurements
 - Center of gravity tracking
 - Movement smoothness scoring
 
 **Step 4: Scoring Algorithm**
+
 ```python
 score = (
     stance_alignment × 0.30 +
@@ -778,6 +827,7 @@ score = (
 ```
 
 **Step 5: Feedback Generation**
+
 - Identifies weak areas
 - Suggests specific improvements
 - Provides drill recommendations
@@ -817,6 +867,7 @@ Response: {
 ```
 
 ### Files Location
+
 ```
 surfapp--ml-engine/
 ├── services/
@@ -840,11 +891,13 @@ SurfApp--frontend/
 ## 5. Surf Community Platform
 
 ### Overview
+
 Social networking features that connect surfers, enable content sharing, and facilitate real-time communication.
 
 ### Key Features
 
 **1. Social Feed**
+
 - Image/text posts
 - Like and comment system
 - Nested comment threads
@@ -852,6 +905,7 @@ Social networking features that connect surfers, enable content sharing, and fac
 - Hashtag support
 
 **2. Real-time Messaging**
+
 - One-on-one chat
 - Typing indicators
 - Read receipts
@@ -859,6 +913,7 @@ Social networking features that connect surfers, enable content sharing, and fac
 - Socket.io powered
 
 **3. User Profiles**
+
 - Profile customization
 - Activity feed
 - Session history
@@ -866,6 +921,7 @@ Social networking features that connect surfers, enable content sharing, and fac
 - Stats and achievements
 
 **4. Session Sharing**
+
 - Log surf sessions
 - Share conditions (wave height, wind, etc.)
 - Upload photos
@@ -873,6 +929,7 @@ Social networking features that connect surfers, enable content sharing, and fac
 - Weather snapshot
 
 **5. Content Moderation**
+
 - AI toxicity detection
 - Flagging system
 - Admin moderation
@@ -881,6 +938,7 @@ Social networking features that connect surfers, enable content sharing, and fac
 ### How It Works
 
 **Social Feed:**
+
 ```javascript
 // Create post
 POST /api/posts
@@ -909,23 +967,25 @@ Response: {
 ```
 
 **Real-time Messaging:**
+
 ```javascript
 // Socket.io events
-socket.on('message', (data) => {
+socket.on("message", (data) => {
   // Receive real-time message
   console.log(data);
 });
 
-socket.emit('typing', { conversationId, isTyping: true });
+socket.emit("typing", { conversationId, isTyping: true });
 
-socket.emit('sendMessage', {
+socket.emit("sendMessage", {
   conversationId: "...",
   content: "Hey, wanna surf tomorrow?",
-  sender: "user_id"
+  sender: "user_id",
 });
 ```
 
 **Toxicity Detection:**
+
 ```python
 # AI-powered comment filtering
 from transformers import pipeline
@@ -942,6 +1002,7 @@ is_toxic = result[0]['label'] == 'toxic'
 ### API Endpoints
 
 **Posts:**
+
 - `POST /api/posts` - Create post
 - `GET /api/posts` - Get feed
 - `GET /api/posts/:id` - Get specific post
@@ -950,12 +1011,14 @@ is_toxic = result[0]['label'] == 'toxic'
 - `DELETE /api/posts/:id` - Delete post
 
 **Messaging:**
+
 - `GET /api/messages/conversations` - Get all conversations
 - `GET /api/messages/:conversationId` - Get conversation messages
 - `POST /api/messages` - Send message
 - `PUT /api/messages/:id/read` - Mark as read
 
 **User Management:**
+
 - `GET /api/users/:id` - Get user profile
 - `PUT /api/users/:id` - Update profile
 - `POST /api/users/:id/follow` - Follow user
@@ -963,11 +1026,13 @@ is_toxic = result[0]['label'] == 'toxic'
 - `GET /api/users/:id/following` - Get following
 
 **Sessions:**
+
 - `POST /api/sessions` - Log session
 - `GET /api/sessions` - Get user sessions
 - `GET /api/sessions/:id` - Get session details
 
 ### Files Location
+
 ```
 surfapp--backend/
 ├── controllers/
@@ -1000,11 +1065,13 @@ SurfApp--frontend/
 ### Authentication
 
 All authenticated endpoints require JWT token in header:
+
 ```
 Authorization: Bearer <token>
 ```
 
 ### Base URL
+
 ```
 http://localhost:3000/api
 ```
@@ -1012,56 +1079,63 @@ http://localhost:3000/api
 ### Main Endpoints
 
 #### Spots & Forecasting
-| Endpoint | Method | Description | Auth |
-|----------|--------|-------------|------|
-| `/spots/recommendations` | GET | Get all spots with suitability scores | No |
-| `/spots/:id` | GET | Get specific spot details | No |
-| `/forecast` | GET | Get 7-day forecast for location | No |
+
+| Endpoint                 | Method | Description                           | Auth |
+| ------------------------ | ------ | ------------------------------------- | ---- |
+| `/spots/recommendations` | GET    | Get all spots with suitability scores | No   |
+| `/spots/:id`             | GET    | Get specific spot details             | No   |
+| `/forecast`              | GET    | Get 7-day forecast for location       | No   |
 
 #### Risk Analysis
-| Endpoint | Method | Description | Auth |
-|----------|--------|-------------|------|
-| `/surfSpots` | GET | Get spots with risk scores | No |
-| `/surfSpots/:id` | GET | Get spot risk details | No |
-| `/hazardReports` | POST | Submit hazard report | Yes |
-| `/incidents` | GET | Get historical incidents | No |
+
+| Endpoint         | Method | Description                | Auth |
+| ---------------- | ------ | -------------------------- | ---- |
+| `/surfSpots`     | GET    | Get spots with risk scores | No   |
+| `/surfSpots/:id` | GET    | Get spot risk details      | No   |
+| `/hazardReports` | POST   | Submit hazard report       | Yes  |
+| `/incidents`     | GET    | Get historical incidents   | No   |
 
 #### AI Training
-| Endpoint | Method | Description | Auth |
-|----------|--------|-------------|------|
-| `/ai-tutor/cardio-plan` | POST | Generate cardio plans | Yes |
-| `/ar/recommendations` | POST | Get surfboard recommendations | Yes |
-| `/progress/save` | POST | Save progress data | Yes |
-| `/progress/load` | GET | Load progress data | Yes |
+
+| Endpoint                | Method | Description                   | Auth |
+| ----------------------- | ------ | ----------------------------- | ---- |
+| `/ai-tutor/cardio-plan` | POST   | Generate cardio plans         | Yes  |
+| `/ar/recommendations`   | POST   | Get surfboard recommendations | Yes  |
+| `/progress/save`        | POST   | Save progress data            | Yes  |
+| `/progress/load`        | GET    | Load progress data            | Yes  |
 
 #### Video Analysis
-| Endpoint | Method | Description | Auth |
-|----------|--------|-------------|------|
-| `/video-analysis/analyze` | POST | Analyze surf video | Yes |
-| `/video-analysis/sessions` | GET | Get analysis history | Yes |
+
+| Endpoint                   | Method | Description          | Auth |
+| -------------------------- | ------ | -------------------- | ---- |
+| `/video-analysis/analyze`  | POST   | Analyze surf video   | Yes  |
+| `/video-analysis/sessions` | GET    | Get analysis history | Yes  |
 
 #### Community
-| Endpoint | Method | Description | Auth |
-|----------|--------|-------------|------|
-| `/posts` | GET/POST | Feed operations | Yes |
-| `/posts/:id/like` | PUT | Like post | Yes |
-| `/posts/:id/comment` | POST | Comment on post | Yes |
-| `/messages` | GET/POST | Messaging | Yes |
-| `/users/:id/follow` | POST | Follow user | Yes |
-| `/sessions` | GET/POST | Session logging | Yes |
+
+| Endpoint             | Method   | Description     | Auth |
+| -------------------- | -------- | --------------- | ---- |
+| `/posts`             | GET/POST | Feed operations | Yes  |
+| `/posts/:id/like`    | PUT      | Like post       | Yes  |
+| `/posts/:id/comment` | POST     | Comment on post | Yes  |
+| `/messages`          | GET/POST | Messaging       | Yes  |
+| `/users/:id/follow`  | POST     | Follow user     | Yes  |
+| `/sessions`          | GET/POST | Session logging | Yes  |
 
 #### Authentication
-| Endpoint | Method | Description | Auth |
-|----------|--------|-------------|------|
-| `/auth/register` | POST | Create account | No |
-| `/auth/login` | POST | Login | No |
-| `/auth/refresh` | POST | Refresh token | No |
+
+| Endpoint         | Method | Description    | Auth |
+| ---------------- | ------ | -------------- | ---- |
+| `/auth/register` | POST   | Create account | No   |
+| `/auth/login`    | POST   | Login          | No   |
+| `/auth/refresh`  | POST   | Refresh token  | No   |
 
 ---
 
 ## 🤖 Machine Learning Models
 
 ### 1. Random Forest Spot Recommender
+
 - **Type**: Multi-output Random Forest Regressor
 - **Purpose**: Predict current surf conditions for all spots
 - **Features**: 15 (10 base + 5 engineered)
@@ -1074,21 +1148,23 @@ http://localhost:3000/api
 - **File**: `models/random_forest_multi_output.pkl`
 
 ### 2. LSTM Wave Forecaster
+
 - **Type**: Sequence-to-Sequence LSTM
 - **Purpose**: 7-day hourly wave forecasting
-- **Architecture**: 
+- **Architecture**:
   - Encoder: LSTM (64 units)
   - Decoder: LSTM (64 units)
   - Dense output (6 units)
 - **Input**: Past 168 hours × 6 features
 - **Output**: Next 168 hours × 6 features
-- **Performance**: 
+- **Performance**:
   - Wave Height: 8.8% MAPE, 0.125m MAE
   - Wave Period: 7.4% MAPE, 0.464s MAE
 - **Training**: 830 sequences, 100 epochs
 - **File**: `models/lstm_wave_forecast.keras`
 
 ### 3. Neural Collaborative Filtering (Cardio)
+
 - **Type**: TensorFlow/Keras NCF
 - **Purpose**: Personalized cardio exercise recommendations
 - **Architecture**: Embedding layers → Dense layers → Sigmoid
@@ -1098,6 +1174,7 @@ http://localhost:3000/api
 - **File**: `models/cardio_ncf_model.h5`
 
 ### 4. AR Surfboard Hybrid Model
+
 - **Type**: Hybrid (Physics formulas + Random Forest)
 - **Purpose**: Personalized surfboard recommendations
 - **Approach**:
@@ -1108,15 +1185,17 @@ http://localhost:3000/api
 - **File**: `ar_surfboard_recommender/trained_model/enhanced_ar_model.joblib`
 
 ### 5. Risk Classifier & Regressor
+
 - **Type**: Random Forest + Gradient Boosting
 - **Purpose**: Surf spot risk assessment
 - **Features**: Historical incidents, hazards, seasonal factors
 - **Output**: Risk score (0-10) and level (Low/Medium/High)
-- **Files**: 
+- **Files**:
   - `models/risk_classifier.pkl`
   - `models/risk_regressor.pkl`
 
 ### 6. Toxicity Detector
+
 - **Type**: BERT transformer
 - **Purpose**: Content moderation for comments
 - **Model**: `unitary/toxic-bert`
@@ -1263,12 +1342,14 @@ surf-ceylon/
 ## 🧪 Testing
 
 ### Frontend Testing
+
 ```bash
 cd SurfApp--frontend
 npm test
 ```
 
 ### Backend Testing
+
 ```bash
 cd surfapp--backend
 npm test
@@ -1281,6 +1362,7 @@ curl http://localhost:3000/api/surfSpots
 ### ML Model Testing
 
 **Test Random Forest:**
+
 ```bash
 cd surfapp--ml-engine
 python testing/test_model1.py
@@ -1288,11 +1370,13 @@ python testing/validate_features.py
 ```
 
 **Test LSTM Forecast:**
+
 ```bash
 python testing/test_wave_forecast.py
 ```
 
 **Test AR Surfboard Model:**
+
 ```bash
 curl -X POST http://localhost:5003/ar/predict \
   -H "Content-Type: application/json" \
@@ -1300,6 +1384,7 @@ curl -X POST http://localhost:5003/ar/predict \
 ```
 
 **Test Cardio Service:**
+
 ```bash
 curl -X POST http://localhost:5001/recommend \
   -H "Content-Type: application/json" \
@@ -1313,6 +1398,7 @@ curl -X POST http://localhost:5001/recommend \
 ### Production Build
 
 **Backend:**
+
 ```bash
 cd surfapp--backend
 npm run build
@@ -1320,6 +1406,7 @@ npm run start:prod
 ```
 
 **Frontend:**
+
 ```bash
 cd SurfApp--frontend
 eas build --platform all
@@ -1327,6 +1414,7 @@ eas submit --platform all
 ```
 
 **ML Services:**
+
 ```bash
 cd surfapp--ml-engine
 
@@ -1342,6 +1430,7 @@ gunicorn --workers 4 --bind 0.0.0.0:5003 ar_surfboard_recommender.ar_prediction_
 ### Environment Variables
 
 **Backend (.env):**
+
 ```
 MONGODB_URI=mongodb://production-uri
 JWT_SECRET=production-secret
@@ -1351,6 +1440,7 @@ PORT=3000
 ```
 
 **Frontend:**
+
 ```javascript
 // constants/config.js
 const API_BASE_URL = "https://api.surfceylon.com";
@@ -1359,6 +1449,7 @@ const API_BASE_URL = "https://api.surfceylon.com";
 ### Cloud Deployment
 
 **Recommended Stack:**
+
 - **Backend**: AWS EC2 / Heroku / DigitalOcean
 - **Database**: MongoDB Atlas
 - **ML Services**: AWS EC2 with GPU / Google Cloud AI Platform
@@ -1372,28 +1463,28 @@ const API_BASE_URL = "https://api.surfceylon.com";
 
 ### ML Model Performance
 
-| Model | Metric | Value | Grade |
-|-------|--------|-------|-------|
-| **Random Forest** | Overall R² | 0.8068 | ⭐⭐⭐⭐ Good |
-| | Wave Height MAE | 0.13m | ⭐⭐⭐⭐⭐ Excellent |
-| | Wind Speed R² | 0.9787 | ⭐⭐⭐⭐⭐ Excellent |
-| **LSTM** | Wave Height MAPE | 8.8% | ⭐⭐⭐⭐⭐ Excellent |
-| | Wave Period MAPE | 7.4% | ⭐⭐⭐⭐⭐ Excellent |
-| | Validation Loss | 0.3215 | ⭐⭐⭐⭐ Good |
-| **Cardio NCF** | AUC | 87% | ⭐⭐⭐⭐ Good |
-| | Accuracy | 82% | ⭐⭐⭐⭐ Good |
-| **AR Surfboard** | Board Length | 95% | ⭐⭐⭐⭐⭐ Excellent |
-| | Board Volume | 90% | ⭐⭐⭐⭐⭐ Excellent |
+| Model             | Metric           | Value  | Grade                |
+| ----------------- | ---------------- | ------ | -------------------- |
+| **Random Forest** | Overall R²       | 0.8068 | ⭐⭐⭐⭐ Good        |
+|                   | Wave Height MAE  | 0.13m  | ⭐⭐⭐⭐⭐ Excellent |
+|                   | Wind Speed R²    | 0.9787 | ⭐⭐⭐⭐⭐ Excellent |
+| **LSTM**          | Wave Height MAPE | 8.8%   | ⭐⭐⭐⭐⭐ Excellent |
+|                   | Wave Period MAPE | 7.4%   | ⭐⭐⭐⭐⭐ Excellent |
+|                   | Validation Loss  | 0.3215 | ⭐⭐⭐⭐ Good        |
+| **Cardio NCF**    | AUC              | 87%    | ⭐⭐⭐⭐ Good        |
+|                   | Accuracy         | 82%    | ⭐⭐⭐⭐ Good        |
+| **AR Surfboard**  | Board Length     | 95%    | ⭐⭐⭐⭐⭐ Excellent |
+|                   | Board Volume     | 90%    | ⭐⭐⭐⭐⭐ Excellent |
 
 ### API Response Times
 
-| Endpoint | Average Response | Target |
-|----------|------------------|--------|
-| `/spots/recommendations` | 450ms | < 500ms |
-| `/forecast` | 2.5s | < 3s |
-| `/surfSpots` | 120ms | < 200ms |
-| `/posts` | 180ms | < 300ms |
-| `/ar/recommendations` | 350ms | < 500ms |
+| Endpoint                 | Average Response | Target  |
+| ------------------------ | ---------------- | ------- |
+| `/spots/recommendations` | 450ms            | < 500ms |
+| `/forecast`              | 2.5s             | < 3s    |
+| `/surfSpots`             | 120ms            | < 200ms |
+| `/posts`                 | 180ms            | < 300ms |
+| `/ar/recommendations`    | 350ms            | < 500ms |
 
 ---
 
@@ -1415,24 +1506,29 @@ const API_BASE_URL = "https://api.surfceylon.com";
 ## 🐛 Known Issues & Limitations
 
 ### Random Forest Model
+
 - Wave period prediction moderate (R² 0.48) - needs more training data
 - May struggle with sudden weather changes
 
 ### LSTM Model
+
 - Wind direction accuracy needs improvement (47° MAE)
 - Accuracy degrades beyond 5-day forecasts
 - Requires significant computational resources for training
 
 ### AR Surfboard Model
+
 - Limited training data (150 samples) - affects wave height prediction
 - Best for common body types (may be less accurate for outliers)
 
 ### Video Analyzer
+
 - Requires clear video quality for accurate pose detection
 - Performance varies with lighting conditions
 - Processing time increases with video length
 
 ### General
+
 - StormGlass API rate limits (10 calls/hour per key)
 - Real-time messaging requires stable internet connection
 - iOS deployment requires Apple Developer account
@@ -1442,6 +1538,7 @@ const API_BASE_URL = "https://api.surfceylon.com";
 ## 🔮 Future Enhancements
 
 ### Phase 1 (Q2 2026)
+
 - [ ] Offline mode with cached forecasts
 - [ ] Push notifications for hazard alerts
 - [ ] Social features: groups, events
@@ -1449,6 +1546,7 @@ const API_BASE_URL = "https://api.surfceylon.com";
 - [ ] Weather radar integration
 
 ### Phase 2 (Q3 2026)
+
 - [ ] Live wave camera feeds
 - [ ] Crowdsourced spot ratings
 - [ ] In-app surfboard marketplace
@@ -1456,6 +1554,7 @@ const API_BASE_URL = "https://api.surfceylon.com";
 - [ ] Advanced analytics dashboard
 
 ### Phase 3 (Q4 2026)
+
 - [ ] Wearable device integration (Apple Watch, Garmin)
 - [ ] VR surf training simulations
 - [ ] Competitive leaderboards
@@ -1469,30 +1568,35 @@ const API_BASE_URL = "https://api.surfceylon.com";
 ### Core Team
 
 **Real-time Surf Forecasting & Spot Recommender**
+
 - Machine Learning model development (Random Forest, LSTM)
 - Feature engineering and domain knowledge integration
 - API service implementation and optimization
 - Model training and performance evaluation
 
 **Surf Risk Analyzer**
+
 - Risk calculation engine development
 - Historical incident analysis
 - Interactive map implementation
 - Hazard reporting system
 
 **AI-Powered Training Features**
+
 - Cardio NCF model development
 - AR Surfboard hybrid ML system
 - Progress tracking and gamification
 - Training data collection and preprocessing
 
 **AI Video Analyzer**
+
 - MediaPipe pose detection integration
 - Technique scoring algorithms
 - Video processing pipeline
 - Feedback generation system
 
 **Surf Community Platform**
+
 - Social feed and messaging features
 - User authentication and profiles
 - Real-time Socket.io implementation
@@ -1568,4 +1672,4 @@ If you use this project in your research, please cite:
 
 **Built with 🌊 for Sri Lankan surfers by surfers**
 
-*Empowering the surfing community through intelligent technology*
+_Empowering the surfing community through intelligent technology_
