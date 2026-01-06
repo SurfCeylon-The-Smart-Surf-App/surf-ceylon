@@ -3,6 +3,8 @@ Train Multi-Output LSTM model for 7-day surf forecasting
 Predicts: Wave Height, Wave Period, Swell Height, Swell Period, Wind Speed, Wind Direction
 
 FIXED VERSION - Handles NaN values, gradient clipping, and proper scaling
+
+Input (168 hours)  →  Encoder  →  Context Vector  →  Decoder  →  Output (168 hours)
 """
 import matplotlib.pyplot as plt
 import numpy as np
@@ -163,6 +165,14 @@ def build_model(n_timesteps_in, n_timesteps_out, n_features):
     print("BUILDING MODEL ARCHITECTURE")
     print("=" * 60)
 
+
+    # Takes input: (batch, 168 hours, 6 features)
+    # Has 64 LSTM units (memory cells)
+    # return_sequences=True → outputs at every timestep
+    # Output shape: (batch, 168, 64)
+    # dropout -> Randomly "turns off" 30% of neurons during training
+        #Forces network to learn redundant representations
+        #Prevents overfitting
     model = Sequential([
         # Encoder: Process input sequence (REDUCED SIZE to prevent overfitting)
         LSTM(64, activation='tanh', return_sequences=True,
@@ -191,6 +201,7 @@ def build_model(n_timesteps_in, n_timesteps_out, n_features):
     ])
 
     # Compile with gradient clipping to prevent explosion
+    # Combines momentum + adaptive learning rates
     optimizer = tf.keras.optimizers.Adam(
         learning_rate=0.001,
         clipnorm=1.0  # CRITICAL: Clip gradients to prevent explosion
@@ -214,7 +225,9 @@ def train_model(model, X_train, y_train, X_test, y_test):
     print("TRAINING MODEL")
     print("=" * 60)
 
-    # Callbacks
+    # Callbacks. watch validation loss every epochs. 
+    # If no improvement for 10 consecutive epochs → stops training.
+    # Automatically restores weights from the best epoch
     early_stop = EarlyStopping(
         monitor='val_loss',
         patience=10,
@@ -222,9 +235,14 @@ def train_model(model, X_train, y_train, X_test, y_test):
         verbose=1
     )
 
-    # CRITICAL: Stop training if NaN loss detected
+    # Checks loss after each batch 
+    # If loss becomes NaN (Not a Number) → immediately stops training
+    # Prevents wasting time training a broken model
     nan_callback = tf.keras.callbacks.TerminateOnNaN()
 
+    # Watches validation loss
+    # If no improvement for 5 epochs → reduces learning rate by half
+    # Continues until learning rate reaches 1e-6
     reduce_lr = ReduceLROnPlateau(
         monitor='val_loss',
         factor=0.5,
@@ -233,6 +251,9 @@ def train_model(model, X_train, y_train, X_test, y_test):
         verbose=1
     )
 
+    # After each epoch, checks if validation loss improved
+    # If improved → saves model to disk
+    # Only saves when model gets better (not every epoch)
     checkpoint = ModelCheckpoint(
         MODEL_FILE,
         monitor='val_loss',
