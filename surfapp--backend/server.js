@@ -9,10 +9,10 @@ require("dotenv").config();
 const app = express();
 
 // Middleware
-app.use(helmet());
-app.use(morgan("combined"));
-app.use(cors());
-app.use(express.json());
+app.use(helmet()); //Security headers (XSS, clickjacking protection)
+app.use(morgan("combined")); //HTTP request logging
+app.use(cors()); //Cross-origin resource sharing for React Native frontend
+app.use(express.json());  //JSON request body parsing
 app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware for debugging
@@ -49,8 +49,8 @@ app.use("/api/posts", require("./routes/posts"));
 app.use("/api/follow", require("./routes/follow"));
 app.use("/api/messages", require("./routes/messages"));
 
-// New routes from thilina version
-app.use("/api/spots", require("./routes/spots"));
+// New routes from spot recomendder and real-time surf forecasting
+app.use("/api/spots", require("./routes/spots")); 
 app.use("/api/sessions", require("./routes/sessions"));
 app.use("/api/forecast", require("./routes/forecast"));
 app.use("/api/health", require("./routes/health"));
