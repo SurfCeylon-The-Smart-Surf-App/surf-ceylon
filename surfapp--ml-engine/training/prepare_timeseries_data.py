@@ -1,6 +1,16 @@
 """
 Prepare time-series training data for multi-output 7-day forecasting
 Predicts: Wave Height, Wave Period, Swell Height, Swell Period, Wind Speed, Wind Direction
+Converts JSON to training sequences
+Creates sliding windows (168 hours input → 168 hours output)
+
+Output:
+
+artifacts/timeseries_X_multioutput.npy - Input sequences (past 168 hours)
+artifacts/timeseries_y_multioutput.npy - Target sequences (next 168 hours)
+
+Front (X): Past 7 days of weather
+Back (y): Next 7 days that actually happened
 """
 import json
 import pandas as pd
@@ -50,7 +60,7 @@ def prepare_multioutput_sequences(json_file, lookback_hours=168, forecast_hours=
 
     print(f"  Found {len(hours_data)} hourly records")
 
-    for hour in hours_data:
+    for hour in hours_data:  #Extract 6 features from nested JSON structure
         try:
             records.append({
                 'timestamp': hour['time'],
@@ -90,6 +100,9 @@ def prepare_multioutput_sequences(json_file, lookback_hours=168, forecast_hours=
 
     print(f"  Creating {max_sequences} training sequences...")
 
+
+    # Creates many training examples from limited data
+    # Teaches model patterns across different time periods
     for i in range(max_sequences):
         # Input: Past lookback_hours (default: 7 days) of all features
         X_seq = df.iloc[i:i+lookback_hours][FEATURE_COLS].values
