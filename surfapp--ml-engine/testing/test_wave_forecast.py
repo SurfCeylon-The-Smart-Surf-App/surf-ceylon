@@ -54,13 +54,14 @@ TEST_SCENARIOS = [
     }
 ]
 
+
 class WaveForecastTester:
     """Comprehensive testing for wave forecast model"""
-    
+
     def __init__(self):
         self.results = []
         self.service_script = 'forecast_7day_service.py'
-        
+
     def run_forecast(self, lat: float, lon: float) -> Dict:
         """Run forecast service and parse results"""
         try:
@@ -71,7 +72,7 @@ class WaveForecastTester:
                 text=True,
                 timeout=60
             )
-            
+
             # Parse JSON output
             if result.returncode == 0:
                 forecast_data = json.loads(result.stdout)
@@ -86,7 +87,7 @@ class WaveForecastTester:
                     'error': result.stderr,
                     'stdout': result.stdout
                 }
-                
+
         except subprocess.TimeoutExpired:
             return {
                 'success': False,
@@ -103,115 +104,146 @@ class WaveForecastTester:
                 'success': False,
                 'error': f'Unexpected error: {e}'
             }
-    
+
     def test_location(self, name: str, lat: float, lon: float, description: str) -> Dict:
         """Test forecast for a specific location"""
         print(f"\n{'='*70}")
         print(f"Testing: {name} ({description})")
         print(f"Coordinates: {lat}, {lon}")
         print(f"{'='*70}")
-        
+
         result = self.run_forecast(lat, lon)
-        
+
         if result['success']:
             data = result['data']
-            
-            # Extract metrics
+
+            # Extract metrics - handle structure where:
+            # 'daily' = {field: [values]} and 'hourly' = [{hour1}, {hour2}, ...]
+            daily_data = data.get('daily', {})
+            hourly_data = data.get('hourly', [])
+
+            # Calculate metrics from daily arrays
+            if daily_data and isinstance(daily_data, dict):
+                avg_wave_height = float(
+                    np.mean(daily_data.get('waveHeight', [0])))
+                max_wave_height = float(
+                    np.max(daily_data.get('waveHeight', [0])))
+                avg_wind_speed = float(
+                    np.mean(daily_data.get('windSpeed', [0])))
+                avg_swell_period = float(
+                    np.mean(daily_data.get('swellPeriod', [0])))
+                days_count = len(daily_data.get('waveHeight', []))
+            else:
+                # Fallback to hourly if daily not available
+                avg_wave_height = self._calculate_avg(
+                    hourly_data, 'waveHeight')
+                max_wave_height = self._calculate_max(
+                    hourly_data, 'waveHeight')
+                avg_wind_speed = self._calculate_avg(hourly_data, 'windSpeed')
+                avg_swell_period = self._calculate_avg(
+                    hourly_data, 'swellPeriod')
+                days_count = 0
+
             metrics = {
                 'location': name,
                 'coordinates': (lat, lon),
-                'method_used': data.get('method_used', 'unknown'),
-                'days_forecasted': len(data.get('forecast', [])),
-                'avg_wave_height': self._calculate_avg(data, 'waveHeight'),
-                'max_wave_height': self._calculate_max(data, 'waveHeight'),
-                'avg_wind_speed': self._calculate_avg(data, 'windSpeed'),
-                'avg_swell_period': self._calculate_avg(data, 'swellPeriod'),
+                'method_used': data.get('metadata', {}).get('forecastMethod', data.get('source', 'unknown')),
+                'data_source': data.get('metadata', {}).get('dataSource', 'unknown'),
+                'days_forecasted': days_count,
+                'hours_forecasted': len(hourly_data),
+                'avg_wave_height': avg_wave_height,
+                'max_wave_height': max_wave_height,
+                'avg_wind_speed': avg_wind_speed,
+                'avg_swell_period': avg_swell_period,
                 'has_confidence': 'confidence' in data,
                 'avg_confidence': data.get('confidence', 0) * 100 if 'confidence' in data else 0
             }
-            
+
             # Print results
             print(f"\n✅ Forecast Generated Successfully")
             print(f"   Method: {metrics['method_used']}")
-            print(f"   Days: {metrics['days_forecasted']}")
-            print(f"   Wave Height: {metrics['avg_wave_height']:.2f}m (max: {metrics['max_wave_height']:.2f}m)")
+            print(f"   Source: {metrics['data_source']}")
+            print(f"   Days: {metrics['days_forecasted']} daily summaries")
+            print(f"   Hours: {metrics['hours_forecasted']} hourly forecasts")
+            print(
+                f"   Wave Height: {metrics['avg_wave_height']:.2f}m (max: {metrics['max_wave_height']:.2f}m)")
             print(f"   Wind Speed: {metrics['avg_wind_speed']:.2f} m/s")
             print(f"   Swell Period: {metrics['avg_swell_period']:.2f}s")
             if metrics['has_confidence']:
                 print(f"   Confidence: {metrics['avg_confidence']:.1f}%")
-            
-            # Check for warnings in stderr
-            if result.get('stderr'):
-                if 'LSTM' in result['stderr']:
-                    print(f"\n📊 Model Info:")
-                    for line in result['stderr'].split('\n'):
-                        if line.strip():
-                            print(f"   {line}")
-            
+
+            # Show sample of daily data
+            if daily_data and isinstance(daily_data, dict):
+                labels = data.get('labels', [])
+                print(f"\n📅 Daily Forecast Summary:")
+                for i in range(min(3, len(daily_data.get('waveHeight', [])))):
+                    wave_h = daily_data['waveHeight'][i]
+                    wave_p = daily_data['wavePeriod'][i]
+                    wind_s = daily_data['windSpeed'][i]
+                    wind_d = daily_data['windDirection'][i]
+                    date_label = labels[i] if i < len(labels) else f"Day {i+1}"
+                    print(
+                        f"   {date_label}: {wave_h:.2f}m @ {wave_p:.1f}s | Wind: {wind_s:.1f} m/s from {wind_d:.0f}°")
+
             return {'success': True, 'metrics': metrics, 'data': data}
-            
+
         else:
             print(f"\n❌ Forecast Failed")
             print(f"   Error: {result['error']}")
             return {'success': False, 'error': result['error']}
-    
-    def _calculate_avg(self, data: Dict, field: str) -> float:
-        """Calculate average of a field across forecast days"""
-        forecast = data.get('forecast', {})
-        if isinstance(forecast, dict):
-            # New format: forecast is dict with arrays
-            values = forecast.get(field, [])
-        else:
-            # Old format: forecast is list of dicts
-            values = [day.get(field, 0) for day in forecast]
-        return np.mean(values) if values else 0.0
-    
-    def _calculate_max(self, data: Dict, field: str) -> float:
-        """Calculate maximum of a field across forecast days"""
-        forecast = data.get('forecast', {})
-        if isinstance(forecast, dict):
-            # New format: forecast is dict with arrays
-            values = forecast.get(field, [])
-        else:
-            # Old format: forecast is list of dicts
-            values = [day.get(field, 0) for day in forecast]
-        return np.max(values) if values else 0.0
-    
+
+    def _calculate_avg(self, forecast_data: list, field: str) -> float:
+        """Calculate average of a field across forecast array"""
+        if not forecast_data:
+            return 0.0
+        values = [day.get(field, 0)
+                  for day in forecast_data if isinstance(day, dict)]
+        return float(np.mean(values)) if values else 0.0
+
+    def _calculate_max(self, forecast_data: list, field: str) -> float:
+        """Calculate maximum of a field across forecast array"""
+        if not forecast_data:
+            return 0.0
+        values = [day.get(field, 0)
+                  for day in forecast_data if isinstance(day, dict)]
+        return float(np.max(values)) if values else 0.0
+
     def quick_test(self):
         """Quick test on 2 main locations"""
         print("\n" + "="*70)
         print("QUICK TEST MODE - Testing 2 Locations")
         print("="*70)
-        
+
         for name, lat, lon, desc in TEST_LOCATIONS[:2]:
             result = self.test_location(name, lat, lon, desc)
             self.results.append(result)
-        
+
         self._print_summary()
-    
+
     def full_test(self):
         """Full test suite on all locations"""
         print("\n" + "="*70)
         print("FULL TEST MODE - Testing All Locations")
         print("="*70)
-        
+
         for name, lat, lon, desc in TEST_LOCATIONS:
             result = self.test_location(name, lat, lon, desc)
             self.results.append(result)
-        
+
         self._print_summary()
         self._generate_visualizations()
-    
+
     def custom_test(self, lat: float, lon: float):
         """Test custom coordinates"""
         print("\n" + "="*70)
         print("CUSTOM LOCATION TEST")
         print("="*70)
-        
-        result = self.test_location("Custom Location", lat, lon, "User-specified coordinates")
+
+        result = self.test_location(
+            "Custom Location", lat, lon, "User-specified coordinates")
         self.results.append(result)
         self._print_summary()
-    
+
     def kfold_validation(self, k: int = 5):
         """Perform K-fold cross-validation (requires training data)"""
         print("\n" + "="*70)
@@ -219,18 +251,18 @@ class WaveForecastTester:
         print("="*70)
         print("\n⚠️  Note: This requires training data and will retrain the model k times")
         print("    This test is computationally expensive and may take several hours.\n")
-        
+
         response = input("Continue with K-fold validation? (yes/no): ")
         if response.lower() != 'yes':
             print("Cancelled.")
             return
-        
+
         # Check if training script exists
         train_script = 'train_wave_forecast_lstm.py'
         if not os.path.exists(train_script):
             print(f"❌ Training script not found: {train_script}")
             return
-        
+
         print("\n🚧 K-fold validation not yet implemented in this version")
         print("   This would require:")
         print("   1. Loading timeseries data")
@@ -240,59 +272,63 @@ class WaveForecastTester:
         print("   5. Aggregating results")
         print("\n   Consider running: python train_wave_forecast_lstm.py")
         print("   and analyzing the training history instead.")
-    
+
     def _print_summary(self):
         """Print test summary"""
         print("\n" + "="*70)
         print("TEST SUMMARY")
         print("="*70)
-        
+
         successful = [r for r in self.results if r.get('success')]
         failed = [r for r in self.results if not r.get('success')]
-        
+
         print(f"\nTotal Tests: {len(self.results)}")
         print(f"✅ Successful: {len(successful)}")
         print(f"❌ Failed: {len(failed)}")
-        
+
         if successful:
             # Check methods used
             methods = {}
             for r in successful:
                 method = r['metrics']['method_used']
                 methods[method] = methods.get(method, 0) + 1
-            
+
             print(f"\n📊 Forecasting Methods Used:")
             for method, count in methods.items():
                 print(f"   {method}: {count} tests")
-            
+
             # Average metrics
-            avg_wave = np.mean([r['metrics']['avg_wave_height'] for r in successful])
-            avg_wind = np.mean([r['metrics']['avg_wind_speed'] for r in successful])
-            avg_swell = np.mean([r['metrics']['avg_swell_period'] for r in successful])
-            
+            avg_wave = np.mean([r['metrics']['avg_wave_height']
+                               for r in successful])
+            avg_wind = np.mean([r['metrics']['avg_wind_speed']
+                               for r in successful])
+            avg_swell = np.mean([r['metrics']['avg_swell_period']
+                                for r in successful])
+
             print(f"\n📈 Average Forecast Metrics:")
             print(f"   Wave Height: {avg_wave:.2f}m")
             print(f"   Wind Speed: {avg_wind:.2f} m/s")
             print(f"   Swell Period: {avg_swell:.2f}s")
-        
+
         if failed:
             print(f"\n❌ Failed Tests:")
             for r in failed:
                 print(f"   {r.get('error', 'Unknown error')}")
-    
+
     def _generate_visualizations(self):
         """Generate visualization plots"""
         print("\n📊 Generating visualizations...")
-        
+
         successful = [r for r in self.results if r.get('success')]
         if not successful:
             print("   No successful results to visualize")
             return
-        
+
         # Create comparison plot
         fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-        fig.suptitle('Wave Forecast Comparison Across Locations', fontsize=16, fontweight='bold')
-        
+        fig.suptitle('Wave Forecast Comparison Across Locations',
+                     fontsize=16, fontweight='bold')
+
         # Plot 1: Wave Height
         ax = axes[0, 0]
         for r in successful:
@@ -303,13 +339,14 @@ class WaveForecastTester:
             else:
                 days = list(range(1, len(forecast) + 1))
                 wave_heights = [day['waveHeight'] for day in forecast]
-            ax.plot(days, wave_heights, marker='o', label=r['metrics']['location'])
+            ax.plot(days, wave_heights, marker='o',
+                    label=r['metrics']['location'])
         ax.set_xlabel('Day')
         ax.set_ylabel('Wave Height (m)')
         ax.set_title('Wave Height Forecast')
         ax.legend()
         ax.grid(True, alpha=0.3)
-        
+
         # Plot 2: Wind Speed
         ax = axes[0, 1]
         for r in successful:
@@ -320,13 +357,14 @@ class WaveForecastTester:
             else:
                 days = list(range(1, len(forecast) + 1))
                 wind_speeds = [day['windSpeed'] for day in forecast]
-            ax.plot(days, wind_speeds, marker='s', label=r['metrics']['location'])
+            ax.plot(days, wind_speeds, marker='s',
+                    label=r['metrics']['location'])
         ax.set_xlabel('Day')
         ax.set_ylabel('Wind Speed (m/s)')
         ax.set_title('Wind Speed Forecast')
         ax.legend()
         ax.grid(True, alpha=0.3)
-        
+
         # Plot 3: Swell Period
         ax = axes[1, 0]
         for r in successful:
@@ -337,13 +375,14 @@ class WaveForecastTester:
             else:
                 days = list(range(1, len(forecast) + 1))
                 swell_periods = [day['swellPeriod'] for day in forecast]
-            ax.plot(days, swell_periods, marker='^', label=r['metrics']['location'])
+            ax.plot(days, swell_periods, marker='^',
+                    label=r['metrics']['location'])
         ax.set_xlabel('Day')
         ax.set_ylabel('Swell Period (s)')
         ax.set_title('Swell Period Forecast')
         ax.legend()
         ax.grid(True, alpha=0.3)
-        
+
         # Plot 4: Average Conditions Bar Chart
         ax = axes[1, 1]
         locations = [r['metrics']['location'] for r in successful]
@@ -356,22 +395,24 @@ class WaveForecastTester:
         ax.set_xticks(x)
         ax.set_xticklabels(locations, rotation=45, ha='right')
         ax.grid(True, alpha=0.3, axis='y')
-        
+
         # Add value labels on bars
         for bar in bars:
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height,
-                   f'{height:.2f}m', ha='center', va='bottom', fontsize=9)
-        
+                    f'{height:.2f}m', ha='center', va='bottom', fontsize=9)
+
         plt.tight_layout()
-        
+
         # Save plot
-        output_file = os.path.join(os.path.dirname(__file__), 'test_results_comparison.png')
+        output_file = os.path.join(os.path.dirname(
+            __file__), 'test_results_comparison.png')
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"   ✅ Saved: {output_file}")
-        
+
         # Save detailed results to JSON
-        results_file = os.path.join(os.path.dirname(__file__), 'test_results.json')
+        results_file = os.path.join(
+            os.path.dirname(__file__), 'test_results.json')
         with open(results_file, 'w') as f:
             json.dump({
                 'timestamp': datetime.now().isoformat(),
@@ -381,48 +422,49 @@ class WaveForecastTester:
             }, f, indent=2)
         print(f"   ✅ Saved: {results_file}")
 
+
 def main():
     parser = argparse.ArgumentParser(
         description='Comprehensive Wave Forecast Model Testing',
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    
+
     parser.add_argument(
         '--mode',
         choices=['quick', 'full', 'kfold', 'custom'],
         default='quick',
         help='Test mode: quick (2 locations), full (all locations), kfold (cross-validation), custom (specify coordinates)'
     )
-    
+
     parser.add_argument(
         '--lat',
         type=float,
         help='Latitude for custom test mode'
     )
-    
+
     parser.add_argument(
         '--lon',
         type=float,
         help='Longitude for custom test mode'
     )
-    
+
     parser.add_argument(
         '--k',
         type=int,
         default=5,
         help='Number of folds for K-fold validation (default: 5)'
     )
-    
+
     args = parser.parse_args()
-    
+
     # Validate custom mode arguments
     if args.mode == 'custom':
         if args.lat is None or args.lon is None:
             parser.error("--lat and --lon are required for custom mode")
-    
+
     # Create tester instance
     tester = WaveForecastTester()
-    
+
     # Run appropriate test mode
     if args.mode == 'quick':
         tester.quick_test()
@@ -432,10 +474,11 @@ def main():
         tester.kfold_validation(k=args.k)
     elif args.mode == 'custom':
         tester.custom_test(args.lat, args.lon)
-    
+
     print("\n" + "="*70)
     print("TESTING COMPLETE")
     print("="*70)
+
 
 if __name__ == '__main__':
     main()
