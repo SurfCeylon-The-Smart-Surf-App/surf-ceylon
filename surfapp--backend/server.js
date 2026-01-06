@@ -54,6 +54,7 @@ app.use("/api/spots", require("./routes/spots"));
 app.use("/api/sessions", require("./routes/sessions"));
 app.use("/api/forecast", require("./routes/forecast"));
 app.use("/api/health", require("./routes/health"));
+app.use("/api/video-analysis", require("./routes/videoAnalysis"));
 
 // Default route
 app.get("/", (req, res) => {
