@@ -417,8 +417,13 @@ def collect_historical_data():
     print("💾 SAVING DATA FILES")
     print('='*70)
 
+    # Ensure data directory exists
+    data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+    os.makedirs(data_dir, exist_ok=True)
+
     for result in all_results:
-        output_filename = f"{result['spot_name'].lower().replace(' ', '_')}_historical_data_fixed.json"
+        output_filename = os.path.join(
+            data_dir, f"{result['spot_name'].lower().replace(' ', '_')}_historical_data_fixed.json")
 
         # Load existing data if current collection was skipped
         if not result['hours']:

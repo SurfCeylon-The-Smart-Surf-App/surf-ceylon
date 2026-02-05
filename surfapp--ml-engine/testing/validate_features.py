@@ -13,7 +13,7 @@ FEATURE_NAMES = [
     'windDirection', 'seaLevel', 'gust', 'secondarySwellHeight',
     'secondarySwellPeriod', 'secondarySwellDirection'
 ]
-TARGET_NAMES = ['waveHeight', 'wavePeriod', 'windSpeed', 'windDirection']
+TARGET_NAMES = ['waveHeight', 'windSpeed', 'windDirection']
 
 
 def get_average_from_sources(source_dict):

@@ -19,6 +19,5 @@ ENGINEERED FEATURES:
 
 TARGETS:
   - waveHeight
-  - wavePeriod
   - windSpeed
   - windDirection
