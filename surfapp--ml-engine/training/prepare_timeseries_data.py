@@ -60,7 +60,7 @@ def prepare_multioutput_sequences(json_file, lookback_hours=168, forecast_hours=
 
     print(f"  Found {len(hours_data)} hourly records")
 
-    for hour in hours_data:  #Extract 6 features from nested JSON structure
+    for hour in hours_data:  # Extract 6 features from nested JSON structure
         try:
             records.append({
                 'timestamp': hour['time'],
@@ -100,7 +100,6 @@ def prepare_multioutput_sequences(json_file, lookback_hours=168, forecast_hours=
 
     print(f"  Creating {max_sequences} training sequences...")
 
-
     # Creates many training examples from limited data
     # Teaches model patterns across different time periods
     for i in range(max_sequences):
@@ -133,27 +132,29 @@ def main():
     print("TIME-SERIES DATA PREPARATION FOR 7-DAY FORECAST")
     print("=" * 60)
 
-    # Prepare data for both spots
-    X_weligama, y_weligama, df_wel = prepare_multioutput_sequences(
-        'data/weligama_historical_data_fixed.json',
-        LOOKBACK_HOURS,
-        FORECAST_HOURS
-    )
+    # Auto-discover and prepare data for all locations
+    import glob
+    data_files = glob.glob('data/*_historical_data_fixed.json')
+    print(f"\n✅ Found {len(data_files)} location files")
 
-    X_arugam, y_arugam, df_aru = prepare_multioutput_sequences(
-        'data/arugam_bay_historical_data_fixed.json',
-        LOOKBACK_HOURS,
-        FORECAST_HOURS
-    )
+    all_X = []
+    all_y = []
+    all_dfs = []
 
-    # Check if both datasets were successfully prepared
-    datasets = []
-    if X_weligama is not None and y_weligama is not None:
-        datasets.append((X_weligama, y_weligama, "Weligama"))
-    if X_arugam is not None and y_arugam is not None:
-        datasets.append((X_arugam, y_arugam, "Arugam Bay"))
+    for filepath in data_files:
+        spot_name = os.path.basename(filepath).replace(
+            '_historical_data_fixed.json', '').replace('_', ' ').title()
+        print(f"  📍 Processing {spot_name}...")
+        X, y, df = prepare_multioutput_sequences(
+            filepath, LOOKBACK_HOURS, FORECAST_HOURS)
+        if X is not None:
+            all_X.append(X)
+            all_y.append(y)
+            all_dfs.append(df)
+            print(f"     ✅ {len(X)} sequences")
 
-    if not datasets:
+    # Check if datasets were successfully prepared
+    if not all_X:
         print("\n❌ Error: No valid datasets created!")
         print("   Please check your JSON files and try again.")
         return
@@ -163,8 +164,8 @@ def main():
     print("COMBINING DATASETS")
     print('=' * 60)
 
-    X_combined = np.vstack([d[0] for d in datasets])
-    y_combined = np.vstack([d[1] for d in datasets])
+    X_combined = np.vstack(all_X)
+    y_combined = np.vstack(all_y)
 
     print(f"\n✅ Combined training sequences: {X_combined.shape}")
     print(f"   Format: (samples, 168 hours, 6 features)")
