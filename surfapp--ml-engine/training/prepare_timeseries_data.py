@@ -15,6 +15,8 @@ Back (y): Next 7 days that actually happened
 import json
 import pandas as pd
 import numpy as np
+import os
+import glob
 from datetime import datetime, timedelta
 
 # Configuration

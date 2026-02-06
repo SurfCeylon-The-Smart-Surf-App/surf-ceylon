@@ -18,6 +18,23 @@ try:
     from tensorflow.keras.layers import LSTM, Dense, Dropout, RepeatVector, TimeDistributed
     from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint, TerminateOnNaN
     TF_AVAILABLE = True
+    
+    # Force CPU-only execution
+    print("=" * 60)
+    print("DEVICE CONFIGURATION - CPU ONLY")
+    print("=" * 60)
+    
+    # Disable GPU visibility (force CPU mode)
+    tf.config.set_visible_devices([], 'GPU')
+    
+    # Optimize CPU threading (0 = use all available cores)
+    tf.config.threading.set_intra_op_parallelism_threads(0)
+    tf.config.threading.set_inter_op_parallelism_threads(0)
+    
+    print("✅ Running on CPU (all cores optimized)")
+    print(f"   Expected training time: 20-25 hours")
+    print("=" * 60 + "\n")
+    
 except ImportError:
     print("❌ TensorFlow not installed!")
     print("   Install with: pip install tensorflow")
