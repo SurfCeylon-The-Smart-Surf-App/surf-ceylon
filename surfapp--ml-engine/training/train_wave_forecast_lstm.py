@@ -18,6 +18,23 @@ try:
     from tensorflow.keras.layers import LSTM, Dense, Dropout, RepeatVector, TimeDistributed
     from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint, TerminateOnNaN
     TF_AVAILABLE = True
+
+    # Force CPU-only execution
+    print("=" * 60)
+    print("DEVICE CONFIGURATION - CPU ONLY")
+    print("=" * 60)
+
+    # Disable GPU visibility (force CPU mode)
+    tf.config.set_visible_devices([], 'GPU')
+
+    # Optimize CPU threading (0 = use all available cores)
+    tf.config.threading.set_intra_op_parallelism_threads(0)
+    tf.config.threading.set_inter_op_parallelism_threads(0)
+
+    print("✅ Running on CPU (all cores optimized)")
+    print(f"   Expected training time: 20-25 hours")
+    print("=" * 60 + "\n")
+
 except ImportError:
     print("❌ TensorFlow not installed!")
     print("   Install with: pip install tensorflow")
@@ -165,14 +182,13 @@ def build_model(n_timesteps_in, n_timesteps_out, n_features):
     print("BUILDING MODEL ARCHITECTURE")
     print("=" * 60)
 
-
     # Takes input: (batch, 168 hours, 6 features)
     # Has 64 LSTM units (memory cells)
     # return_sequences=True → outputs at every timestep
     # Output shape: (batch, 168, 64)
     # dropout -> Randomly "turns off" 30% of neurons during training
-        #Forces network to learn redundant representations
-        #Prevents overfitting
+    # Forces network to learn redundant representations
+    # Prevents overfitting
     model = Sequential([
         # Encoder: Process input sequence (REDUCED SIZE to prevent overfitting)
         LSTM(64, activation='tanh', return_sequences=True,
@@ -225,7 +241,7 @@ def train_model(model, X_train, y_train, X_test, y_test):
     print("TRAINING MODEL")
     print("=" * 60)
 
-    # Callbacks. watch validation loss every epochs. 
+    # Callbacks. watch validation loss every epochs.
     # If no improvement for 10 consecutive epochs → stops training.
     # Automatically restores weights from the best epoch
     early_stop = EarlyStopping(
@@ -235,7 +251,7 @@ def train_model(model, X_train, y_train, X_test, y_test):
         verbose=1
     )
 
-    # Checks loss after each batch 
+    # Checks loss after each batch
     # If loss becomes NaN (Not a Number) → immediately stops training
     # Prevents wasting time training a broken model
     nan_callback = tf.keras.callbacks.TerminateOnNaN()

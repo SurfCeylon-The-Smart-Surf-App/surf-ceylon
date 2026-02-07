@@ -11,7 +11,7 @@ RANDOM_FOREST_BASE_FEATURES = [
     'gust',                  # Wind gust speed (m/s)
     'secondarySwellHeight',  # Secondary swell height (m)
     'secondarySwellPeriod',  # Secondary swell period (s)
-    'secondarySwellDirection' # Secondary swell direction (degrees)
+    'secondarySwellDirection'  # Secondary swell direction (degrees)
 ]
 
 # Model 1 (Random Forest) - 5 engineered features (calculated from base features)
@@ -24,12 +24,12 @@ RANDOM_FOREST_ENGINEERED_FEATURES = [
 ]
 
 # Model 1 (Random Forest) - Total: 15 features (10 base + 5 engineered)
-RANDOM_FOREST_ALL_FEATURES = RANDOM_FOREST_BASE_FEATURES + RANDOM_FOREST_ENGINEERED_FEATURES
+RANDOM_FOREST_ALL_FEATURES = RANDOM_FOREST_BASE_FEATURES + \
+    RANDOM_FOREST_ENGINEERED_FEATURES
 
-# Model 1 (Random Forest) - 4 prediction targets
+# Model 1 (Random Forest) - 3 prediction targets
 RANDOM_FOREST_TARGETS = [
     'waveHeight',      # Predicted wave height (m)
-    'wavePeriod',      # Predicted wave period (s)
     'windSpeed',       # Predicted wind speed (m/s)
     'windDirection'    # Predicted wind direction (degrees)
 ]
