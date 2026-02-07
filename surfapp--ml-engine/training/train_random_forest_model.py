@@ -22,7 +22,7 @@ FEATURE_NAMES = [
     'secondarySwellPeriod', 'secondarySwellDirection'
 ]
 # These are the multiple outputs the model will predict.
-TARGET_NAMES = ['waveHeight', 'wavePeriod', 'windSpeed', 'windDirection']
+TARGET_NAMES = ['waveHeight', 'windSpeed', 'windDirection']
 
 # Engineered features will be added during preprocessing
 ENGINEERED_FEATURES = []
@@ -50,10 +50,14 @@ def load_historical_data_from_files():
     data_dir = os.path.join(project_root, 'data')
 
     all_records = []
+    # Auto-discover all historical data files
     files = [
-        os.path.join(data_dir, 'weligama_historical_data_fixed.json'),
-        os.path.join(data_dir, 'arugam_bay_historical_data_fixed.json')
+        os.path.join(data_dir, f)
+        for f in os.listdir(data_dir)
+        if f.endswith('_historical_data_fixed.json')
     ]
+    print(
+        f"✅ Found {len(files)} location datasets: {[os.path.basename(f) for f in files]}")
 
     for filepath in files:
         try:

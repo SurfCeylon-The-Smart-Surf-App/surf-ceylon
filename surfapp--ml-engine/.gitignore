@@ -6,15 +6,32 @@ __pycache__/
 # Python Dependencies
 *.pyc
 
-# ML Model Files (Should be stored in MongoDB, but ignore local copies)
+# ML Model Files
+# Ignore Random Forest model (200+ MB)
+models/surf_forecast_model.joblib
+
+# Allow LSTM models (small size - commit to repo)
+# LSTM models are explicitly allowed:
+# - wave_forecast_multioutput_lstm.keras
+# - wave_forecast_scaler_X_multioutput.joblib
+# - wave_forecast_scaler_y_multioutput.joblib
+# - wave_forecast_feature_names.joblib
+
+# Ignore other large model files
 *.pkl
-*.joblib
 *.h5
 *.npy
-*.keras
+
 # Environment
 .env
 .env.local
 
-arugam_bay_historical_data_fixed.json
-weligama_historical_data_fixed.json
+# Historical Data Files (Large JSON files - 1GB+ total)
+data/ahangama_historical_data_fixed.json
+data/arugam_bay_historical_data_fixed.json
+data/hikkaduwa_historical_data_fixed.json
+data/hiriketiya_historical_data_fixed.json
+data/midigama_historical_data_fixed.json
+data/okanda_historical_data_fixed.json
+data/pottuvil_point_historical_data_fixed.json
+data/weligama_historical_data_fixed.json

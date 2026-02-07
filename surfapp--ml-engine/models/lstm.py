@@ -1,4 +1,5 @@
-"""LSTM Model Wrapper"""
+"""wrapper/facade for LSTM model operations. 
+It handles loading, caching, and prediction."""
 import sys
 import os
 import numpy as np
@@ -27,6 +28,7 @@ except ImportError:
     print("Warning: joblib not available. LSTM scalers cannot be loaded.", file=sys.stderr)
 
 # Global model and scaler instances
+# Cache models in memory after first load
 _lstm_model = None
 _scaler_x = None
 _scaler_y = None
