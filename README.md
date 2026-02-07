@@ -49,7 +49,7 @@ Surf Ceylon is a next-generation surf application that leverages cutting-edge AI
 
 - **LSTM Wave Forecasting**: 7-day hourly predictions (168 hours) for wave height, period, wind speed
 - **Random Forest Spot Scoring**: Intelligent suitability scoring (0-100) for all Sri Lankan surf spots
-- **Live Weather Integration**: StormGlass API with 19-key rotation for reliable data
+- **Live Weather Integration**: StormGlass API with 100-key rotation for reliable data
 - **Feature Engineering**: 5 surf-specific features (swell energy, offshore wind, etc.)
 - **Performance**: 80% accuracy for spot recommendations, 8.8% error for wave height
 
@@ -311,7 +311,7 @@ Machine learning-powered system that provides 7-day wave forecasts and intellige
 
 - Fetches current weather from StormGlass API
 - Uses ensemble averaging (sg, noaa, meteo sources)
-- Rotates between 19 API keys for reliability
+- Rotates between 100 API keys for reliability
 
 **Step 2: Feature Engineering**
 Creates 5 surf-specific features:
@@ -568,7 +568,6 @@ Three integrated AI features for personalized surf training: Cardio Plans, AR Su
 **How It Works:**
 
 1. **User Quiz**
-
    - Height, weight (calculates BMI)
    - Skill level (Beginner/Intermediate/Advanced)
    - Goals (Endurance, Strength, Balance, Paddling Power)
@@ -576,7 +575,6 @@ Three integrated AI features for personalized surf training: Cardio Plans, AR Su
    - Physical limitations
 
 2. **AI Generation (TensorFlow NCF Model)**
-
    - Neural Collaborative Filtering
    - 211K parameters
    - Trained on 47K user-exercise pairs
