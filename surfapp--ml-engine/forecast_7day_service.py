@@ -7,7 +7,7 @@ This file maintains backward compatibility with Node.js backend.
 All business logic has been extracted to organized modules:
 - config/ - API keys, model paths, features, settings
 - models/ - LSTM model wrapper with scalers
-- utils/ - API client (19-key rotation), mock data, date utilities
+- utils/ - API client (100-key rotation), mock data, date utilities
 - services/ - Main forecast logic
 
 Usage:
