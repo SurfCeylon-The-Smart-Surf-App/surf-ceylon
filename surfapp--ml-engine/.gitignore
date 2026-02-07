@@ -16,5 +16,13 @@ __pycache__/
 .env
 .env.local
 
-arugam_bay_historical_data_fixed.json
-weligama_historical_data_fixed.json
+# Historical Data Files (Large JSON files - 1GB+ total)
+data/ahangama_historical_data_fixed.json
+data/arugam_bay_historical_data_fixed.json
+data/hikkaduwa_historical_data_fixed.json
+data/hiriketiya_historical_data_fixed.json
+data/midigama_historical_data_fixed.json
+data/okanda_historical_data_fixed.json
+data/pottuvil_point_historical_data_fixed.json
+data/weligama_historical_data_fixed.json
+

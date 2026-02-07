@@ -433,7 +433,6 @@ mape = np.mean(|y_pred - y_true| / |y_true|) × 100
 Training generates these plots in `artifacts/`:
 
 1. **training_history_multioutput.png**
-
    - Loss curves (train vs validation)
    - MAE curves over epochs
 
@@ -528,8 +527,8 @@ const getForecast = async (req, res) => {
 The model uses **StormGlass Weather API** for historical data:
 
 ```python
-# 19-key rotation for rate limit management
-API_KEYS = [key1, key2, ..., key19]
+# 100-key rotation for rate limit management
+API_KEYS = [key1, key2, ..., key100]
 
 # Fetch 168 hours of historical data
 params = [
@@ -558,9 +557,9 @@ response = requests.get(
 
 ```python
 # Automatic key rotation on 429 errors
-- Total: 19 API keys
-- Each key: 50 requests/day
-- Total capacity: 950 requests/day
+- Total: 100 API keys
+- Each key: 10 requests/day (free tier)
+- Total capacity: 1000 requests/day
 - Automatic failover to next key
 - Exponential backoff on errors
 ```
