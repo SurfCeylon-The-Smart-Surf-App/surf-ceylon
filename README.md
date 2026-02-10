@@ -69,9 +69,9 @@ This module adds three AI-powered features to the SurfCeylon application:
                    │ HTTP POST
                    │
 ┌──────────────────▼──────────────────────────────────────────┐
-│          Python Flask ML Server (Port 5003)                  │
+│          Python Flask ML Server (Port 5001)                  │
 │  (surfapp--ml-engine/)                                       │
-│  - services/cardio_service.py → TensorFlow NCF model        │
+│  - services/cardio_ml_server.py → TensorFlow NCF model      │
 │  - ar_surfboard_recommender/ar_prediction_service.py        │
 │    → Hybrid ML model (Physics + RandomForest)               │
 └─────────────────────────────────────────────────────────────┘
@@ -125,8 +125,7 @@ npm start
 ```bash
 cd surfapp--ml-engine
 python start_all_services.py
-# Cardio service: http://localhost:5001
-# AR service: http://localhost:5003
+# Cardio AI service: http://localhost:5001
 ```
 
 **Terminal 3 - Frontend:**
@@ -183,9 +182,9 @@ const BACKEND_PORT = "3000";
 - `surfapp--backend/routes/aiTutor.js` - API routes
 
 **ML Service:**
-- `surfapp--ml-engine/services/cardio_service.py` - Flask API
-- `surfapp--ml-engine/training/cardio_ncf_model.py` - Model definition
-- `surfapp--ml-engine/models/cardio_ncf_model.h5` - Trained weights
+- `surfapp--ml-engine/services/cardio_ml_server.py` - Flask API
+- `surfapp--ml-engine/training/3_train_deep_model.py` - Model training
+- `surfapp--ml-engine/models/cardio_recommender_v1.keras` - Trained model
 
 ### API Usage
 
@@ -455,15 +454,15 @@ const BACKEND_PORT = "3000";
 ### Cardio NCF Model
 
 **Training Data:**
-- **Source**: Synthetic user-exercise interaction dataset
-- **Size**: 47,000+ interaction pairs
-- **Features**: User embeddings, exercise embeddings
-- **Labels**: Binary interaction (0/1)
+- **Source**: Kaggle 600K Fitness Exercise Dataset (real data, not synthetic)
+- **Size**: 47,120 training samples, 2,074 unique exercises
+- **Features**: User profile (BMI, skill, goals) + Exercise embeddings
+- **Labels**: Suitability scores (0-1)
 
 **Model File:**
-- Location: `surfapp--ml-engine/models/cardio_ncf_model.h5`
-- Size: ~3.2 MB
-- Format: Keras HDF5
+- Location: `surfapp--ml-engine/models/cardio_recommender_v1.keras`
+- Size: ~824 KB
+- Format: Keras (TensorFlow 2.x)
 
 ### AR Surfboard Model
 
@@ -499,7 +498,7 @@ const BACKEND_PORT = "3000";
 ### Retrain Cardio Model
 ```bash
 cd surfapp--ml-engine/training
-python cardio_ncf_model.py
+python 3_train_deep_model.py
 ```
 
 ### Retrain AR Model
@@ -511,9 +510,9 @@ python train_enhanced_model.py
 ### Test ML Services Directly
 ```bash
 # Cardio service
-curl -X POST http://localhost:5001/recommend \
+curl -X POST http://localhost:5001/api/ai-tutor/recommend \
   -H "Content-Type: application/json" \
-  -d '{"userProfile": {"height": 175, "weight": 70, "skillLevel": "Intermediate"}}'
+  -d '{"skillLevel": "intermediate", "goal": "endurance", "equipment": "none", "height": 175, "weight": 70}'
 
 # AR service
 curl -X POST http://localhost:5003/ar/predict \
