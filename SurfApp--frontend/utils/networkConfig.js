@@ -14,9 +14,9 @@ const getDevServerHost = () => {
 };
 
 // Using PC's actual IP for physical device testing
-const MANUAL_HOST = "172.24.130.182"; // Your PC's IP on local network
+const MANUAL_HOST = "172.20.124.182"; // Your PC's IP on local network
 
-const API_HOST = "172.24.130.182"; // Fixed IP for physical device testing
+const API_HOST = "172.20.124.182"; // Fixed IP for physical device testing
 
 const API_PORT = 3000;
 

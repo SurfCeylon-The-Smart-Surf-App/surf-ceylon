@@ -10,7 +10,7 @@ import { Platform } from "react-native";
  * - Physical Device: 172.24.130.182 (your PC's IP on local network)
  * - Backend Port: 3000
  */
-const API_HOST = "172.24.130.182";
+const API_HOST = "172.20.124.182";
 const API_PORT = 3000;
 const API_BASE_URL = `http://${API_HOST}:${API_PORT}`;
 

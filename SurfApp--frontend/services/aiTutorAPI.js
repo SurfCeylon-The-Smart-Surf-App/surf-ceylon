@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
  */
 
 // Get API base URL - use backend server (which then calls ML server internally)
-const API_HOST = "172.24.130.182";
+const API_HOST = "172.20.124.182";
 const API_PORT = 3000;
 const API_BASE_URL = `http://${API_HOST}:${API_PORT}`;
 

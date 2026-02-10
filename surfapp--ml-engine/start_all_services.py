@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Surf AI - Unified ML Services Startup Script
-Starts both Cardio AI (Model Server) and Pose Detection Server
+Surf AI - Cardio ML Service Startup Script
+Starts the Cardio AI Recommendation Server
 """
 
 import subprocess
@@ -108,41 +108,29 @@ def start_service(name, script_path, port):
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("Surf AI - ML Services Startup")
+    print("Surf AI - Cardio ML Service Startup")
     print("=" * 60)
     print("")
-    print("Starting both ML services:")
-    print("  1. Cardio AI (Model Server) - Port 8000")
-    print("  2. Pose Detection Server - Port 8001")
+    print("Starting Cardio AI Recommendation Server...")
+    print("  Port: 5001")
     print("")
-    print("Press Ctrl+C to stop all services")
+    print("Press Ctrl+C to stop the service")
     print("=" * 60)
     print("")
     
     # Get script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # Start Cardio AI (Model Server)
-    model_server_script = os.path.join(script_dir, "start_server.py")
-    proc1 = start_service("Cardio AI", model_server_script, 8000)
+    # Start Cardio ML Server
+    cardio_server_script = os.path.join(script_dir, "services", "cardio_ml_server.py")
+    proc1 = start_service("Cardio AI", cardio_server_script, 5001)
     if proc1 is None:
         print("Failed to start Cardio AI server", file=sys.stderr)
         sys.exit(1)
     
     time.sleep(3)  # Give it time to start
     
-    # Start Pose Detection Server
-    pose_server_script = os.path.join(script_dir, "start_pose_server.py")
-    proc2 = start_service("Pose Detection", pose_server_script, 8001)
-    if proc2 is None:
-        print("Failed to start Pose Detection server", file=sys.stderr)
-        if proc1:
-            proc1.terminate()
-        sys.exit(1)
-    
-    time.sleep(3)  # Give it time to start
-    
-    # Check if services are still running
+    # Check if service is still running
     if proc1.poll() is not None:
         print(f"ERROR: Cardio AI server exited with code {proc1.returncode}", file=sys.stderr)
         if proc1.stderr:
@@ -157,35 +145,16 @@ if __name__ == "__main__":
                 print(f"Could not read error output: {e}", file=sys.stderr)
         sys.exit(1)
     
-    if proc2.poll() is not None:
-        print(f"ERROR: Pose Detection server exited with code {proc2.returncode}", file=sys.stderr)
-        if proc2.stderr:
-            try:
-                error_output = proc2.stderr.read()
-                if error_output:
-                    # With universal_newlines=True, error_output is already a string
-                    if isinstance(error_output, bytes):
-                        error_output = error_output.decode('utf-8', errors='replace')
-                    print(f"Error output: {error_output}", file=sys.stderr)
-            except Exception as e:
-                print(f"Could not read error output: {e}", file=sys.stderr)
-        if proc1:
-            proc1.terminate()
-        sys.exit(1)
-    
     print("")
-    print("Both services started successfully!")
+    print("Cardio AI service started successfully!")
     print("")
-    print("Service URLs:")
-    print("  - Cardio AI: http://localhost:8000")
-    print("    Health: http://localhost:8000/health")
-    print("    Predict: POST http://localhost:8000/predict")
+    print("Service URL:")
+    print("  - Cardio AI: http://localhost:5001")
+    print("    Health: http://localhost:5001/health")
+    print("    Recommend: POST http://localhost:5001/api/ai-tutor/recommend")
+    print("    Model Info: GET http://localhost:5001/api/ai-tutor/model/info")
     print("")
-    print("  - Pose Detection: http://localhost:8001")
-    print("    Health: http://localhost:8001/health")
-    print("    Detect: POST http://localhost:8001/detect")
-    print("")
-    print("Monitoring services... (Press Ctrl+C to stop)")
+    print("Monitoring service... (Press Ctrl+C to stop)")
     print("")
     
     # Monitor processes

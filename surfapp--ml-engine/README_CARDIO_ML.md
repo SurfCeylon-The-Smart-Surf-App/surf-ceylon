@@ -1,8 +1,5 @@
 # 🏋️ Deep Learning Cardio Recommendation System
 
-## ✅ COMPLETE - PRODUCTION READY
-
-This directory contains the complete implementation of a deep learning-based cardio workout recommendation system that replaces the old template-based approach with real ML.
 
 ---
 

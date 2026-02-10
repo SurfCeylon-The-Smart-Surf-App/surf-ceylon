@@ -20,8 +20,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Load the trained model
-MODEL_DIR = os.path.join(os.path.dirname(__file__), 'trained_model')
-MODEL_PATH = os.path.join(MODEL_DIR, 'enhanced_ar_model.joblib')
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "ar_surfboard", "enhanced_ar_model.joblib")
 
 # Global model variable
 model_data = None

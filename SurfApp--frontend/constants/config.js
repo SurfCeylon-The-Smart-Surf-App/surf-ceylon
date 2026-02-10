@@ -2,7 +2,7 @@
 // Update this IP address to match your backend server
 
 // Your local network IP address
-const LOCAL_IP = "172.24.130.182";
+const LOCAL_IP = "172.20.124.182";
 
 // Backend server port
 const BACKEND_PORT = "3000";
