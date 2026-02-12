@@ -39,7 +39,8 @@ def load_random_forest_model():
         return None
     
     try:
-        print(f"Loading Random Forest model from {RANDOM_FOREST_MODEL}...", file=sys.stderr)
+        print(
+            f"Loading Random Forest model from {RANDOM_FOREST_MODEL}...", file=sys.stderr)
         model_data = joblib.load(RANDOM_FOREST_MODEL)
         
         # Extract model from dictionary structure

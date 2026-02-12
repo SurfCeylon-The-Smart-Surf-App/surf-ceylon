@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Test script for Model 1 (Random Forest) with feature engineering."""
+import os
 import joblib
 import pandas as pd
 import numpy as np

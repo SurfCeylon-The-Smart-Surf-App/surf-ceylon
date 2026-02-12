@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 
 // 🔧 CONFIGURE THIS FOR PHYSICAL DEVICE TESTING
 // Use the same IP as your computer (same as in riskAnalyzerConstants.js)
-const DEVICE_API_URL = 'http://10.18.46.168:3000/api';
+const DEVICE_API_URL = 'http://10.121.69.168:3000/api';
 
 const getApiUrl = () => {
   // If testing on physical device, use the configured URL

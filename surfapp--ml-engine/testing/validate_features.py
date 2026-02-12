@@ -15,12 +15,15 @@ FEATURE_NAMES = [
 ]
 TARGET_NAMES = ['waveHeight', 'wavePeriod', 'windSpeed', 'windDirection']
 
+
 def get_average_from_sources(source_dict):
     """Calculate average from multiple weather data sources."""
     if not source_dict or not isinstance(source_dict, dict):
         return None
-    values = [v for v in source_dict.values() if v is not None and isinstance(v, (int, float))]
+    values = [v for v in source_dict.values(
+    ) if v is not None and isinstance(v, (int, float))]
     return sum(values) / len(values) if values else None
+
 
 def load_historical_data(file_path, sample_size=5000):
     """Load and flatten historical JSON data with sampling for large files."""
@@ -31,15 +34,18 @@ def load_historical_data(file_path, sample_size=5000):
             data = json.load(f)
         
         if 'hours' not in data or not data['hours']:
-            print(f"  Error: No 'hours' data found in {file_path}", file=sys.stderr)
+            print(
+                f"  Error: No 'hours' data found in {file_path}", file=sys.stderr)
             return None
         
-        print(f"  Total records in file: {len(data['hours'])}", file=sys.stderr)
+        print(
+            f"  Total records in file: {len(data['hours'])}", file=sys.stderr)
         
         # Sample data if too large
         hours_data = data['hours']
         if len(hours_data) > sample_size:
-            print(f"  Sampling {sample_size} records from {len(hours_data)} total...", file=sys.stderr)
+            print(
+                f"  Sampling {sample_size} records from {len(hours_data)} total...", file=sys.stderr)
             import random
             hours_data = random.sample(hours_data, sample_size)
         
@@ -70,6 +76,7 @@ def load_historical_data(file_path, sample_size=5000):
         print(f"  Error: Invalid JSON in {file_path}", file=sys.stderr)
         return None
 
+
 def analyze_correlations(df):
     """Analyze correlation between features and targets."""
     print("\n" + "="*70)
@@ -89,7 +96,8 @@ def analyze_correlations(df):
                 # Remove NaN values
                 valid_data = df[[feature, target]].dropna()
                 if len(valid_data) > 10:  # Need minimum data points
-                    corr, p_value = pearsonr(valid_data[feature], valid_data[target])
+                    corr, p_value = pearsonr(
+                        valid_data[feature], valid_data[target])
                     correlations[feature] = {
                         'correlation': corr,
                         'p_value': p_value,
@@ -97,7 +105,8 @@ def analyze_correlations(df):
                     }
                     
                     significance = '✓ Significant' if p_value < 0.05 else '✗ Not significant'
-                    print(f"  {feature:30} | r={corr:+.3f} | p={p_value:.4f} | {significance}")
+                    print(
+                        f"  {feature:30} | r={corr:+.3f} | p={p_value:.4f} | {significance}")
         
         # Identify strongest predictors
         strong_predictors = {k: v for k, v in correlations.items() 
@@ -111,6 +120,7 @@ def analyze_correlations(df):
                 print(f"     - {feat}: r={stats['correlation']:+.3f}")
         else:
             print(f"\n  ⚠️  No strong predictors found for {target}")
+
 
 def create_correlation_heatmap(df):
     """Create correlation heatmap."""
@@ -127,11 +137,14 @@ def create_correlation_heatmap(df):
     sns.heatmap(correlation_matrix, annot=True, fmt='.2f', 
                 cmap='coolwarm', center=0, vmin=-1, vmax=1,
                 square=True, linewidths=0.5)
-    plt.title('Feature-Target Correlation Matrix', fontsize=18, fontweight='bold', pad=20)
+    plt.title('Feature-Target Correlation Matrix', 
+              fontsize=18, fontweight='bold', pad=20)
     plt.tight_layout()
-    output_path = os.path.join(os.path.dirname(__file__), 'correlation_heatmap.png')
+    output_path = os.path.join(os.path.dirname(
+        __file__), 'correlation_heatmap.png')
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"\n✅ Correlation heatmap saved as '{output_path}'")
+
 
 def analyze_missing_data(df):
     """Analyze missing data patterns."""
@@ -153,13 +166,15 @@ def analyze_missing_data(df):
                 print(f"  {var:30} | Missing: {missing:6d} ({pct:5.2f}%)")
     
     # Identify problematic features
-    problematic = {k: v for k, v in missing_stats.items() if v['percentage'] > 10}
+    problematic = {k: v for k, v in missing_stats.items() 
+                   if v['percentage'] > 10}
     if problematic:
         print(f"\n  ⚠️  Features with >10% missing data:")
         for feat, stats in problematic.items():
             print(f"     - {feat}: {stats['percentage']:.2f}%")
     else:
         print("\n  ✅ No features with excessive missing data")
+
 
 def analyze_data_distribution(df):
     """Analyze data distribution and outliers."""
@@ -181,7 +196,9 @@ def analyze_data_distribution(df):
                 outliers = ((data < lower_bound) | (data > upper_bound)).sum()
                 outlier_pct = (outliers / len(data)) * 100
                 
-                print(f"  {var:30} | Mean: {data.mean():8.2f} | Std: {data.std():8.2f} | Outliers: {outliers:4d} ({outlier_pct:5.2f}%)")
+                print(
+                    f"  {var:30} | Mean: {data.mean():8.2f} | Std: {data.std():8.2f} | Outliers: {outliers:4d} ({outlier_pct:5.2f}%)")
+
 
 if __name__ == '__main__':
     print("\n" + "="*70)
@@ -204,7 +221,8 @@ if __name__ == '__main__':
     
     print(f"\n📊 Combined dataset: {len(combined_df)} total records")
     if 'time' in combined_df.columns:
-        print(f"📅 Date range: {combined_df['time'].min()} to {combined_df['time'].max()}")
+        print(
+            f"📅 Date range: {combined_df['time'].min()} to {combined_df['time'].max()}")
     
     # Run analyses
     analyze_missing_data(combined_df)

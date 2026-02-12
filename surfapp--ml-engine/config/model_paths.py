@@ -6,16 +6,22 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Model 1: Random Forest (for spot recommendations)
-RANDOM_FOREST_MODEL = os.path.join(BASE_DIR, 'surf_forecast_model.joblib')
+RANDOM_FOREST_MODEL = os.path.join(
+    BASE_DIR, 'surf_forecast_model.joblib')
 
 # Model 2: LSTM (for 7-day forecasts)
-LSTM_MODEL = os.path.join(BASE_DIR, 'wave_forecast_multioutput_lstm.keras')
-LSTM_SCALER_X = os.path.join(BASE_DIR, 'wave_forecast_scaler_X_multioutput.joblib')
-LSTM_SCALER_Y = os.path.join(BASE_DIR, 'wave_forecast_scaler_y_multioutput.joblib')
-LSTM_FEATURE_NAMES = os.path.join(BASE_DIR, 'wave_forecast_feature_names.joblib')
+LSTM_MODEL = os.path.join(
+    BASE_DIR, 'wave_forecast_multioutput_lstm.keras')
+LSTM_SCALER_X = os.path.join(
+    BASE_DIR, 'wave_forecast_scaler_X_multioutput.joblib')
+LSTM_SCALER_Y = os.path.join(
+    BASE_DIR, 'wave_forecast_scaler_y_multioutput.joblib')
+LSTM_FEATURE_NAMES = os.path.join(
+    BASE_DIR, 'wave_forecast_feature_names.joblib')
 
 # Artifacts directory for organized storage
 ARTIFACTS_DIR = os.path.join(BASE_DIR, 'artifacts')
+
 
 def validate_model_exists(model_path, model_name):
     """
@@ -30,6 +36,7 @@ def validate_model_exists(model_path, model_name):
         print(f"⚠️  {model_name} not found at: {model_path}", file=sys.stderr)
         return False
     return True
+
 
 def get_model_info():
     """Get information about all models"""

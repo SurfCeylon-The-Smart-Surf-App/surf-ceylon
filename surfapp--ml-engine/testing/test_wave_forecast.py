@@ -54,6 +54,7 @@ TEST_SCENARIOS = [
     }
 ]
 
+
 class WaveForecastTester:
     """Comprehensive testing for wave forecast model"""
     
