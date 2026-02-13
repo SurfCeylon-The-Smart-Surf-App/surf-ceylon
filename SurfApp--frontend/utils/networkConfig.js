@@ -14,11 +14,12 @@ const getDevServerHost = () => {
 };
 
 // Fallback to manual configuration if Expo host detection fails
-const MANUAL_HOST = "172.20.10.5"; // Update this if your IP changes
+const MANUAL_HOST = "10.121.69.168"; // Update this if your IP changes
 
+// For physical Android devices, use the actual network IP
 const API_HOST =
   Platform.OS === "android"
-    ? "10.0.2.2" // Android emulator special IP to reach host machine
+    ? "10.121.69.168" // Android emulator special IP to reach host machine
     : Platform.OS === "web"
     ? "localhost"
     : getDevServerHost() || MANUAL_HOST; // iOS/physical devices: auto-detect or fallback
