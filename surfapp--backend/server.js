@@ -12,8 +12,8 @@ const app = express();
 app.use(helmet()); //Security headers (XSS, clickjacking protection)
 app.use(morgan("combined")); //HTTP request logging
 app.use(cors()); //Cross-origin resource sharing for React Native frontend
-app.use(express.json());  //JSON request body parsing
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));  //JSON request body parsing - Increased for pose detection images
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Request logging middleware for debugging
 app.use((req, res, next) => {
@@ -56,6 +56,12 @@ app.use("/api/forecast", require("./routes/forecast"));
 app.use("/api/health", require("./routes/health"));
 app.use("/api/video-analysis", require("./routes/videoAnalysis"));
 
+// AI Surf Tutor routes (from Sabri's implementation)
+app.use("/api/ai-tutor", require("./routes/aiTutor"));
+
+// AR Surfboard Recommendations (ML-powered)
+app.use("/api/ar", require("./routes/arRecommendations"));
+
 // Default route
 app.get("/", (req, res) => {
   res.json({
@@ -81,7 +87,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
 });
