@@ -16,7 +16,6 @@ const getDevServerHost = () => {
 // Fallback to manual configuration if Expo host detection fails
 const MANUAL_HOST = "10.121.69.168"; // Update this if your IP changes
 
-// For physical Android devices, use the actual network IP
 const API_HOST =
   Platform.OS === "android"
     ? "10.121.69.168" // Android emulator special IP to reach host machine
