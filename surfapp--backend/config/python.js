@@ -44,9 +44,30 @@ const SURF_POSE_ANALYZER_SCRIPT = path.resolve(
   "surf_pose_analyzer_service.py"
 );
 
+// Sabri's ML Services
+const AR_PREDICTION_SCRIPT = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  "surfapp--ml-engine",
+  "services",
+  "ar_prediction_service.py"
+);
+
+const CARDIO_ML_SCRIPT = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  "surfapp--ml-engine",
+  "services",
+  "cardio_ml_server.py"
+);
+
 module.exports = {
   PYTHON_EXECUTABLE,
   SPOT_RECOMMENDER_SCRIPT,
   FORECAST_7DAY_SCRIPT,
   SURF_POSE_ANALYZER_SCRIPT,
+  AR_PREDICTION_SCRIPT,
+  CARDIO_ML_SCRIPT,
 };

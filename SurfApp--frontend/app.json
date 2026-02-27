@@ -33,7 +33,8 @@
       "package": "com.anonymous.surfceylon",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
       ]
     },
     "web": {
@@ -42,6 +43,16 @@
       "output": "server"
     },
     "plugins": [
+      [
+        "@reactvision/react-viro",
+        {
+          "android": {
+            "xRMode": [
+              "AR"
+            ]
+          }
+        }
+      ],
       "expo-router",
       [
         "expo-location",
@@ -56,7 +67,8 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

@@ -3,11 +3,11 @@ import { Platform } from 'react-native';
 
 const getApiUrl = () => {
   // Default to localhost for web or if detection fails
-  let host = '127.0.0.1';
+  let host = '172.20.124.182';
 
   // Special handling for Android Emulator
   if (Platform.OS === 'android') {
-    host = '10.0.2.2';
+    host = '172.20.124.182';
   }
 
   // Try to get the host from Expo constants (works for Expo Go and Dev Builds)

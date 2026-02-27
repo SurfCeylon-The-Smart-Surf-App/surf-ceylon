@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 // @ts-ignore
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { API_BASE_URL } from "../constants/config";
+import { TECHNIQUE_INSTRUCTIONS } from "../data/techniqueInstructions";
 
 const techniques = [
   {
@@ -27,7 +28,7 @@ const techniques = [
     id: "pop-up",
     name: "The Pop-Up",
     description: "Demonstrates the explosive transition from lying down to standing",
-    icon: "sports-surfing",
+    icon: "surfing",
   },
   {
     id: "surfing-stance",
@@ -114,6 +115,7 @@ export default function ARVisualizationScreen() {
   const [showUserForm, setShowUserForm] = useState(false);
   const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [instructionsExpanded, setInstructionsExpanded] = useState(false);
   
   // User input state
   const [userProfile, setUserProfile] = useState({
@@ -126,6 +128,25 @@ export default function ARVisualizationScreen() {
   
   const { useRouter } = require("expo-router");
   const router = useRouter();
+
+  // Map technique IDs to model keys for AR viewer
+  const techniqueToModelKey = {
+    "paddling-technique": "paddling",
+    "pop-up": "pop_up",
+    "surfing-stance": "stance_balance",
+    "safely-falling": "safely_falling",
+    "bottom-turn": "bottom_turn",
+    "generating-speed": "generating_speed",
+    "cutback": "cutback",
+    "tube-riding": "tube_riding_stance",
+    "catching-whitewater": "catching_whitewater",
+    "catching-green-waves": "catching_green_waves",
+    "trimming-angling": "trimming_angling",
+    "floater": "floater",
+    "re-entry-snap": "re_entry_snap",
+    "roundhouse-cutback": "roundhouse_cutback",
+    "aerial": "air_aerial",
+  };
 
   const handleSelectTechnique = (techniqueId) => {
     setSelectedTechnique(techniqueId);
@@ -193,6 +214,25 @@ export default function ARVisualizationScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLaunchAR = () => {
+    const modelKey = techniqueToModelKey[selectedTechnique];
+    const technique = techniques.find(t => t.id === selectedTechnique);
+    
+    if (!modelKey || !technique) {
+      Alert.alert("Error", "Invalid technique selected");
+      return;
+    }
+
+    router.push({
+      pathname: "/arViewer",
+      params: {
+        modelKey: modelKey,
+        title: technique.name,
+        difficulty: userProfile.experience_level,
+      },
+    });
   };
 
   return (
@@ -448,16 +488,68 @@ export default function ARVisualizationScreen() {
               ))}
             </View>
 
-            {/* AR Placeholder */}
-            <View style={styles.arPlaceholder}>
-              <Icon name="view-in-ar" size={64} color="#007AFF" />
-              <Text style={styles.arPlaceholderTitle}>AR View Coming Soon</Text>
-              <Text style={styles.arPlaceholderText}>
-                When FBX animations are ready, you'll see a 3D visualization of the{' '}
-                {techniques.find(t => t.id === selectedTechnique)?.name} technique right here,{' '}
-                personalized with your equipment specs!
-              </Text>
-            </View>
+            {/* Technique Instructions */}
+            {TECHNIQUE_INSTRUCTIONS[selectedTechnique] && (
+              <View style={styles.instructionsContainer}>
+                <TouchableOpacity 
+                  style={styles.instructionsHeader}
+                  onPress={() => setInstructionsExpanded(!instructionsExpanded)}
+                  activeOpacity={0.7}
+                >
+                  <Icon name="description" size={24} color="#2563eb" />
+                  <Text style={styles.instructionsHeaderText}>
+                    📋 Technique Instructions
+                  </Text>
+                  <Icon 
+                    name={instructionsExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
+                    size={28} 
+                    color="#2563eb" 
+                  />
+                </TouchableOpacity>
+
+                {instructionsExpanded && (
+                  <View style={styles.instructionsContent}>
+                    <Text style={styles.instructionsSubtitle}>
+                      Follow these steps to master this technique:
+                    </Text>
+
+                    {TECHNIQUE_INSTRUCTIONS[selectedTechnique].steps.map((step, index) => (
+                      <View key={index} style={styles.stepItem}>
+                        <View style={styles.stepNumberBadge}>
+                          <Text style={styles.stepNumberText}>{index + 1}</Text>
+                        </View>
+                        <Text style={styles.stepText}>{step}</Text>
+                      </View>
+                    ))}
+
+                    <View style={styles.proTipBox}>
+                      <View style={styles.proTipHeader}>
+                        <Icon name="lightbulb" size={20} color="#047857" />
+                        <Text style={styles.proTipTitle}>Pro Tip</Text>
+                      </View>
+                      <Text style={styles.proTipText}>
+                        {TECHNIQUE_INSTRUCTIONS[selectedTechnique].proTip}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {/* AR Visualization Button */}
+            <TouchableOpacity 
+              style={styles.arLaunchButton}
+              onPress={handleLaunchAR}
+              activeOpacity={0.8}
+            >
+              <View style={styles.arButtonContent}>
+                <Icon name="view-in-ar" size={48} color="#fff" />
+                <Text style={styles.arButtonTitle}>Launch AR Visualization</Text>
+                <Text style={styles.arButtonSubtitle}>
+                  View 3D model of {techniques.find(t => t.id === selectedTechnique)?.name} in AR
+                </Text>
+              </View>
+            </TouchableOpacity>
           </>
         )}
       </ScrollView>
@@ -778,27 +870,119 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     lineHeight: 20,
   },
-  arPlaceholder: {
-    backgroundColor: "#eff6ff",
+  arLaunchButton: {
+    backgroundColor: "#2563eb",
     borderRadius: 12,
-    padding: 28,
-    alignItems: "center",
+    padding: 24,
     marginTop: 6,
-    borderWidth: 2,
-    borderColor: "#bfdbfe",
-    borderStyle: "dashed",
+    shadowColor: "#2563eb",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  arPlaceholderTitle: {
+  arButtonContent: {
+    alignItems: "center",
+  },
+  arButtonTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1e40af",
-    marginTop: 14,
-    marginBottom: 8,
+    color: "#fff",
+    marginTop: 12,
+    marginBottom: 6,
   },
-  arPlaceholderText: {
+  arButtonSubtitle: {
     fontSize: 13,
-    color: "#3b82f6",
+    color: "#bfdbfe",
     textAlign: "center",
     lineHeight: 19,
+  },
+  instructionsContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginTop: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+    overflow: "hidden",
+  },
+  instructionsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#eff6ff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#bfdbfe",
+  },
+  instructionsHeaderText: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1e40af",
+    marginLeft: 10,
+  },
+  instructionsContent: {
+    padding: 16,
+  },
+  instructionsSubtitle: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 16,
+    fontWeight: "500",
+  },
+  stepItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 14,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  stepNumberBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#2563eb",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+    marginTop: 2,
+  },
+  stepNumberText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#374151",
+    lineHeight: 21,
+  },
+  proTipBox: {
+    backgroundColor: "#d1fae5",
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: "#10b981",
+  },
+  proTipHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  proTipTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#047857",
+    marginLeft: 8,
+  },
+  proTipText: {
+    fontSize: 14,
+    color: "#065f46",
+    lineHeight: 20,
   },
 });

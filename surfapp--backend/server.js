@@ -8,7 +8,23 @@ require("dotenv").config();
 
 const app = express();
 
-// Middleware
+// ============================================================================
+// ML SERVICES AUTO-START
+// ============================================================================
+const {
+  startMLServices,
+  setupShutdownHandlers,
+} = require("./config/mlServices");
+
+// Start ML services in background
+startMLServices();
+
+// Setup graceful shutdown handlers
+setupShutdownHandlers();
+
+// ============================================================================
+// MIDDLEWARE
+// ============================================================================
 app.use(helmet()); //Security headers (XSS, clickjacking protection)
 app.use(morgan("combined")); //HTTP request logging
 app.use(cors()); //Cross-origin resource sharing for React Native frontend
