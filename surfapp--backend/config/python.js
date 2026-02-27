@@ -93,6 +93,9 @@ input_args = json.loads(r'''${argsJson}''')
 if '${scriptName}' == 'analyze_hazard':
     from analyze_hazard_cnn import analyze_hazard_image
     result = analyze_hazard_image(input_args.get('image_path'), input_args.get('hazard_type'))
+elif '${scriptName}' == 'image_hash':
+    from image_hash import get_image_hash
+    result = get_image_hash(input_args.get('image_path'))
 elif '${scriptName}' == 'predict_risk':
     from predict_risk import predict_risk_score
     result = predict_risk_score(input_args.get('spot_name'))
@@ -214,6 +217,26 @@ const updateSkillLevelRisks = async () => {
   }
 };
 
+/**
+ * Compute perceptual hash for an image (for duplicate detection)
+ * @param {string} imagePath - Path to the image file
+ * @returns {Promise<object>} - { success: boolean, hash: string } or { success: false, error: string }
+ */
+const computeImageHash = async (imagePath) => {
+  try {
+    const result = await runPythonScript("image_hash", {
+      image_path: imagePath,
+    });
+    return result;
+  } catch (error) {
+    console.error("❌ Image hash computation failed:", error.message);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
 // ==================== EXPORTS ====================
 
 module.exports = {
@@ -226,4 +249,5 @@ module.exports = {
   predictRiskScore,
   updateAllRiskScores,
   updateSkillLevelRisks,
+  computeImageHash,
 };
