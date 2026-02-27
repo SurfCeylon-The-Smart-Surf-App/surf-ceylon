@@ -43,10 +43,13 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
     
-    console.error('❌ API Error:', error.message);
-    console.error('❌ Error details:', error.response?.data || error);
+    // Check for Network Error (no response received)
+    const isNetworkError = error.code === 'ECONNREFUSED' || 
+                           error.code === 'ERR_NETWORK' || 
+                           error.message === 'Network Error';
     
-    if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+    if (isNetworkError) {
+      // Show user-friendly alert without console spam
       Alert.alert(
         'Connection Error',
         `Cannot connect to server at ${API_BASE_URL}.\n\n` +
@@ -56,7 +59,13 @@ api.interceptors.response.use(
         '3. Check API_BASE_URL in constants.js',
         [{ text: 'OK' }]
       );
+      // Reject silently without console error logs
+      return Promise.reject(error);
     }
+    
+    // Log other errors normally
+    console.error('❌ API Error:', error.message);
+    console.error('❌ Error details:', error.response?.data || error);
     
     return Promise.reject(error);
   }

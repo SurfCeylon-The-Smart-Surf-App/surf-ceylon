@@ -10,6 +10,7 @@ import {
   Image,
   StyleSheet,
   StatusBar,
+  Linking,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -72,10 +73,33 @@ export default function ReportHazardScreen() {
 
   const openCamera = async () => {
     try {
-      // Request camera permission
+      // Check current camera permission status first
+      const { status: currentStatus } = await ImagePicker.getCameraPermissionsAsync();
+      
+      if (currentStatus === 'denied') {
+        // Permission was previously denied - guide user to settings
+        Alert.alert(
+          'Camera Permission Required',
+          'Camera access was denied. Please enable it in your device settings to take photos.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+          ]
+        );
+        return;
+      }
+      
+      // Request camera permission if not determined yet
       const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
       if (cameraStatus !== 'granted') {
-        Alert.alert('Permission Denied', 'Camera permission is required to take photos');
+        Alert.alert(
+          'Permission Required',
+          'Camera permission is required to take photos. Please enable it in settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() }
+          ]
+        );
         return;
       }
 
@@ -192,12 +216,21 @@ export default function ReportHazardScreen() {
           [{ text: 'OK', onPress: () => router.back() }]
         );
       } else if (response.rejected) {
-        // Image was rejected by AI validation
-        Alert.alert(
-          '❌ Image Rejected',
-          'Please upload a clear photo of an actual surf hazard (shark, jellyfish, rip current, sea urchin, large waves, or reef danger).',
-          [{ text: 'OK' }]
-        );
+        // Check if it's a duplicate image rejection
+        if (response.rejectionReason === 'duplicate_image') {
+          Alert.alert(
+            '❌ Duplicate Image',
+            'This image has already been submitted as a hazard report.',
+            [{ text: 'OK' }]
+          );
+        } else {
+          // Image was rejected by AI validation (not a valid surf scene)
+          Alert.alert(
+            '❌ Image Rejected',
+            'Please upload a clear photo of an actual surf hazard (shark, jellyfish, rip current, sea urchin, large waves, or reef danger).',
+            [{ text: 'OK' }]
+          );
+        }
       } else {
         Alert.alert('Error', response.message || 'Failed to submit report');
       }
