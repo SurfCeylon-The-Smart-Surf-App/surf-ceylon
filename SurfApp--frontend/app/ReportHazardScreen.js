@@ -60,8 +60,8 @@ export default function ReportHazardScreen() {
 
   const pickImage = () => {
     Alert.alert(
-      'Select Media',
-      'Choose how to add photos/videos',
+      'Select Photo',
+      'Choose how to add a photo',
       [
         { text: 'Camera', onPress: () => openCamera() },
         { text: 'Gallery', onPress: () => openGallery() },
@@ -80,7 +80,7 @@ export default function ReportHazardScreen() {
       }
 
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ['images', 'videos'],
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -91,7 +91,7 @@ export default function ReportHazardScreen() {
         const asset = result.assets[0];
         setMediaFiles([...mediaFiles, {
           uri: asset.uri,
-          type: asset.type || (asset.uri.includes('mp4') ? 'video' : 'image'),
+          type: 'image',
           fileName: asset.fileName || `photo_${Date.now()}.jpg`,
         }]);
       }
@@ -111,7 +111,7 @@ export default function ReportHazardScreen() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images', 'videos'],
+        mediaTypes: ['images'],
         allowsEditing: false,
         quality: 0.8,
         allowsMultiple: true,
@@ -121,8 +121,8 @@ export default function ReportHazardScreen() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const newAssets = result.assets.map((asset, index) => ({
           uri: asset.uri,
-          type: asset.type || (asset.uri.includes('mp4') ? 'video' : 'image'),
-          fileName: asset.fileName || `media_${Date.now()}_${index}.jpg`,
+          type: 'image',
+          fileName: asset.fileName || `photo_${Date.now()}_${index}.jpg`,
         }));
         setMediaFiles([...mediaFiles, ...newAssets]);
       }
@@ -145,7 +145,7 @@ export default function ReportHazardScreen() {
     }
 
     if (mediaFiles.length === 0) {
-      Alert.alert('Error', 'Please add at least one photo or video to verify the hazard');
+      Alert.alert('Error', 'Please add at least one photo to verify the hazard');
       return;
     }
 
@@ -161,18 +161,15 @@ export default function ReportHazardScreen() {
 
       mediaFiles.forEach((media, index) => {
         // Get proper MIME type for the file
-        const getMimeType = (uri, type) => {
-          if (type === 'video' || uri.includes('.mp4') || uri.includes('.mov')) {
-            return 'video/mp4';
-          }
+        const getMimeType = (uri) => {
           if (uri.includes('.png')) {
             return 'image/png';
           }
           return 'image/jpeg';
         };
 
-        const mimeType = getMimeType(media.uri, media.type);
-        const fileName = media.fileName || `media_${index}.${mimeType.includes('video') ? 'mp4' : 'jpg'}`;
+        const mimeType = getMimeType(media.uri);
+        const fileName = media.fileName || `photo_${index}.jpg`;
         
         formDataToSend.append('media', {
           uri: media.uri,
@@ -198,9 +195,7 @@ export default function ReportHazardScreen() {
         // Image was rejected by AI validation
         Alert.alert(
           '❌ Image Rejected',
-          response.message + '\n\n' +
-          '📷 Please upload a clear photo of an actual surf hazard ' +
-          '(shark, jellyfish, rip current, sea urchin, large waves, or reef danger).',
+          'Please upload a clear photo of an actual surf hazard (shark, jellyfish, rip current, sea urchin, large waves, or reef danger).',
           [{ text: 'OK' }]
         );
       } else {
@@ -332,11 +327,11 @@ export default function ReportHazardScreen() {
 
         {/* Media Upload */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Photos/Videos *</Text>
+          <Text style={styles.label}>Photos *</Text>
           <Text style={styles.helpText}>Visual evidence is required to verify the hazard</Text>
 
           <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
-            <Text style={styles.uploadButtonText}>📷 Add Media {mediaFiles.length > 0 ? `(${mediaFiles.length}/5)` : ''}</Text>
+            <Text style={styles.uploadButtonText}>📷 Add Photo {mediaFiles.length > 0 ? `(${mediaFiles.length}/5)` : ''}</Text>
           </TouchableOpacity>
 
           {/* Media Preview */}
