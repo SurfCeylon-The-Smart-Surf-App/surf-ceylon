@@ -63,10 +63,21 @@ const PYTHON_CMD = process.platform === "win32" ? "python" : "python3";
 const runPythonScript = (scriptName, args = {}) => {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(ML_ENGINE_PATH, `${scriptName}.py`);
-    const argsJson = JSON.stringify(args);
+    
+    // Escape backslashes in paths for Windows compatibility
+    const escapedArgs = {};
+    for (const [key, value] of Object.entries(args)) {
+      if (typeof value === 'string') {
+        escapedArgs[key] = value.replace(/\\/g, '/');
+      } else {
+        escapedArgs[key] = value;
+      }
+    }
+    const argsJson = JSON.stringify(escapedArgs);
 
     console.log(`🐍 Running Python script: ${scriptName}`);
     console.log(`📁 Script path: ${scriptPath}`);
+    console.log(`📦 Args: ${argsJson}`);
 
     const pythonProcess = spawn(
       PYTHON_EXECUTABLE || PYTHON_CMD,
@@ -75,12 +86,12 @@ const runPythonScript = (scriptName, args = {}) => {
         `
 import sys
 import json
-sys.path.insert(0, r'${ML_ENGINE_PATH}')
+sys.path.insert(0, r'${ML_ENGINE_PATH.replace(/\\/g, '/')}')
 
-input_args = json.loads('''${argsJson}''')
+input_args = json.loads(r'''${argsJson}''')
 
 if '${scriptName}' == 'analyze_hazard':
-    from analyze_hazard import analyze_hazard_image
+    from analyze_hazard_cnn import analyze_hazard_image
     result = analyze_hazard_image(input_args.get('image_path'), input_args.get('hazard_type'))
 elif '${scriptName}' == 'predict_risk':
     from predict_risk import predict_risk_score
@@ -150,16 +161,28 @@ print(json.dumps(result))
 
 const analyzeHazardImage = async (imagePath, hazardType) => {
   try {
-    return await runPythonScript("analyze_hazard", {
+    const result = await runPythonScript("analyze_hazard", {
       image_path: imagePath,
       hazard_type: hazardType,
     });
+    
+    // Ensure validated field exists
+    if (result && typeof result.validated === 'undefined') {
+      console.warn("⚠️ ML result missing 'validated' field, defaulting to false");
+      result.validated = false;
+      result.rejectionReason = 'invalid_ml_response';
+    }
+    
+    return result;
   } catch (error) {
     console.error("❌ Hazard analysis failed:", error.message);
+    // Return with validated: false so the report gets rejected
     return {
-      detectedHazards: ["Analysis unavailable"],
+      detectedHazards: [],
       confidenceScore: 0,
-      aiSuggestions: "ML analysis could not be performed",
+      aiSuggestions: "ML analysis could not be performed. Please try again.",
+      validated: false,
+      rejectionReason: 'ml_analysis_failed'
     };
   }
 };
