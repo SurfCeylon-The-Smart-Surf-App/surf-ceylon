@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs'); // Added for file cleanup and validation
 
 // Import Python runner utility (executes ML scripts directly)
-const { analyzeHazardImage, updateAllRiskScores } = require('../config/python');
+const { analyzeHazardImage, updateAllRiskScores, computeImageHash } = require('../config/python');
 
 /**
  * Middleware: Multer error handling
@@ -102,6 +102,48 @@ router.post('/', handleMulterUpload, async (req, res) => {
             });
           }
           // --- END REJECTION LOGIC ---
+
+          // --- DUPLICATE DETECTION ---
+          // Compute perceptual hash for the image
+          console.log('🔍 Computing image hash for duplicate detection...');
+          const hashResult = await computeImageHash(imagePath);
+          
+          if (hashResult.success && hashResult.hash) {
+            const imageHash = hashResult.hash;
+            console.log(`📋 Image hash: ${imageHash}`);
+            
+            // Check if this hash already exists in the database
+            const existingReport = await HazardReport.findOne({
+              imageHash: imageHash,
+              status: { $ne: 'rejected' }  // Don't count rejected reports
+            });
+            
+            if (existingReport) {
+              console.warn('🚫 Report rejected: Duplicate image detected.');
+              
+              // Clean up uploaded files
+              req.files.forEach(file => {
+                try {
+                  if (fs.existsSync(file.path)) {
+                    fs.unlinkSync(file.path);
+                    console.log(`🗑️ Deleted duplicate file: ${file.filename}`);
+                  }
+                } catch (e) {
+                  console.error(`⚠️ Failed to delete ${file.filename}:`, e.message);
+                }
+              });
+              
+              return res.status(422).json({
+                success: false,
+                message: 'This image has already been submitted as a hazard report.',
+                rejectionReason: 'duplicate_image'
+              });
+            }
+            
+            // Store hash in the report for future duplicate checks
+            hazardReport.imageHash = imageHash;
+          }
+          // --- END DUPLICATE DETECTION ---
 
           console.log('✅ ML Analysis passed:', analysisResult);
         } catch (mlError) {

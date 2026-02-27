@@ -14,6 +14,11 @@ const hazardReportSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // Image hash for duplicate detection
+  imageHash: {
+    type: String,
+    index: true  // Index for fast duplicate lookups
+  },
   description: {
     type: String,
     required: true
