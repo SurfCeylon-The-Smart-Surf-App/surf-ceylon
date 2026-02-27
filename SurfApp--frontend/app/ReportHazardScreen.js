@@ -194,9 +194,20 @@ export default function ReportHazardScreen() {
           '',
           [{ text: 'OK', onPress: () => router.back() }]
         );
+      } else if (response.rejected) {
+        // Image was rejected by AI validation
+        Alert.alert(
+          '❌ Image Rejected',
+          response.message + '\n\n' +
+          '📷 Please upload a clear photo of an actual surf hazard ' +
+          '(shark, jellyfish, rip current, sea urchin, large waves, or reef danger).',
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert('Error', response.message || 'Failed to submit report');
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to submit report');
+      Alert.alert('Error', 'Failed to submit report. Please try again.');
     } finally {
       setLoading(false);
     }

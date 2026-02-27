@@ -37,6 +37,12 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Don't log 422 errors to console - these are expected validation rejections
+    if (error.response?.status === 422) {
+      // Silently pass through - will be handled by the calling function
+      return Promise.reject(error);
+    }
+    
     console.error('❌ API Error:', error.message);
     console.error('❌ Error details:', error.response?.data || error);
     
@@ -121,6 +127,16 @@ export const submitHazardReport = async (formData) => {
     });
     return response.data;
   } catch (error) {
+    // Handle 422 (validation rejection) specially - return the rejection details
+    if (error.response && error.response.status === 422) {
+      const rejectionData = error.response.data;
+      return {
+        success: false,
+        rejected: true,
+        message: rejectionData.message || 'Image validation failed',
+        rejectionReason: rejectionData.rejectionReason || 'validation_failed'
+      };
+    }
     throw new Error(`Failed to submit hazard report: ${error.message}`);
   }
 };
