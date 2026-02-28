@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const SurfSpot = require('../models/SurfSpot');
+const surfSpotController = require('../controllers/surfSpotController');
 
 // Get all surf spots with full risk data including skill levels
 router.get('/', async (req, res) => {
@@ -97,5 +98,16 @@ router.put('/:id/risk-score', async (req, res) => {
     });
   }
 });
+
+// ==================== SERVER STATUS ROUTES ====================
+
+// Welcome/Root route
+router.get('/welcome', surfSpotController.getWelcome);
+
+// Health check endpoint
+router.get('/health-check', surfSpotController.getHealthCheck);
+
+// Server info endpoint (for mobile dev)
+router.get('/server-info', surfSpotController.getServerInfo);
 
 module.exports = router;

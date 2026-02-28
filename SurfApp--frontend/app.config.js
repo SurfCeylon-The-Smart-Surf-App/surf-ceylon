@@ -1,7 +1,7 @@
 export default {
   expo: {
-    name: "Surf Risk Analyzer",
-    slug: "surf-risk-analyzer",
+    name: "SurfCeylon",
+    slug: "surf-ceylon",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",

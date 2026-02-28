@@ -1,5 +1,6 @@
 const SurfSpot = require('../models/SurfSpot');
 const axios = require('axios');
+const os = require('os');
 
 exports.getAllSurfSpots = async (req, res) => {
   try {
@@ -81,4 +82,51 @@ exports.updateRiskScore = async (req, res) => {
       error: error.message 
     });
   }
+};
+
+// ==================== SERVER STATUS FUNCTIONS ====================
+
+/**
+ * Welcome/Root route
+ */
+exports.getWelcome = (req, res) => {
+  res.json({
+    message: "Welcome to SurfCeylon API",
+    version: "1.0.0",
+  });
+};
+
+/**
+ * Health check endpoint
+ */
+exports.getHealthCheck = (req, res) => {
+  res.json({
+    status: "OK",
+    message: "API is running",
+    mongoConnected: req.isMongoConnected,
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+  });
+};
+
+/**
+ * Server info endpoint (for mobile dev)
+ */
+exports.getServerInfo = (req, res) => {
+  const networkInterfaces = os.networkInterfaces();
+  const addresses = [];
+
+  for (const name of Object.keys(networkInterfaces)) {
+    for (const net of networkInterfaces[name]) {
+      if (net.family === "IPv4" && !net.internal) {
+        addresses.push(net.address);
+      }
+    }
+  }
+
+  res.json({
+    host: addresses[0] || "localhost",
+    port: process.env.PORT || 5001,
+    addresses: addresses,
+  });
 };

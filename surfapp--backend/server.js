@@ -80,45 +80,17 @@ app.use("/api/incidents", require("./routes/incidents"));
 
 // ==================== DEFAULT ROUTE ====================
 
-app.get("/", (req, res) => {
-  res.json({
-    message: "Welcome to SurfCeylon API",
-    version: "1.0.0",
-  });
-});
+const surfSpotController = require('./controllers/surfSpotController');
+
+app.get("/", surfSpotController.getWelcome);
 
 // ==================== ENHANCED HEALTH CHECK ====================
 
-app.get("/api/health-check", (req, res) => {
-  res.json({
-    status: "OK",
-    message: "API is running",
-    mongoConnected: req.isMongoConnected,
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-  });
-});
+app.get("/api/health-check", surfSpotController.getHealthCheck);
 
 // ==================== SERVER INFO (FOR MOBILE DEV) ====================
 
-app.get("/api/server-info", (req, res) => {
-  const networkInterfaces = os.networkInterfaces();
-  const addresses = [];
-
-  for (const name of Object.keys(networkInterfaces)) {
-    for (const net of networkInterfaces[name]) {
-      if (net.family === "IPv4" && !net.internal) {
-        addresses.push(net.address);
-      }
-    }
-  }
-
-  res.json({
-    host: addresses[0] || "localhost",
-    port: process.env.PORT || 5001,
-    addresses: addresses,
-  });
-});
+app.get("/api/server-info", surfSpotController.getServerInfo);
 
 // ==================== 404 HANDLER ====================
 
