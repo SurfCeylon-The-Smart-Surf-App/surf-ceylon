@@ -108,4 +108,11 @@ export const dummyDashboardFeatures = [
     icon: "🎓",
     color: "bg-green-500",
   },
+  {
+    id: 6,
+    title: "AR Experience",
+    description: "Experience surf spots in augmented reality before you go.",
+    icon: "📸",
+    color: "bg-cyan-500",
+  },
 ];
