@@ -3,13 +3,10 @@
  * Handles ML-based workout recommendations using Deep Learning Model
  */
 
-const fetch = require("node-fetch");
-
+const { spawn } = require('child_process');
+const path = require('path');
+const { PYTHON_EXECUTABLE, CARDIO_ML_SCRIPT } = require('../config/python');
 const { asyncHandler } = require("../middlewares/errorHandler");
-
-// ML Cardio Server Configuration
-const ML_CARDIO_SERVER_URL = process.env.ML_CARDIO_SERVER_URL || "http://127.0.0.1:5006/api/ai-tutor/recommend";
-const ML_SERVER_TIMEOUT = 30000; // 30 seconds
 
 /**
  * Normalize string for model input
@@ -108,126 +105,106 @@ const getRecommendation = asyncHandler(async (req, res) => {
     limitations: userLimitations
   });
 
-  // Prepare payload for ML server
+  // Call Python ML script via spawn
+  const pythonProcess = spawn(PYTHON_EXECUTABLE, [CARDIO_ML_SCRIPT], {
+    cwd: path.resolve(__dirname, '..', '..', 'surfapp--ml-engine')
+  });
+
+  let pythonOutput = '';
+  let pythonError = '';
+  let hasResponded = false;
+
+  // Set timeout (30 seconds)
+  const timeout = setTimeout(() => {
+    if (!hasResponded) {
+      pythonProcess.kill();
+      console.error('[recommend] Python process timed out');
+      res.status(504).json({ 
+        error: 'ML prediction timed out' 
+      });
+      hasResponded = true;
+    }
+  }, 30000);
+
+  // Send input data to Python via stdin
   const payload = {
     skillLevel: userFitnessLevel,
     fitnessLevel: userFitnessLevel,
     goal: userGoal,
     equipment: userEquipment,
     duration: userDuration,
+    durationRange: userDuration,
     height: userHeight,
     weight: userWeight,
-    limitations: userLimitations
+    limitations: userLimitations,
+    userId
   };
+  
+  console.log("[recommend] Sending to Python:", JSON.stringify(payload, null, 2));
+  pythonProcess.stdin.write(JSON.stringify(payload));
+  pythonProcess.stdin.end();
 
-  try {
-    console.log("[recommend] Calling ML Cardio Server at:", ML_CARDIO_SERVER_URL);
-    console.log("[recommend] Payload:", JSON.stringify(payload, null, 2));
+  pythonProcess.stdout.on('data', (data) => pythonOutput += data.toString());
+  pythonProcess.stderr.on('data', (data) => {
+    pythonError += data.toString();
+    console.log(`[CARDIO ML LOG]: ${data.toString().trim()}`);
+  });
 
-    // Use AbortController for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      ML_SERVER_TIMEOUT
-    );
+  pythonProcess.on('error', (err) => {
+    clearTimeout(timeout);
+    if (!hasResponded) {
+      console.error('[recommend] Failed to spawn Python process:', err);
+      res.status(500).json({ 
+        error: 'Failed to start ML prediction service',
+        details: err.message 
+      });
+      hasResponded = true;
+    }
+  });
 
-    const resp = await fetch(ML_CARDIO_SERVER_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
+  pythonProcess.on('exit', (code) => {
+    clearTimeout(timeout);
+    if (hasResponded) return;
+    hasResponded = true;
 
-    clearTimeout(timeoutId);
+    if (code !== 0) {
+      console.error(`[recommend] Python exited with code ${code}`);
+      console.error('[recommend] Python stderr:', pythonError);
+      return res.status(500).json({
+        error: 'ML prediction failed',
+        details: pythonError || 'Unknown error',
+        exitCode: code
+      });
+    }
 
-    if (!resp.ok) {
-      let json;
-      try {
-        json = await resp.json();
-      } catch (parseError) {
-        json = {
-          error: "Failed to parse ML server response",
-          status: resp.status,
-        };
+    try {
+      console.log('[recommend] Python stdout:', pythonOutput);
+      const mlResponse = JSON.parse(pythonOutput);
+      
+      // ML server returns {plans: [...]} with multiple plans
+      const workoutPlans = mlResponse.plans || [mlResponse];
+      console.log("[recommend] Generated plans:", workoutPlans.length);
+      if (workoutPlans.length > 0) {
+        console.log("[recommend] First plan:", workoutPlans[0].planName);
+        console.log("[recommend] Exercises in first plan:", workoutPlans[0].exercises?.length || 0);
       }
 
-      const errorPayload = {
-        error: json?.error || json?.message || "ML server error",
-        details: json?.details || `HTTP ${resp.status}`,
-        status: resp.status,
+      // Frontend expects { recommendedPlans: [...] } format
+      const responsePayload = {
+        recommendedPlans: workoutPlans
       };
-      console.error("[recommend] ML server returned error:", errorPayload);
-      return res
-        .status(resp.status >= 400 && resp.status < 600 ? resp.status : 500)
-        .json(errorPayload);
+
+      console.log("[recommend] Sending response with", workoutPlans.length, "plans");
+      return res.json(responsePayload);
+    } catch (err) {
+      console.error('[recommend] Failed to parse Python output:', err);
+      console.error('[recommend] Python stdout:', pythonOutput);
+      return res.status(500).json({
+        error: 'Failed to parse ML prediction response',
+        details: err.message
+      });
     }
-
-    const mlResponse = await resp.json();
-    console.log("[recommend] ML server response received successfully");
-    
-    // ML server returns {plans: [...]} with multiple plans
-    const workoutPlans = mlResponse.plans || [mlResponse];
-    console.log("[recommend] Generated plans:", workoutPlans.length);
-    if (workoutPlans.length > 0) {
-      console.log("[recommend] First plan:", workoutPlans[0].planName);
-      console.log("[recommend] Exercises in first plan:", workoutPlans[0].exercises?.length || 0);
-    }
-
-    // Optionally persist plan to Firestore (disabled - firebaseAdmin not configured)
-    // if (firebaseAdmin.isInitialized() && userId) {
-    //   try {
-    //     const db = firebaseAdmin.firestore();
-    //     for (const plan of workoutPlans) {
-    //       const planDoc = db
-    //         .collection("users")
-    //         .doc(userId)
-    //         .collection("cardio_plans")
-    //         .doc();
-    //       await planDoc.set({
-    //         createdAt: new Date().toISOString(),
-    //         ...plan,
-    //         userId,
-    //       });
-    //     }
-    //     console.log("[recommend] Plans saved to Firestore");
-    //   } catch (e) {
-    //     console.error("[recommend] Failed to save plans to Firestore:", e.message);
-    //   }
-    // }
-
-    // Frontend expects { recommendedPlans: [...] } format
-    const responsePayload = {
-      recommendedPlans: workoutPlans
-    };
-
-    console.log("[recommend] Sending response with", workoutPlans.length, "plans");
-    return res.json(responsePayload);
-  } catch (e) {
-    console.error("[recommend] Error calling ML server:", e);
-    console.error("[recommend] Error message:", e.message);
-
-    // Provide specific error messages
-    let errorMessage = "Failed to call ML cardio server";
-    let errorDetails = e.message || "Unknown error";
-
-    if (e.code === "ECONNREFUSED" || e.message?.includes("ECONNREFUSED")) {
-      errorMessage = "ML cardio server is not running";
-      errorDetails = `Cannot connect to ${ML_CARDIO_SERVER_URL}. Please ensure the Python ML server is running on port 5001.`;
-    } else if (e.code === "ETIMEDOUT" || e.message?.includes("timeout")) {
-      errorMessage = "ML server request timed out";
-      errorDetails = "The ML server took too long to respond. Please try again.";
-    } else if (e.message?.includes("fetch")) {
-      errorMessage = "Network error connecting to ML server";
-      errorDetails = e.message;
-    }
-
-    return res.status(500).json({
-      error: errorMessage,
-      details: errorDetails,
-      serverUrl: ML_CARDIO_SERVER_URL,
-      code: e.code,
-    });
-  }
+  });
 });
 
 module.exports = {

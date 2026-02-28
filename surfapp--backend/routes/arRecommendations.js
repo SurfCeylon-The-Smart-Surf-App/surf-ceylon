@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
-
-// ML Service configuration
-const ML_SERVICE_URL = process.env.ML_AR_SERVICE_URL || 'http://localhost:5003';
+const { spawn } = require('child_process');
+const path = require('path');
+const { PYTHON_EXECUTABLE, AR_PREDICTION_SCRIPT } = require('../config/python');
 
 /**
  * POST /api/ar/recommendations
@@ -61,42 +60,112 @@ router.post('/recommendations', async (req, res) => {
       });
     }
 
-    // Call ML prediction service
-    console.log(`🤖 Calling ML service for AR recommendations...`);
-    const mlResponse = await axios.post(`${ML_SERVICE_URL}/ar/predict`, {
+    // Call Python ML script via spawn
+    console.log(`🤖 Calling AR prediction script...`);
+    const pythonProcess = spawn(PYTHON_EXECUTABLE, [AR_PREDICTION_SCRIPT], {
+      cwd: path.resolve(__dirname, '..', '..', 'surfapp--ml-engine')
+    });
+
+    let pythonOutput = '';
+    let pythonError = '';
+    let hasResponded = false;
+
+    // Set timeout (10 seconds)
+    const timeout = setTimeout(() => {
+      if (!hasResponded) {
+        pythonProcess.kill();
+        console.error('Python process timed out');
+        res.status(504).json({ 
+          success: false,
+          error: 'ML prediction timed out' 
+        });
+        hasResponded = true;
+      }
+    }, 10000);
+
+    // Send input data to Python via stdin
+    const inputData = JSON.stringify({
       height_cm,
       weight_kg,
       age,
       experience_level,
       gender: gender || 'Male'
-    }, {
-      timeout: 10000 // 10 second timeout
+    });
+    pythonProcess.stdin.write(inputData);
+    pythonProcess.stdin.end();
+
+    pythonProcess.stdout.on('data', (data) => pythonOutput += data.toString());
+    pythonProcess.stderr.on('data', (data) => {
+      pythonError += data.toString();
+      console.log(`[AR ML LOG]: ${data.toString().trim()}`);
     });
 
-    if (!mlResponse.data.success) {
-      throw new Error(mlResponse.data.error || 'ML prediction failed');
-    }
-
-    // Enhance response with drill information
-    const response = {
-      success: true,
-      data: {
-        ...mlResponse.data.data,
-        drill: {
-          id: drill_id || 'general',
-          selected: drill_id || null
-        },
-        timestamp: new Date().toISOString()
+    pythonProcess.on('error', (error) => {
+      clearTimeout(timeout);
+      if (!hasResponded) {
+        console.error('Failed to start Python process:', error);
+        res.status(500).json({ 
+          success: false,
+          error: 'Failed to start ML service', 
+          details: error.message 
+        });
+        hasResponded = true;
       }
-    };
+    });
 
-    console.log(`✅ AR recommendations generated successfully`);
-    res.json(response);
+    pythonProcess.on('close', (code) => {
+      clearTimeout(timeout);
+      
+      if (hasResponded) return;
+      hasResponded = true;
+
+      console.log(`Python process exited with code: ${code}`);
+
+      if (code !== 0) {
+        console.error(`Python script failed. Code: ${code}. Error: ${pythonError}`);
+        return res.status(500).json({ 
+          success: false,
+          error: 'ML prediction failed', 
+          details: process.env.NODE_ENV === 'development' ? pythonError : undefined 
+        });
+      }
+
+      try {
+        const mlResult = JSON.parse(pythonOutput);
+
+        if (!mlResult.success) {
+          throw new Error(mlResult.error || 'ML prediction failed');
+        }
+
+        // Enhance response with drill information
+        const response = {
+          success: true,
+          data: {
+            ...mlResult.data,
+            drill: {
+              id: drill_id || 'general',
+              selected: drill_id || null
+            },
+            timestamp: new Date().toISOString()
+          }
+        };
+
+        console.log(`✅ AR recommendations generated successfully`);
+        res.json(response);
+
+      } catch (parseError) {
+        console.error('Failed to parse Python output:', parseError);
+        console.error('Python output:', pythonOutput);
+        res.status(500).json({ 
+          success: false,
+          error: 'Failed to process ML results' 
+        });
+      }
+    });
 
   } catch (error) {
     console.error('❌ Error generating AR recommendations:', error.message);
 
-    // Check if ML service is unavailable
     if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
       return res.status(503).json({
         success: false,

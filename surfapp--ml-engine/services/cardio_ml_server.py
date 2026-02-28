@@ -1,6 +1,15 @@
 """
 Cardio ML Server - Deep Learning Based Workout Recommendation
-Replaces the old template-based system with trained neural network
+CLI mode for on-demand predictions (spawned by Node.js)
+
+Usage:
+  python cardio_ml_server.py
+
+Input (stdin JSON):
+  {"skillLevel": "intermediate", "goal": "endurance", "equipment": "none", "height": 170, "weight": 70}
+
+Output (stdout JSON):
+  {"plans": [...]}
 """
 
 import sys
@@ -13,31 +22,19 @@ sys.path.append(str(Path(__file__).parent.parent / "training"))
 import numpy as np
 import json
 import pickle
-from flask import Flask, request, jsonify
-from flask_cors import CORS
 import tensorflow as tf
 from tensorflow import keras
 
 from cardio_config import *
 
-app = Flask(__name__)
-CORS(app)
-
 # ============================================================================
 # LOAD MODEL AND ARTIFACTS
 # ============================================================================
 
-print("=" * 80)
-print("🚀 LOADING ML CARDIO RECOMMENDER")
-print("=" * 80)
-
 # Load trained model
-print(f"Loading model from: {MODEL_PATH}")
 model = keras.models.load_model(MODEL_PATH)
-print("✅ Model loaded successfully")
 
 # Load encoders
-print(f"Loading encoders from: {ENCODER_PATH}")
 with open(ENCODER_PATH, 'rb') as f:
     artifacts = pickle.load(f)
 
@@ -47,17 +44,10 @@ goal_encoder = artifacts['goal_encoder']
 equipment_encoder = artifacts['equipment_encoder']
 bmi_encoder = artifacts['bmi_encoder']
 scaler = artifacts['scaler']
-print("✅ Encoders loaded successfully")
 
 # Load exercise database
-print(f"Loading exercise DB from: {EXERCISE_DB_PATH}")
 with open(EXERCISE_DB_PATH, 'r') as f:
     exercise_database = json.load(f)
-print(f"✅ Exercise database loaded: {len(exercise_database)} exercises")
-
-print("=" * 80)
-print("✅ ML SERVER READY")
-print("=" * 80)
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -261,46 +251,17 @@ def build_workout_plan(recommended_exercises, duration_minutes, goal, strategy='
     return plan
 
 # ============================================================================
-# API ENDPOINTS
+# MAIN CLI FUNCTION
 # ============================================================================
 
-@app.route('/health', methods=['GET'])
-def health():
-    """Health check endpoint"""
-    return jsonify({
-        'status': 'healthy',
-        'service': 'Cardio ML Recommender',
-        'model': 'Deep Learning v1',
-        'exercises': len(exercise_database)
-    })
-
-@app.route('/api/ai-tutor/recommend', methods=['POST'])
-def recommend_workout():
-    """
-    Generate 3 diverse ML-based workout recommendations
-    
-    Request body:
-    {
-        "skillLevel": "beginner" | "intermediate" | "pro",
-        "goal": "endurance" | "power" | "warm-up",
-        "equipment": "none" | "kettlebell" | "gym",
-        "duration": "5-10" | "10-20" | "20+",
-        "height": 170,
-        "weight": 70,
-        "limitations": ["knee_pain", ...]
-    }
-    """
+def main():
+    """Main CLI function - reads JSON from stdin, prints JSON to stdout"""
     try:
-        data = request.json
-        
-        print(f"\n📊 Recommendation request (3 plans):")
-        print(f"   Fitness: {data.get('skillLevel', data.get('fitnessLevel'))}")
-        print(f"   Goal: {data.get('goal')}")
-        print(f"   Equipment: {data.get('equipment')}")
-        print(f"   Duration: {data.get('duration')}")
+        # Read JSON input from stdin
+        data = json.loads(sys.stdin.read())
         
         # Parse duration
-        duration_range = data.get('duration', '10-20')
+        duration_range = data.get('duration', data.get('durationRange', '10-20'))
         if duration_range in DURATION_RANGES:
             duration_minutes = DURATION_RANGES[duration_range][1]  # Use max
         else:
@@ -311,8 +272,6 @@ def recommend_workout():
         
         # Filter exercises by constraints
         candidate_exercises = filter_exercises_by_constraints(data)
-        
-        print(f"   Candidate exercises: {len(candidate_exercises)}")
         
         if len(candidate_exercises) == 0:
             # Fallback: relax constraints
@@ -333,11 +292,6 @@ def recommend_workout():
         
         # Sort by score (descending)
         scored_exercises.sort(key=lambda x: x['score'], reverse=True)
-        
-        print(f"   Top scored exercises: {len(scored_exercises)}")
-        if scored_exercises:
-            print(f"   Best score: {scored_exercises[0]['score']:.4f}")
-            print(f"   Best exercise: {scored_exercises[0]['name']}")
         
         # Generate 3 DIVERSE workout plans
         plans = []
@@ -395,58 +349,24 @@ def recommend_workout():
             plan['modelVersion'] = 'v2_enhanced_deep_learning'
             plan['confidence'] = scored_exercises[0]['score'] if scored_exercises else 0.85
         
-        print(f"✅ Generated 3 diverse plans:")
-        for plan in plans:
-            print(f"   - {plan['planName']}: {len(plan['exercises'])} exercises")
-        print()
+        # Print result as JSON to stdout
+        print(json.dumps({'plans': plans}))
+        sys.exit(0)
         
-        return jsonify({'plans': plans})
-        
+    except json.JSONDecodeError as e:
+        print(json.dumps({
+            'error': f'Invalid JSON input: {str(e)}'
+        }))
+        sys.exit(1)
+    
     except Exception as e:
-        print(f"❌ Error: {e}")
-        import traceback
-        traceback.print_exc()
-        
-        return jsonify({
+        print(json.dumps({
             'error': str(e),
             'message': 'Failed to generate recommendation'
-        }), 500
+        }))
+        sys.exit(1)
 
-@app.route('/api/ai-tutor/exercises/search', methods=['GET'])
-def search_exercises():
-    """Search exercises by name or category"""
-    query = request.args.get('q', '').lower()
-    limit = int(request.args.get('limit', 20))
-    
-    results = [
-        ex for ex in exercise_database
-        if query in ex['name'].lower()
-    ][:limit]
-    
-    return jsonify(results)
-
-@app.route('/api/ai-tutor/model/info', methods=['GET'])
-def model_info():
-    """Get model information"""
-    return jsonify({
-        'modelType': 'Deep Neural Network',
-        'architecture': 'Hybrid User-Exercise Embedding',
-        'trainingExamples': 47120,
-        'validationAUC': 0.8607,
-        'totalExercises': len(exercise_database),
-        'fitnessLevels': FITNESS_LEVELS,
-        'goals': GOALS,
-        'equipmentOptions': EQUIPMENT_OPTIONS
-    })
-
-# ============================================================================
-# MAIN
-# ============================================================================
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5006))
-    print(f"\n🚀 Starting ML Cardio Server on port {port}")
-    print(f"📊 Exercise database: {len(exercise_database)} exercises")
-    print(f"🧠 Model ready for predictions\n")
-    
-    app.run(host='0.0.0.0', port=port, debug=True)
+    main()
+

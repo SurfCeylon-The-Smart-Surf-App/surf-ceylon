@@ -9,20 +9,6 @@ require("dotenv").config();
 const app = express();
 
 // ============================================================================
-// ML SERVICES AUTO-START
-// ============================================================================
-const {
-  startMLServices,
-  setupShutdownHandlers,
-} = require("./config/mlServices");
-
-// Start ML services in background
-startMLServices();
-
-// Setup graceful shutdown handlers
-setupShutdownHandlers();
-
-// ============================================================================
 // MIDDLEWARE
 // ============================================================================
 app.use(helmet()); //Security headers (XSS, clickjacking protection)

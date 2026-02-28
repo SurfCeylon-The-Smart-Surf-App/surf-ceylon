@@ -1,23 +1,24 @@
 """
 AR Surfboard Recommendation Prediction Service
-Flask API for real-time surfboard and wave recommendations
+CLI mode for on-demand predictions (spawned by Node.js)
 
-Endpoints:
-  POST /ar/predict - Get personalized surfboard recommendations
-  GET /ar/health - Health check
+Usage:
+  python ar_prediction_service.py
+  
+Input (stdin JSON):
+  {"height_cm": 175, "weight_kg": 75, "age": 28, "experience_level": "Intermediate", "gender": "Male"}
+
+Output (stdout JSON):
+  {"success": true, "data": {...}}
 """
-from flask import Flask, request, jsonify
-from flask_cors import CORS
 import joblib
 import numpy as np
 import os
 import sys
+import json
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-app = Flask(__name__)
-CORS(app)
 
 # Load the trained model
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "ar_surfboard", "enhanced_ar_model.joblib")
@@ -31,14 +32,14 @@ class ARSurfboardRecommender:
     
     def __init__(self, model_path):
         """Load the trained model"""
-        print(f"Loading model from: {model_path}")
+        print(f"Loading model from: {model_path}", file=sys.stderr)
         data = joblib.load(model_path)
         self.wave_model = data['wave_model']
         self.scaler = data['scaler']
         self.label_encoders = data['label_encoders']
         self.feature_names = data['feature_names']
         self.metrics = data['metrics']
-        print("✅ Model loaded successfully!")
+        print("[OK] Model loaded successfully!", file=sys.stderr)
     
     def calculate_ideal_volume(self, weight_kg, height_cm, experience_level):
         """Physics-based volume calculation"""
@@ -172,139 +173,71 @@ class ARSurfboardRecommender:
 
 # Initialize model on startup
 def load_model():
-    """Load the model when the server starts"""
+    """Load the model when the script starts"""
     global model_data
     if os.path.exists(MODEL_PATH):
         model_data = ARSurfboardRecommender(MODEL_PATH)
         return True
     else:
-        print(f"❌ Model not found at: {MODEL_PATH}")
-        print("Please run train_enhanced_model.py first!")
+        print(json.dumps({
+            'success': False,
+            'error': f'Model not found at: {MODEL_PATH}'
+        }), file=sys.stderr)
         return False
 
 
-@app.route('/ar/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
-    return jsonify({
-        'status': 'healthy',
-        'service': 'AR Surfboard Recommender',
-        'model_loaded': model_data is not None
-    })
-
-
-@app.route('/ar/predict', methods=['POST'])
-def predict():
-    """
-    Prediction endpoint
-    
-    Request body:
-    {
-        "height_cm": 175,
-        "weight_kg": 75,
-        "age": 28,
-        "experience_level": "Intermediate",
-        "gender": "Male"
-    }
-    """
+def main():
+    """Main CLI function - reads JSON from stdin, prints JSON to stdout"""
     try:
-        if model_data is None:
-            return jsonify({
+        # Load model
+        if not load_model():
+            print(json.dumps({
                 'success': False,
-                'error': 'Model not loaded. Please contact administrator.'
-            }), 500
+                'error': 'Failed to load model'
+            }))
+            sys.exit(1)
         
-        data = request.get_json()
+        # Read JSON input from stdin
+        input_data = json.loads(sys.stdin.read())
         
         # Validate required fields
         required_fields = ['height_cm', 'weight_kg', 'age', 'experience_level']
-        missing_fields = [f for f in required_fields if f not in data]
+        missing_fields = [f for f in required_fields if f not in input_data]
         
         if missing_fields:
-            return jsonify({
+            print(json.dumps({
                 'success': False,
                 'error': f'Missing required fields: {", ".join(missing_fields)}'
-            }), 400
+            }))
+            sys.exit(1)
         
         # Get prediction
         result = model_data.predict(
-            height_cm=float(data['height_cm']),
-            weight_kg=float(data['weight_kg']),
-            age=int(data['age']),
-            experience_level=data['experience_level'],
-            gender=data.get('gender', 'Male')
+            height_cm=float(input_data['height_cm']),
+            weight_kg=float(input_data['weight_kg']),
+            age=int(input_data['age']),
+            experience_level=input_data['experience_level'],
+            gender=input_data.get('gender', 'Male')
         )
         
-        return jsonify(result)
+        # Print result as JSON to stdout
+        print(json.dumps(result))
+        sys.exit(0)
+    
+    except json.JSONDecodeError as e:
+        print(json.dumps({
+            'success': False,
+            'error': f'Invalid JSON input: {str(e)}'
+        }))
+        sys.exit(1)
     
     except Exception as e:
-        return jsonify({
+        print(json.dumps({
             'success': False,
             'error': str(e)
-        }), 500
-
-
-@app.route('/ar/drills', methods=['GET'])
-def get_drills():
-    """Get list of available AR surfing drills"""
-    drills = [
-        {
-            "id": "catch-wave",
-            "name": "Catching a Wave",
-            "description": "Learn wave timing and positioning",
-            "difficulty": "Beginner",
-            "icon": "waves"
-        },
-        {
-            "id": "pop-up",
-            "name": "Pop-Up Technique",
-            "description": "Master the pop-up motion",
-            "difficulty": "Beginner",
-            "icon": "sports-surfing"
-        },
-        {
-            "id": "bottom-turn",
-            "name": "Bottom Turn",
-            "description": "Essential wave riding technique",
-            "difficulty": "Intermediate",
-            "icon": "arrow-downward"
-        },
-        {
-            "id": "cutback",
-            "name": "Cutback",
-            "description": "Advanced maneuver to stay in the power zone",
-            "difficulty": "Advanced",
-            "icon": "swap-horiz"
-        },
-        {
-            "id": "tube-riding",
-            "name": "Tube Riding",
-            "description": "Ride inside the barrel",
-            "difficulty": "Advanced",
-            "icon": "water"
-        }
-    ]
-    
-    return jsonify({
-        'success': True,
-        'drills': drills
-    })
+        }))
+        sys.exit(1)
 
 
 if __name__ == '__main__':
-    print("\n" + "🏄 "*20)
-    print("AR SURFBOARD RECOMMENDATION SERVICE")
-    print("🏄 "*20 + "\n")
-    
-    # Load model
-    if load_model():
-        print("\n✅ Service ready!")
-        print("📡 Starting server on http://localhost:5003")
-        print("\nEndpoints:")
-        print("  GET  /ar/health  - Health check")
-        print("  POST /ar/predict - Get recommendations")
-        print("  GET  /ar/drills  - List available drills")
-        app.run(host='0.0.0.0', port=5003, debug=True)
-    else:
-        print("\n❌ Failed to load model. Exiting...")
-        sys.exit(1)
+    main()

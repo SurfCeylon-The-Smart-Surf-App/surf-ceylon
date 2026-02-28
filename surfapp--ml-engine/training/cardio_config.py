@@ -3,6 +3,7 @@ Centralized Configuration for Cardio ML System
 """
 
 import os
+import sys
 from pathlib import Path
 
 # ============================================================================
@@ -133,5 +134,5 @@ MIN_EXERCISES_PER_PLAN = 4
 MAX_EXERCISES_PER_PLAN = 8
 DIVERSITY_WEIGHT = 0.3  # Balance between relevance and diversity
 
-print(f"✅ Config loaded: Models → {MODELS_DIR}")
-print(f"✅ Exercise DB → {EXERCISE_DB_PATH}")
+print(f"[OK] Config loaded: Models -> {MODELS_DIR}", file=sys.stderr)
+print(f"[OK] Exercise DB -> {EXERCISE_DB_PATH}", file=sys.stderr)
