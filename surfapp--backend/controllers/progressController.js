@@ -3,7 +3,7 @@
  * Handles user progress tracking operations
  */
 
-const { asyncHandler } = require("../middlewares/errorHandler");
+const { asyncHandler } = require("./recommendController");
 
 /**
  * Save user progress

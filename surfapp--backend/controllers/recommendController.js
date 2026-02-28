@@ -6,7 +6,15 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const { PYTHON_EXECUTABLE, CARDIO_ML_SCRIPT } = require('../config/python');
-const { asyncHandler } = require("../middlewares/errorHandler");
+
+/**
+ * Async handler wrapper to catch async errors
+ */
+const asyncHandler = (fn) => {
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+};
 
 /**
  * Normalize string for model input
@@ -209,4 +217,5 @@ const getRecommendation = asyncHandler(async (req, res) => {
 
 module.exports = {
   getRecommendation,
+  asyncHandler,
 };

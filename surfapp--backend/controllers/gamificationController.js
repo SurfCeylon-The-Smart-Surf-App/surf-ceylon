@@ -3,7 +3,7 @@
  * Handles points, badges, streaks, and achievements
  */
 
-const { asyncHandler } = require("../middlewares/errorHandler");
+const { asyncHandler } = require("./recommendController");
 
 /**
  * ✅ ENHANCED: Award points/badges to user with validation
