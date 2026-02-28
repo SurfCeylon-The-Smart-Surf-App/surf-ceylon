@@ -11,7 +11,7 @@ from pathlib import Path
 # ============================================================================
 BASE_DIR = Path(__file__).parent
 ML_ENGINE_DIR = BASE_DIR.parent
-DATA_DIR = BASE_DIR / "data"
+DATA_DIR = ML_ENGINE_DIR / "data"  # Use shared data folder at ml-engine level
 ARTIFACTS_DIR = ML_ENGINE_DIR / "artifacts"
 MODELS_DIR = ML_ENGINE_DIR / "models"
 
