@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 
 const getApiUrl = () => {
   // Default to localhost for web or if detection fails
-  let host = '172.20.124.182';
+  let host = '127.0.0.1';
 
   // Special handling for Android Emulator
   if (Platform.OS === 'android') {
