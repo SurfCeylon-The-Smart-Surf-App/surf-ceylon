@@ -23,6 +23,9 @@ export default function DashboardScreen() {
     } else if (item.id === 3) {
       // Navigate to AI Video Analyzer
       router.push("/aiVideoAnalyzer");
+    } else if (item.id === 4) {
+      // Navigate to AI Surf Tutor
+      router.push("/aiSurfTutor");
     } else {
       // Other features not implemented yet
       console.log(`Feature "${item.title}" not yet implemented`);
