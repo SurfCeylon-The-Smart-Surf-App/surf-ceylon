@@ -7,7 +7,7 @@ const getApiUrl = () => {
 
   // Special handling for Android Emulator
   if (Platform.OS === 'android') {
-    host = '10.0.2.2';
+    host = '172.20.124.182';
   }
 
   // Try to get the host from Expo constants (works for Expo Go and Dev Builds)

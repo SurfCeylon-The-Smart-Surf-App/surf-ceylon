@@ -93,6 +93,19 @@ app.get("/api/health-check", surfSpotController.getHealthCheck);
 app.get("/api/server-info", surfSpotController.getServerInfo);
 
 // ==================== 404 HANDLER ====================
+// AI Surf Tutor routes (from Sabri's implementation)
+app.use("/api/ai-tutor", require("./routes/aiTutor"));
+
+// AR Surfboard Recommendations (ML-powered)
+app.use("/api/ar", require("./routes/arRecommendations"));
+
+// Default route
+app.get("/", (req, res) => {
+  res.json({
+    message: "Welcome to SurfCeylon API",
+    version: "1.0.0",
+  });
+});
 
 app.use("*", (req, res) => {
   res.status(404).json({

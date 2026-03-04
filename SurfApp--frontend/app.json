@@ -50,8 +50,15 @@
 
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0891b2"
-      }
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.surfceylon",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ]
     },
 
     "web": {
@@ -61,6 +68,16 @@
     },
 
     "plugins": [
+      [
+        "@reactvision/react-viro",
+        {
+          "android": {
+            "xRMode": [
+              "AR"
+            ]
+          }
+        }
+      ],
       "expo-router",
       [
         "expo-location",
@@ -82,7 +99,8 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "expo-asset"
     ],
 
     "experiments": {

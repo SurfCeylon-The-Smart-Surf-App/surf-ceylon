@@ -250,4 +250,6 @@ module.exports = {
   updateAllRiskScores,
   updateSkillLevelRisks,
   computeImageHash,
+  AR_PREDICTION_SCRIPT,
+  CARDIO_ML_SCRIPT,
 };
