@@ -1,0 +1,5 @@
+Place safe beach/ocean images here (minimum 100 images recommended)
+- Normal beach scenes without hazards
+- Calm ocean water
+- Safe surfing conditions
+- Random non-hazard images (to train model to reject invalid uploads)

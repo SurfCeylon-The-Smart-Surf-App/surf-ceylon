@@ -20,9 +20,15 @@ export default function DashboardScreen() {
     if (item.id === 1) {
       // Navigate to market tab
       router.push("/market");
+    } else if (item.id === 2) {
+      // Navigate to Risk Analyzer
+      router.push("/RiskAnalyzerScreen");
     } else if (item.id === 3) {
       // Navigate to AI Video Analyzer
       router.push("/aiVideoAnalyzer");
+    } else if (item.id === 4) {
+      // Navigate to AI Surf Tutor
+      router.push("/aiSurfTutor");
     } else {
       // Other features not implemented yet
       console.log(`Feature "${item.title}" not yet implemented`);
