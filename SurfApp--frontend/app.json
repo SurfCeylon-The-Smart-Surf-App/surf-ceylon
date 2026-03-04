@@ -5,26 +5,49 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
     "scheme": "surfceylon",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#3b82f6"
+      "backgroundColor": "#0891b2"
     },
+
+    "assetBundlePatterns": ["**/*"],
+
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.surfrisk.analyzer",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Surf Ceylon needs your location to show you nearby surf spots and personalized recommendations."
+        "NSLocationWhenInUseUsageDescription": "This app needs your location to show nearby surf spots and calculate distances.",
+        "NSCameraUsageDescription": "This app needs camera access to capture hazard photos.",
+        "NSPhotoLibraryUsageDescription": "This app needs photo library access to select hazard images.",
+        "NSMicrophoneUsageDescription": "This app needs microphone access for video recording."
       }
     },
+
     "android": {
+      "package": "com.surfrisk.analyzer",
+      "edgeToEdgeEnabled": true,
+      "useNextNotificationApi": true,
+
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO"
+      ],
+
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyA8urPyyxzUaTp8X3CQTQcZMWm_ObVS3Zc"
         }
       },
+
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -33,20 +56,40 @@
       "package": "com.anonymous.surfceylon",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
       ]
     },
+
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
       "output": "server"
     },
+
     "plugins": [
+      [
+        "@reactvision/react-viro",
+        {
+          "android": {
+            "xRMode": [
+              "AR"
+            ]
+          }
+        }
+      ],
       "expo-router",
       [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Surf Ceylon needs your location to show you nearby surf spots and personalized recommendations."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Surf Risk Analyzer to access your photos to upload hazard images.",
+          "cameraPermission": "Allow Surf Risk Analyzer to access your camera to capture hazard photos."
         }
       ],
       [
@@ -56,8 +99,10 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "expo-asset"
     ],
+
     "experiments": {
       "typedRoutes": true
     }
