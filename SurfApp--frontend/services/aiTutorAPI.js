@@ -1,5 +1,6 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BASE_URL } from "../config/network";
 
 /**
  * ============================================================
@@ -8,10 +9,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
  * API endpoints for AI Surf Tutor features
  */
 
-// Get API base URL - use backend server (which then calls ML server internally)
-const API_HOST = "172.20.124.182";
-const API_PORT = 3000;
-const API_BASE_URL = `http://${API_HOST}:${API_PORT}`;
+// Get API base URL from centralized config
+const API_BASE_URL = BASE_URL;
 
 console.log(`[AI Tutor API] Using backend: ${API_BASE_URL}`);
 
@@ -36,7 +35,7 @@ aiTutorAPI.interceptors.response.use(
       console.warn("[AI Tutor API] Backend unreachable. Check connection.");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 /**
@@ -80,7 +79,7 @@ export const poseAPI = {
   healthCheck: async () => {
     try {
       const response = await aiTutorAPI.get(
-        "/api/ai-tutor/pose-analysis/health"
+        "/api/ai-tutor/pose-analysis/health",
       );
       return response.data;
     } catch (error) {
@@ -102,7 +101,7 @@ export const cardioAPI = {
     durationRange,
     limitations,
     equipment,
-    adaptiveAdjustments
+    adaptiveAdjustments,
   ) => {
     try {
       const goalArray = Array.isArray(goal) ? goal : [goal];
@@ -140,7 +139,7 @@ export const progressAPI = {
 
       const response = await aiTutorAPI.post(
         "/api/ai-tutor/progress/save",
-        body
+        body,
       );
       return response.data;
     } catch (error) {
@@ -176,7 +175,7 @@ export const gamificationAPI = {
           streak,
           achievement,
           metadata,
-        }
+        },
       );
       return response.data;
     } catch (error) {
@@ -202,7 +201,7 @@ export const gamificationAPI = {
         {
           lastWorkoutDate,
           currentDate,
-        }
+        },
       );
       return response.data;
     } catch (error) {
@@ -215,7 +214,7 @@ export const gamificationAPI = {
     workoutCount,
     totalMinutes,
     streak,
-    completionRate
+    completionRate,
   ) => {
     try {
       const response = await aiTutorAPI.post(
@@ -225,7 +224,7 @@ export const gamificationAPI = {
           totalMinutes,
           streak,
           completionRate,
-        }
+        },
       );
       return response.data;
     } catch (error) {
@@ -238,7 +237,7 @@ export const gamificationAPI = {
     workoutDuration,
     activitiesCompleted,
     completionRate,
-    streak
+    streak,
   ) => {
     try {
       const response = await aiTutorAPI.post(
@@ -248,7 +247,7 @@ export const gamificationAPI = {
           activitiesCompleted,
           completionRate,
           streak,
-        }
+        },
       );
       return response.data;
     } catch (error) {

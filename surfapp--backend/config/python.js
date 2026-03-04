@@ -19,7 +19,7 @@ const getPythonExecutable = () => {
     "..",
     "..",
     "surfapp--ml-engine",
-    "venv"
+    "venv",
   );
 
   if (isWin) {
@@ -37,22 +37,34 @@ const ML_ENGINE_PATH = path.resolve(
   __dirname,
   "..",
   "..",
-  "surfapp--ml-engine"
+  "surfapp--ml-engine",
 );
 
 const SPOT_RECOMMENDER_SCRIPT = path.resolve(
   ML_ENGINE_PATH,
-  "spot_recommender_service.py"
+  "spot_recommender_service.py",
 );
 
 const FORECAST_7DAY_SCRIPT = path.resolve(
   ML_ENGINE_PATH,
-  "forecast_7day_service.py"
+  "forecast_7day_service.py",
 );
 
 const SURF_POSE_ANALYZER_SCRIPT = path.resolve(
   ML_ENGINE_PATH,
-  "surf_pose_analyzer_service.py"
+  "surf_pose_analyzer_service.py",
+);
+
+const AR_PREDICTION_SCRIPT = path.resolve(
+  ML_ENGINE_PATH,
+  "services",
+  "ar_prediction_service.py",
+);
+
+const CARDIO_ML_SCRIPT = path.resolve(
+  ML_ENGINE_PATH,
+  "services",
+  "cardio_ml_server.py",
 );
 
 // Fallback Python command (used if venv python fails)
@@ -63,12 +75,12 @@ const PYTHON_CMD = process.platform === "win32" ? "python" : "python3";
 const runPythonScript = (scriptName, args = {}) => {
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(ML_ENGINE_PATH, `${scriptName}.py`);
-    
+
     // Escape backslashes in paths for Windows compatibility
     const escapedArgs = {};
     for (const [key, value] of Object.entries(args)) {
-      if (typeof value === 'string') {
-        escapedArgs[key] = value.replace(/\\/g, '/');
+      if (typeof value === "string") {
+        escapedArgs[key] = value.replace(/\\/g, "/");
       } else {
         escapedArgs[key] = value;
       }
@@ -86,7 +98,7 @@ const runPythonScript = (scriptName, args = {}) => {
         `
 import sys
 import json
-sys.path.insert(0, r'${ML_ENGINE_PATH.replace(/\\/g, '/')}')
+sys.path.insert(0, r'${ML_ENGINE_PATH.replace(/\\/g, "/")}')
 
 input_args = json.loads(r'''${argsJson}''')
 
@@ -114,7 +126,7 @@ print(json.dumps(result))
       {
         cwd: ML_ENGINE_PATH,
         env: { ...process.env, PYTHONIOENCODING: "utf-8" },
-      }
+      },
     );
 
     let stdout = "";
@@ -148,7 +160,7 @@ print(json.dumps(result))
       } catch (parseError) {
         console.error("❌ Failed to parse Python output:", stdout);
         reject(
-          new Error(`Failed to parse Python output: ${parseError.message}`)
+          new Error(`Failed to parse Python output: ${parseError.message}`),
         );
       }
     });
@@ -168,14 +180,16 @@ const analyzeHazardImage = async (imagePath, hazardType) => {
       image_path: imagePath,
       hazard_type: hazardType,
     });
-    
+
     // Ensure validated field exists
-    if (result && typeof result.validated === 'undefined') {
-      console.warn("⚠️ ML result missing 'validated' field, defaulting to false");
+    if (result && typeof result.validated === "undefined") {
+      console.warn(
+        "⚠️ ML result missing 'validated' field, defaulting to false",
+      );
       result.validated = false;
-      result.rejectionReason = 'invalid_ml_response';
+      result.rejectionReason = "invalid_ml_response";
     }
-    
+
     return result;
   } catch (error) {
     console.error("❌ Hazard analysis failed:", error.message);
@@ -185,7 +199,7 @@ const analyzeHazardImage = async (imagePath, hazardType) => {
       confidenceScore: 0,
       aiSuggestions: "ML analysis could not be performed. Please try again.",
       validated: false,
-      rejectionReason: 'ml_analysis_failed'
+      rejectionReason: "ml_analysis_failed",
     };
   }
 };
@@ -232,7 +246,7 @@ const computeImageHash = async (imagePath) => {
     console.error("❌ Image hash computation failed:", error.message);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  NativeModules,
   PermissionsAndroid,
   Platform,
   StatusBar,
@@ -13,9 +14,28 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ViroARSceneNavigator } from "@reactvision/react-viro";
-import SurfARScene from "../components/SurfARScene";
-import { AR_DEFAULTS, MODEL_MAP, POSE_BY_ID, SURF_POSES } from "../data/surfPoses";
+
+// Check if ViroReact native modules are available (not in Expo Go)
+const isViroAvailable = !!NativeModules.VRTMaterialManager;
+
+// Conditionally import ViroReact only if available
+let ViroARSceneNavigator, SurfARScene;
+if (isViroAvailable) {
+  try {
+    ViroARSceneNavigator =
+      require("@reactvision/react-viro").ViroARSceneNavigator;
+    SurfARScene = require("../components/SurfARScene").default;
+  } catch (error) {
+    console.warn("Failed to load ViroReact:", error.message);
+  }
+}
+
+import {
+  AR_DEFAULTS,
+  MODEL_MAP,
+  POSE_BY_ID,
+  SURF_POSES,
+} from "../data/surfPoses";
 
 const SCALE_MIN = 0.2;
 const SCALE_MAX = 1.2;
@@ -32,7 +52,7 @@ async function requestAndroidCameraPermission() {
       buttonPositive: "Allow",
       buttonNegative: "Deny",
       buttonNeutral: "Ask Later",
-    }
+    },
   );
   return granted === PermissionsAndroid.RESULTS.GRANTED;
 }
@@ -53,7 +73,9 @@ export default function ARViewerScreen() {
       return POSE_BY_ID[params.poseId] || null;
     }
     if (params.modelKey && typeof params.modelKey === "string") {
-      return SURF_POSES.find((item) => item.modelKey === params.modelKey) || null;
+      return (
+        SURF_POSES.find((item) => item.modelKey === params.modelKey) || null
+      );
     }
     return null;
   }, [params.modelKey, params.poseId]);
@@ -70,10 +92,40 @@ export default function ARViewerScreen() {
     };
   }, [pose]);
 
-  const modelKey = pose?.modelKey || (typeof params.modelKey === "string" ? params.modelKey : "");
-  const poseTitle = pose?.title || (typeof params.title === "string" ? params.title : "Surf Technique");
-  const difficulty = pose?.difficulty || (typeof params.difficulty === "string" ? params.difficulty : "Beginner");
+  const modelKey =
+    pose?.modelKey ||
+    (typeof params.modelKey === "string" ? params.modelKey : "");
+  const poseTitle =
+    pose?.title ||
+    (typeof params.title === "string" ? params.title : "Surf Technique");
+  const difficulty =
+    pose?.difficulty ||
+    (typeof params.difficulty === "string" ? params.difficulty : "Beginner");
   const hasValidModel = !!MODEL_MAP[modelKey];
+
+  // Show message if ViroReact is not available (e.g., in Expo Go)
+  if (!isViroAvailable) {
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="cube-outline" size={64} color="#64748b" />
+        <Text style={styles.errorTitle}>AR Not Available</Text>
+        <Text style={styles.errorText}>
+          AR features require a development build with native modules.{"\n\n"}
+          Please run: <Text style={styles.codeText}>
+            npx expo run:android
+          </Text>{" "}
+          or <Text style={styles.codeText}>npx expo run:ios</Text>
+          {"\n\n"}AR is not supported in Expo Go.
+        </Text>
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.primaryButtonText}>Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   useEffect(() => {
     setScale(poseARDefaults.scale);
@@ -100,7 +152,7 @@ export default function ARViewerScreen() {
     if (!granted) {
       Alert.alert(
         "Camera Permission Required",
-        "Enable camera permission in Android settings to use AR."
+        "Enable camera permission in Android settings to use AR.",
       );
     }
   };
@@ -112,7 +164,10 @@ export default function ARViewerScreen() {
         <Text style={styles.errorText}>
           The selected technique model was not found in the app bundle.
         </Text>
-        <TouchableOpacity style={styles.primaryButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={() => router.back()}
+        >
           <Text style={styles.primaryButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
@@ -125,14 +180,19 @@ export default function ARViewerScreen() {
 
       <SafeAreaView edges={["top"]} style={styles.headerSafeArea}>
         <View style={styles.headerRow}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <View style={styles.headerTextWrap}>
             <Text style={styles.headerTitle} numberOfLines={1}>
               {poseTitle}
             </Text>
-            <Text style={styles.headerSubtitle}>Android ARCore - fixed placement</Text>
+            <Text style={styles.headerSubtitle}>
+              Android ARCore - fixed placement
+            </Text>
           </View>
         </View>
       </SafeAreaView>
@@ -141,7 +201,9 @@ export default function ARViewerScreen() {
         {hasCameraPermission === null ? (
           <View style={styles.centered}>
             <ActivityIndicator size="large" color="#2563eb" />
-            <Text style={styles.infoLabel}>Requesting camera permission...</Text>
+            <Text style={styles.infoLabel}>
+              Requesting camera permission...
+            </Text>
           </View>
         ) : hasCameraPermission === false ? (
           <View style={styles.centered}>
@@ -149,8 +211,13 @@ export default function ARViewerScreen() {
             <Text style={styles.errorText}>
               AR needs camera permission. Grant permission and try again.
             </Text>
-            <TouchableOpacity style={styles.primaryButton} onPress={requestPermissionAgain}>
-              <Text style={styles.primaryButtonText}>Grant Camera Permission</Text>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={requestPermissionAgain}
+            >
+              <Text style={styles.primaryButtonText}>
+                Grant Camera Permission
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -193,7 +260,9 @@ export default function ARViewerScreen() {
         <View style={styles.controlsRow}>
           <TouchableOpacity
             style={styles.controlButton}
-            onPress={() => setScale((prev) => clamp(prev - SCALE_STEP, SCALE_MIN, SCALE_MAX))}
+            onPress={() =>
+              setScale((prev) => clamp(prev - SCALE_STEP, SCALE_MIN, SCALE_MAX))
+            }
           >
             <Ionicons name="remove" size={18} color="#fff" />
             <Text style={styles.controlText}>Scale -</Text>
@@ -201,7 +270,9 @@ export default function ARViewerScreen() {
 
           <TouchableOpacity
             style={styles.controlButton}
-            onPress={() => setScale((prev) => clamp(prev + SCALE_STEP, SCALE_MIN, SCALE_MAX))}
+            onPress={() =>
+              setScale((prev) => clamp(prev + SCALE_STEP, SCALE_MIN, SCALE_MAX))
+            }
           >
             <Ionicons name="add" size={18} color="#fff" />
             <Text style={styles.controlText}>Scale +</Text>
@@ -219,7 +290,9 @@ export default function ARViewerScreen() {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.infoLabel}>{`Scale ${scale.toFixed(2)} | Rotation ${rotationY}\u00B0`}</Text>
+        <Text
+          style={styles.infoLabel}
+        >{`Scale ${scale.toFixed(2)} | Rotation ${rotationY}\u00B0`}</Text>
       </SafeAreaView>
     </View>
   );
@@ -323,6 +396,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 14,
     lineHeight: 20,
+  },
+  codeText: {
+    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
+    color: "#60a5fa",
+    fontWeight: "600",
   },
   primaryButton: {
     marginTop: 18,
