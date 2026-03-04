@@ -1,6 +1,6 @@
 {
   "model_type": "Hybrid (Physics-based + ML)",
-  "training_date": "2026-03-04T16:37:26.148995",
+  "training_date": "2026-02-14T15:41:21.838201",
   "metrics": {
     "board_length": {
       "test_r2": -2.204317868440394,
