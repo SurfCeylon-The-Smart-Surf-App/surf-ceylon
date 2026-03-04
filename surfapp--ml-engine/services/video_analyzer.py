@@ -192,33 +192,44 @@ def classify_pose(landmarks_list, model, label_encoder):
     if not landmarks_list or len(landmarks_list) == 0:
         return None
     
-    # Calculate features
-    avg_pose = np.mean(landmarks_list, axis=0).reshape(1, -1)
-    std_pose = np.std(landmarks_list, axis=0)
+    # 1. Convert to numpy array for temporal feature extraction
+    seq_arr = np.array(landmarks_list)
     
-    motion_intensity = np.mean(avg_pose)
-    motion_variation = np.mean(std_pose)
+    # 2. EXTRACT THE 528 TEMPORAL FEATURES
+    mean_feat = np.mean(seq_arr, axis=0)
+    std_feat = np.std(seq_arr, axis=0)
+    min_feat = np.min(seq_arr, axis=0)
+    max_feat = np.max(seq_arr, axis=0)
+    
+    # Combine them to match the exact 528 features the model expects
+    combined_features = np.concatenate([mean_feat, std_feat, min_feat, max_feat])
+    input_data = combined_features.reshape(1, -1)
+    
+    # Keep your existing motion variables for your fallback logic
+    motion_intensity = float(np.mean(mean_feat))
+    motion_variation = float(np.mean(std_feat))
     
     # Check if we have real pose data
-    has_real_pose_data = np.max(avg_pose) < 10
+    has_real_pose_data = np.max(mean_feat) < 10
     
-    # Predict
-    prediction = model.predict(avg_pose)[0]
-    probabilities = model.predict_proba(avg_pose)[0]
+    # 3. PREDICT using the full 528-feature array
+    prediction_encoded = model.predict(input_data)[0]
+    probabilities = model.predict_proba(input_data)[0]
     
-    # Add variation if using basic features
+    # Add variation if using basic features (your fallback logic)
     if not has_real_pose_data and motion_variation < 5:
         print("  ⚠️  Using basic features, adding variation", file=sys.stderr)
         noise = np.random.dirichlet(np.ones(len(probabilities)) * 2)
         probabilities = 0.7 * probabilities + 0.3 * noise
         probabilities = probabilities / np.sum(probabilities)
+        # Update the predicted class based on the added noise
+        prediction_encoded = np.argmax(probabilities)
     
-    # Get updated prediction
-    prediction = np.argmax(probabilities)
-    pose_class = label_encoder.inverse_transform([prediction])[0]
-    confidence = float(probabilities[prediction])
+    # Decode the prediction back to a readable string (e.g., 'roller', '360')
+    pose_class = label_encoder.inverse_transform([prediction_encoded])[0]
+    confidence = float(probabilities[prediction_encoded])
     
-    # Get all class probabilities
+    # Get all class probabilities for your JSON response
     all_classes = {}
     for idx, class_name in enumerate(label_encoder.classes_):
         all_classes[class_name] = float(probabilities[idx])
@@ -228,11 +239,10 @@ def classify_pose(landmarks_list, model, label_encoder):
         'confidence': confidence,
         'all_classes': all_classes,
         'frames_analyzed': len(landmarks_list),
-        'motion_intensity': float(motion_intensity),
-        'motion_variation': float(motion_variation),
+        'motion_intensity': motion_intensity,
+        'motion_variation': motion_variation,
         'real_pose_detection': bool(has_real_pose_data)
     }
-
 
 def generate_feedback(classification_result):
     """Generate detailed feedback based on pose classification"""
