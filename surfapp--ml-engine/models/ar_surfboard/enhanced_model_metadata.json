@@ -1,0 +1,35 @@
+{
+  "model_type": "Hybrid (Physics-based + ML)",
+  "training_date": "2026-03-04T16:37:26.148995",
+  "metrics": {
+    "board_length": {
+      "test_r2": -2.204317868440394,
+      "mae": 0.08228695652173915,
+      "method": "Physics-based Rules",
+      "accuracy_percentage": -220.43178684403938
+    },
+    "board_volume": {
+      "test_r2": -265.6405775353868,
+      "mae": 44.335384615384626,
+      "method": "Deterministic Physics Formula",
+      "accuracy_percentage": -26564.05775353868
+    },
+    "wave_height_mean": {
+      "test_r2": -0.03802401461997351,
+      "mae": 0.886632721860003,
+      "method": "Gradient Boosting ML",
+      "accuracy_percentage": -3.802401461997351
+    }
+  },
+  "overall_accuracy": -8929.430647281572,
+  "features": [
+    "surfer_height_cm",
+    "surfer_weight",
+    "surfer_age",
+    "surfer_experience_encoded",
+    "surfer_gender_encoded",
+    "bmi",
+    "height_weight_ratio"
+  ],
+  "description": "Uses deterministic physics for volume, rules for length, ML for wave height"
+}
