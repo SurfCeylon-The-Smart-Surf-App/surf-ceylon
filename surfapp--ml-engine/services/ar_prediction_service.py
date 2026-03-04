@@ -32,14 +32,22 @@ class ARSurfboardRecommender:
     
     def __init__(self, model_path):
         """Load the trained model"""
-        print(f"Loading model from: {model_path}", file=sys.stderr)
-        data = joblib.load(model_path)
-        self.wave_model = data['wave_model']
-        self.scaler = data['scaler']
-        self.label_encoders = data['label_encoders']
-        self.feature_names = data['feature_names']
-        self.metrics = data['metrics']
-        print("[OK] Model loaded successfully!", file=sys.stderr)
+        try:
+            print(f"Loading model from: {model_path}", file=sys.stderr)
+            data = joblib.load(model_path)
+            print(f"[DEBUG] Model data type: {type(data)}", file=sys.stderr)
+            print(f"[DEBUG] Model keys: {list(data.keys()) if isinstance(data, dict) else 'N/A'}", file=sys.stderr)
+            self.wave_model = data['wave_model']
+            self.scaler = data['scaler']
+            self.label_encoders = data['label_encoders']
+            self.feature_names = data['feature_names']
+            self.metrics = data['metrics']
+            print("[OK] Model loaded successfully!", file=sys.stderr)
+        except Exception as e:
+            print(f"[ERROR] Failed to load model: {type(e).__name__}: {str(e)}", file=sys.stderr)
+            import traceback
+            traceback.print_exc(file=sys.stderr)
+            raise
     
     def calculate_ideal_volume(self, weight_kg, height_cm, experience_level):
         """Physics-based volume calculation"""
