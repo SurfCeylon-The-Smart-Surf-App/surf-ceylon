@@ -11,12 +11,13 @@ import { API_BASE_URL, BASE_URL } from "../config/network";
 export { API_BASE_URL, BASE_URL };
 
 // API Endpoints (legacy - prefer using API_ENDPOINTS from config/network)
+// Note: No /api prefix here since API_BASE_URL already includes it
 export const ENDPOINTS = {
-  HEALTH: "/api/health",
-  SERVER_INFO: "/api/server-info",
-  SURF_SPOTS: "/api/surf-spots",
-  HAZARD_REPORTS: "/api/hazard-reports",
-  INCIDENTS: "/api/incidents",
+  HEALTH: "/health",
+  SERVER_INFO: "/server-info",
+  SURF_SPOTS: "/surf-spots",
+  HAZARD_REPORTS: "/hazard-reports",
+  INCIDENTS: "/incidents",
 };
 
 // Skill Levels
