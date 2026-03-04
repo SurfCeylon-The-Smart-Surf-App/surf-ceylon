@@ -1,6 +1,24 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 
+/** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
+// SVG support
+config.transformer = {
+  ...config.transformer,
+  babelTransformerPath: require.resolve("react-native-svg-transformer"),
+};
+
+config.resolver = {
+  ...config.resolver,
+  assetExts: [
+    ...config.resolver.assetExts.filter((ext) => ext !== "svg"),
+    "glb", // Add GLB support for 3D models
+    "gltf", // Add GLTF support for 3D models
+  ],
+  sourceExts: [...config.resolver.sourceExts, "svg"],
+};
+
+// Wrap with NativeWind (must be last)
 module.exports = withNativeWind(config, { input: "./global.css" });
