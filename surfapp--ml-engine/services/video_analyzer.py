@@ -17,6 +17,14 @@ except ImportError as e:
     MEDIAPIPE_AVAILABLE = False
     print(f"⚠️  MediaPipe not available: {e}", file=sys.stderr)
 
+# YOLOv8 imports
+try:
+    from ultralytics import YOLO
+    YOLO_AVAILABLE = True
+except ImportError as e:
+    YOLO_AVAILABLE = False
+    print(f"⚠️  Ultralytics (YOLO) not available: {e}", file=sys.stderr)
+
 # Get base directory
 BASE_DIR = Path(__file__).parent.parent.absolute()
 
@@ -36,39 +44,80 @@ def load_models():
         return model, label_encoder
     except FileNotFoundError as e:
         print(f"❌ Model files not found: {e}", file=sys.stderr)
-        print(f"   Expected at: {SURF_MODEL_PATH}", file=sys.stderr)
         return None, None
     except Exception as e:
         print(f"❌ Error loading models: {e}", file=sys.stderr)
         return None, None
 
 
+def validate_surfing_video(video_path, max_yolo_checks=30, frame_skip=5):
+    """
+    Level 3 Gatekeeper: Scans deeper into the video using frame skipping
+    to find a surfboard before allowing heavy ML processing.
+    """
+    if not YOLO_AVAILABLE:
+        print("⚠️  YOLO not installed. Skipping video validation.", file=sys.stderr)
+        return True # Fail open
+
+    print("🕵️ Checking for surfboard using YOLOv8...", file=sys.stderr)
+    try:
+        yolo_model = YOLO('yolov8n.pt')
+        cap = cv2.VideoCapture(str(video_path))
+        if not cap.isOpened():
+            return False
+
+        SURFBOARD_CLASS_ID = 37 
+        frame_count = 0
+        checks_performed = 0
+        surfboard_found = False
+
+        # Keep reading frames until we've run YOLO 'max_yolo_checks' times
+        while checks_performed < max_yolo_checks:
+            ret, cap_frame = cap.read()
+            if not ret: break # End of video
+            
+            # Only run heavy YOLO analysis every 5th frame
+            if frame_count % frame_skip == 0:
+                results = yolo_model(cap_frame, verbose=False)
+                
+                for result in results:
+                    for box in result.boxes:
+                        # Dropped confidence to 20% to account for water spray
+                        if int(box.cls[0]) == SURFBOARD_CLASS_ID and float(box.conf[0]) > 0.20:
+                            surfboard_found = True
+                            break
+                    if surfboard_found: break
+                
+                checks_performed += 1
+
+            if surfboard_found: break
+            frame_count += 1
+
+        cap.release()
+        
+        if surfboard_found:
+            print("✅ Surfboard detected! Proceeding with deep analysis.", file=sys.stderr)
+            return True
+        else:
+            print("❌ No surfboard detected after scanning. Rejecting video.", file=sys.stderr)
+            return False
+            
+    except Exception as e:
+        print(f"⚠️  YOLO validation error: {e}", file=sys.stderr)
+        return True
+
 def extract_pose_landmarks(video_path, max_frames=300):
-    """
-    Extract pose landmarks from video using MediaPipe Pose Landmarker
-    
-    Args:
-        video_path: Path to video file
-        max_frames: Maximum number of frames to process
-    
-    Returns:
-        list: List of pose landmark arrays (one per frame)
-    """
+    """Extract pose landmarks from video using MediaPipe"""
     if not MEDIAPIPE_AVAILABLE:
-        print("⚠️  MediaPipe not available, using basic video analysis", file=sys.stderr)
         return extract_basic_features(video_path, max_frames)
     
     try:
-        # Download model if not exists
         if not POSE_MODEL_PATH.exists():
-            print("📥 Downloading MediaPipe Pose Landmarker model...", file=sys.stderr)
             import urllib.request
             model_url = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task"
             POSE_MODEL_PATH.parent.mkdir(exist_ok=True)
             urllib.request.urlretrieve(model_url, POSE_MODEL_PATH)
-            print("✓ Model downloaded", file=sys.stderr)
         
-        # Create pose landmarker
         base_options = python.BaseOptions(model_asset_path=str(POSE_MODEL_PATH))
         options = vision.PoseLandmarkerOptions(
             base_options=base_options,
@@ -80,50 +129,29 @@ def extract_pose_landmarks(video_path, max_frames=300):
         )
         
         detector = vision.PoseLandmarker.create_from_options(options)
-        
-        # Open video
         cap = cv2.VideoCapture(str(video_path))
         if not cap.isOpened():
-            print(f"❌ Could not open video: {video_path}", file=sys.stderr)
             return extract_basic_features(video_path, max_frames)
         
         landmarks_list = []
         frame_count = 0
         fps = cap.get(cv2.CAP_PROP_FPS) or 30
         
-        print(f"🎥 Processing video: {video_path}", file=sys.stderr)
-        
         while frame_count < max_frames:
             ret, frame = cap.read()
-            if not ret:
-                break
+            if not ret: break
             
-            # Convert BGR to RGB
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            
-            # Create MediaPipe Image
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
-            
-            # Calculate timestamp in milliseconds
             timestamp_ms = int((frame_count / fps) * 1000)
             
-            # Detect pose
             detection_result = detector.detect_for_video(mp_image, timestamp_ms)
             
-            # Extract landmarks if pose detected
             if detection_result.pose_landmarks:
                 pose = detection_result.pose_landmarks[0]
-                
-                # Convert landmarks to feature vector (33 landmarks × 4 = 132 features)
                 features = []
                 for landmark in pose:
-                    features.extend([
-                        landmark.x,
-                        landmark.y,
-                        landmark.z,
-                        landmark.visibility
-                    ])
-                
+                    features.extend([landmark.x, landmark.y, landmark.z, landmark.visibility])
                 landmarks_list.append(features)
             
             frame_count += 1
@@ -132,40 +160,30 @@ def extract_pose_landmarks(video_path, max_frames=300):
         detector.close()
         
         if landmarks_list:
-            print(f"  ✓ Extracted {len(landmarks_list)} pose frames with MediaPipe", file=sys.stderr)
             return landmarks_list
         else:
-            print(f"  ⚠️  No poses detected, falling back to basic features", file=sys.stderr)
             return extract_basic_features(video_path, max_frames)
             
     except Exception as e:
-        print(f"  ⚠️  MediaPipe error: {e}, using basic features", file=sys.stderr)
         return extract_basic_features(video_path, max_frames)
 
 
 def extract_basic_features(video_path, max_frames=300):
-    """Fallback feature extraction without MediaPipe"""
+    """Fallback feature extraction"""
     cap = cv2.VideoCapture(str(video_path))
-    if not cap.isOpened():
-        return None
+    if not cap.isOpened(): return None
     
     features_list = []
     prev_frame = None
     
-    print(f"🎥 Processing video: {video_path}", file=sys.stderr)
-    
     while len(features_list) < max_frames:
         ret, frame = cap.read()
-        if not ret:
-            break
-        
+        if not ret: break
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
         if prev_frame is not None:
             diff = cv2.absdiff(prev_frame, gray)
             motion = np.mean(diff)
-            
-            # Basic feature vector
             features = [motion, np.mean(gray), np.std(gray), np.max(diff)]
             features = features + [0.5] * (132 - len(features))
             features_list.append(features)
@@ -173,63 +191,38 @@ def extract_basic_features(video_path, max_frames=300):
         prev_frame = gray
     
     cap.release()
-    print(f"  Extracted {len(features_list)} feature frames", file=sys.stderr)
     return features_list if features_list else None
 
 
 def classify_pose(landmarks_list, model, label_encoder):
-    """
-    Classify surf pose using trained model
+    """Classify surf pose using trained model"""
+    if not landmarks_list or len(landmarks_list) == 0: return None
     
-    Args:
-        landmarks_list: List of pose landmark arrays
-        model: Trained Random Forest model
-        label_encoder: Label encoder for class names
-    
-    Returns:
-        dict: Classification results
-    """
-    if not landmarks_list or len(landmarks_list) == 0:
-        return None
-    
-    # 1. Convert to numpy array for temporal feature extraction
     seq_arr = np.array(landmarks_list)
-    
-    # 2. EXTRACT THE 528 TEMPORAL FEATURES
     mean_feat = np.mean(seq_arr, axis=0)
     std_feat = np.std(seq_arr, axis=0)
     min_feat = np.min(seq_arr, axis=0)
     max_feat = np.max(seq_arr, axis=0)
     
-    # Combine them to match the exact 528 features the model expects
     combined_features = np.concatenate([mean_feat, std_feat, min_feat, max_feat])
     input_data = combined_features.reshape(1, -1)
     
-    # Keep your existing motion variables for your fallback logic
     motion_intensity = float(np.mean(mean_feat))
     motion_variation = float(np.mean(std_feat))
-    
-    # Check if we have real pose data
     has_real_pose_data = np.max(mean_feat) < 10
     
-    # 3. PREDICT using the full 528-feature array
     prediction_encoded = model.predict(input_data)[0]
     probabilities = model.predict_proba(input_data)[0]
     
-    # Add variation if using basic features (your fallback logic)
     if not has_real_pose_data and motion_variation < 5:
-        print("  ⚠️  Using basic features, adding variation", file=sys.stderr)
         noise = np.random.dirichlet(np.ones(len(probabilities)) * 2)
         probabilities = 0.7 * probabilities + 0.3 * noise
         probabilities = probabilities / np.sum(probabilities)
-        # Update the predicted class based on the added noise
         prediction_encoded = np.argmax(probabilities)
     
-    # Decode the prediction back to a readable string (e.g., 'roller', '360')
     pose_class = label_encoder.inverse_transform([prediction_encoded])[0]
     confidence = float(probabilities[prediction_encoded])
     
-    # Get all class probabilities for your JSON response
     all_classes = {}
     for idx, class_name in enumerate(label_encoder.classes_):
         all_classes[class_name] = float(probabilities[idx])
@@ -243,6 +236,7 @@ def classify_pose(landmarks_list, model, label_encoder):
         'motion_variation': motion_variation,
         'real_pose_detection': bool(has_real_pose_data)
     }
+
 
 def generate_feedback(classification_result):
     """Generate detailed feedback based on pose classification"""
@@ -258,122 +252,59 @@ def generate_feedback(classification_result):
     confidence = classification_result['confidence']
     all_classes = classification_result['all_classes']
     
-    # Feedback database
     feedback_db = {
         'roller': {
             'rating': 'excellent',
             'message': '🌊 Nice roller technique! You\'re using the wave\'s power effectively.',
-            'strengths': [
-                'Good wave positioning',
-                'Smooth transition up the face',
-                'Maintaining speed through the maneuver'
-            ],
-            'suggestions': [
-                'Try extending the roller further along the wave face',
-                'Work on your exit to maintain momentum',
-                'Practice on different wave sizes to adapt your technique'
-            ],
-            'next_steps': [
-                'Combine rollers with other maneuvers',
-                'Practice on steeper sections',
-                'Work on timing and wave reading'
-            ]
+            'strengths': ['Good wave positioning', 'Smooth transition up the face', 'Maintaining speed through the maneuver'],
+            'suggestions': ['Try extending the roller further along the wave face', 'Work on your exit to maintain momentum', 'Practice on different wave sizes to adapt your technique'],
+            'next_steps': ['Combine rollers with other maneuvers', 'Practice on steeper sections', 'Work on timing and wave reading']
         },
         'cutback-frontside': {
             'rating': 'excellent',
             'message': '🎯 Great frontside cutback! Classic surfing technique.',
-            'strengths': [
-                'Good rail-to-rail transition',
-                'Proper body rotation',
-                'Carving through the turn'
-            ],
-            'suggestions': [
-                'Drive harder off the bottom turn to set up the cutback',
-                'Keep your eyes on where you want to go',
-                'Try to complete the arc closer to the whitewater'
-            ],
-            'next_steps': [
-                'Work on layback cutbacks for style',
-                'Practice snap cutbacks for tighter turns',
-                'Combine with other maneuvers in sequence'
-            ]
+            'strengths': ['Good rail-to-rail transition', 'Proper body rotation', 'Carving through the turn'],
+            'suggestions': ['Drive harder off the bottom turn to set up the cutback', 'Keep your eyes on where you want to go', 'Try to complete the arc closer to the whitewater'],
+            'next_steps': ['Work on layback cutbacks for style', 'Practice snap cutbacks for tighter turns', 'Combine with other maneuvers in sequence']
         },
         'take-off': {
             'rating': 'good',
             'message': '🏄 Solid take-off! Getting into waves is crucial.',
-            'strengths': [
-                'Good wave selection',
-                'Timing the pop-up well',
-                'Proper positioning on the board'
-            ],
-            'suggestions': [
-                'Paddle stronger to catch waves earlier',
-                'Look ahead to the section you want to hit',
-                'Work on explosive pop-up for steeper waves'
-            ],
-            'next_steps': [
-                'Practice take-offs on different wave types',
-                'Work on angled take-offs',
-                'Build paddling strength and endurance'
-            ]
+            'strengths': ['Good wave selection', 'Timing the pop-up well', 'Proper positioning on the board'],
+            'suggestions': ['Paddle stronger to catch waves earlier', 'Look ahead to the section you want to hit', 'Work on explosive pop-up for steeper waves'],
+            'next_steps': ['Practice take-offs on different wave types', 'Work on angled take-offs', 'Build paddling strength and endurance']
         },
         '360': {
             'rating': 'excellent',
             'message': '🔄 Impressive 360! Advanced aerial maneuver!',
-            'strengths': [
-                'Explosive off the lip',
-                'Good rotation control',
-                'Committed to the maneuver'
-            ],
-            'suggestions': [
-                'Work on landing with more control',
-                'Try to spot your landing earlier',
-                'Build more speed going into the maneuver'
-            ],
-            'next_steps': [
-                'Practice on different sections',
-                'Try variations like alley-oop 360s',
-                'Work on other aerial maneuvers'
-            ]
+            'strengths': ['Explosive off the lip', 'Good rotation control', 'Committed to the maneuver'],
+            'suggestions': ['Work on landing with more control', 'Try to spot your landing earlier', 'Build more speed going into the maneuver'],
+            'next_steps': ['Practice on different sections', 'Try variations like alley-oop 360s', 'Work on other aerial maneuvers']
         }
     }
     
-    # Default feedback
     default_feedback = {
         'rating': 'good',
         'message': f'🏄 Detected technique: {pose}',
-        'suggestions': [
-            'Keep practicing consistently',
-            'Film your sessions to track progress',
-            'Focus on fundamentals'
-        ],
-        'next_steps': [
-            'Set specific goals for each session',
-            'Practice on appropriate wave sizes',
-            'Stay patient and persistent'
-        ]
+        'suggestions': ['Keep practicing consistently', 'Film your sessions to track progress', 'Focus on fundamentals'],
+        'next_steps': ['Set specific goals for each session', 'Practice on appropriate wave sizes', 'Stay patient and persistent']
     }
     
-    # Get feedback
     pose_key = pose.lower().replace(' ', '_').replace('-', '_')
     feedback = feedback_db.get(pose_key, default_feedback).copy()
     
-    # Add confidence note if low
     if confidence < 0.6:
         feedback['note'] = f'⚠️ Low confidence ({confidence*100:.0f}%). The model may need more training data.'
     
-    # Check if model is uncertain
     sorted_probs = sorted(all_classes.items(), key=lambda x: x[1], reverse=True)
     if len(sorted_probs) > 1:
         top_prob = sorted_probs[0][1]
         second_prob = sorted_probs[1][1]
         
         if top_prob - second_prob < 0.15:
-            if 'note' not in feedback:
-                feedback['note'] = ''
+            if 'note' not in feedback: feedback['note'] = ''
             feedback['note'] += '\n📊 Model is uncertain between multiple techniques.'
     
-    # Add alternative detections
     alternatives = []
     for class_name, prob in sorted_probs[1:3]:
         if prob > 0.2:
@@ -386,49 +317,34 @@ def generate_feedback(classification_result):
 
 
 def analyze_video(video_path):
-    """
-    Main analysis function - coordinates the entire pipeline
-    
-    Args:
-        video_path: Path to video file
-    
-    Returns:
-        dict: Complete analysis results
-    """
+    """Main analysis function - coordinates the entire pipeline"""
     print(f"\n🔍 Starting surf video analysis...", file=sys.stderr)
     
-    # Check video exists
     if not os.path.exists(video_path):
+        return {'success': False, 'error': f'Video file not found: {video_path}'}
+
+    # --- LEVEL 3 YOLO GATEKEEPER ---
+    is_valid_surf_video = validate_surfing_video(video_path)
+    if not is_valid_surf_video:
         return {
             'success': False,
-            'error': f'Video file not found: {video_path}'
+            'error': 'NOT_SURFING_VIDEO',
+            'message': 'No surfboard detected. Please upload a clear surfing video.',
+            'is_surf_video': False
         }
     
-    # Load models
     model, label_encoder = load_models()
     if model is None or label_encoder is None:
-        return {
-            'success': False,
-            'error': 'Could not load ML models.'
-        }
+        return {'success': False, 'error': 'Could not load ML models.'}
     
-    # Extract pose landmarks
     landmarks = extract_pose_landmarks(video_path)
     if landmarks is None or len(landmarks) == 0:
-        return {
-            'success': False,
-            'error': 'Could not extract pose data from video.'
-        }
+        return {'success': False, 'error': 'Could not extract pose data from video.'}
     
-    # Classify pose
     classification = classify_pose(landmarks, model, label_encoder)
     if classification is None:
-        return {
-            'success': False,
-            'error': 'Could not classify pose from extracted data.'
-        }
+        return {'success': False, 'error': 'Could not classify pose from extracted data.'}
     
-    # Generate feedback
     feedback = generate_feedback(classification)
     
     print(f"✅ Analysis complete!", file=sys.stderr)
@@ -442,18 +358,18 @@ def analyze_video(video_path):
 
 
 def main():
-    """CLI entry point - maintains backward compatibility"""
+    """CLI entry point"""
     if len(sys.argv) < 2:
         print("Usage: python surf_pose_analyzer_service.py <video_path>", file=sys.stderr)
         sys.exit(1)
     
     video_path = sys.argv[1]
-    
-    # Run analysis
     result = analyze_video(video_path)
     
-    # Output JSON to stdout
     print(json.dumps(result, indent=2))
     
-    # Exit with appropriate code
-    sys.exit(0 if result['success'] else 1)
+    # CRITICAL FIX: Always exit 0 so Node.js can parse the JSON error cleanly!
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
