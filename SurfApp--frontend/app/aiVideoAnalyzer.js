@@ -24,7 +24,6 @@ export default function AIVideoAnalyzer() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Request media library permissions
   const requestPermissions = async () => {
     if (Platform.OS !== "web") {
       const { status } =
@@ -32,7 +31,7 @@ export default function AIVideoAnalyzer() {
       if (status !== "granted") {
         Alert.alert(
           "Permission Required",
-          "Please grant camera roll permissions to select videos."
+          "Please grant camera roll permissions to select videos.",
         );
         return false;
       }
@@ -40,7 +39,6 @@ export default function AIVideoAnalyzer() {
     return true;
   };
 
-  // Pick video from gallery
   const pickVideo = async () => {
     try {
       const hasPermission = await requestPermissions();
@@ -55,11 +53,10 @@ export default function AIVideoAnalyzer() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const video = result.assets[0];
 
-        // Check file size (max 50MB)
         if (video.fileSize && video.fileSize > 50 * 1024 * 1024) {
           Alert.alert(
             "File Too Large",
-            "Please select a video smaller than 50MB."
+            "Please select a video smaller than 50MB.",
           );
           return;
         }
@@ -74,7 +71,6 @@ export default function AIVideoAnalyzer() {
     }
   };
 
-  // Analyze video
   const analyzeVideo = async () => {
     if (!selectedVideo) {
       Alert.alert("No Video", "Please select a video first.");
@@ -85,17 +81,13 @@ export default function AIVideoAnalyzer() {
       setAnalyzing(true);
       setUploadProgress(0);
 
-      // Get auth token
       const token = await AsyncStorage.getItem("userToken");
       if (!token) {
         Alert.alert("Error", "Please login to use this feature.");
         return;
       }
 
-      // Prepare form data
       const formData = new FormData();
-
-      // Handle different platforms
       const videoFile = {
         uri: selectedVideo.uri,
         type: "video/mp4",
@@ -103,10 +95,8 @@ export default function AIVideoAnalyzer() {
       };
 
       formData.append("video", videoFile);
-
       const API_URL = getStaticApiBaseUrl();
 
-      // Upload and analyze (with extended timeout for video processing)
       const response = await axios.post(
         `${API_URL}/video-analysis/analyze`,
         formData,
@@ -115,14 +105,14 @@ export default function AIVideoAnalyzer() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-          timeout: 120000, // 2 minutes timeout for video analysis
+          timeout: 120000,
           onUploadProgress: (progressEvent) => {
             const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
+              (progressEvent.loaded * 100) / progressEvent.total,
             );
             setUploadProgress(percentCompleted);
           },
-        }
+        },
       );
 
       if (response.data.success) {
@@ -132,19 +122,33 @@ export default function AIVideoAnalyzer() {
         throw new Error(response.data.error || "Analysis failed");
       }
     } catch (error) {
-      console.error("Analysis error:", error);
+      // --- THE FIX: Organized error handling so the console stays clean ---
+      const errorCode = error.response?.data?.error;
       const errorMessage =
-        error.response?.data?.error ||
+        error.response?.data?.message ||
         error.message ||
         "Failed to analyze video. Please try again.";
-      Alert.alert("Analysis Failed", errorMessage);
+
+      if (errorCode === "NOT_SURFING_VIDEO") {
+        // Trigger a custom popup for non-surfing videos
+        console.log("Video rejected: Not a surfing video.");
+        Alert.alert(
+          "🏄 Not a Surfing Video",
+          "We couldn't detect a surfboard in this video. Please ensure the surfer and board are clearly visible.",
+          [{ text: "Got it", style: "default" }],
+        );
+      } else {
+        // Fallback for real server crashes (like the 500 error)
+        console.error("Analysis error:", error);
+        Alert.alert("Analysis Failed", errorMessage);
+      }
+      // ------------------------------------------------------------------
     } finally {
       setAnalyzing(false);
       setUploadProgress(0);
     }
   };
 
-  // Get rating badge style
   const getRatingStyle = (rating) => {
     switch (rating) {
       case "excellent":
@@ -160,7 +164,6 @@ export default function AIVideoAnalyzer() {
     }
   };
 
-  // Get rating icon
   const getRatingIcon = (rating) => {
     switch (rating) {
       case "excellent":
@@ -176,7 +179,6 @@ export default function AIVideoAnalyzer() {
     }
   };
 
-  // Get rating color
   const getRatingColor = (rating) => {
     switch (rating) {
       case "excellent":
@@ -192,7 +194,6 @@ export default function AIVideoAnalyzer() {
     }
   };
 
-  // Render feedback section
   const renderFeedback = () => {
     if (!analysisResult || !analysisResult.success) return null;
 
@@ -231,9 +232,7 @@ export default function AIVideoAnalyzer() {
             >
               <Ionicons name={ratingIcon} size={18} color={ratingColor} />
               <Text
-                className={`text-sm font-bold ml-2 ${
-                  ratingStyle.split(" ")[2]
-                }`}
+                className={`text-sm font-bold ml-2 ${ratingStyle.split(" ")[2]}`}
               >
                 {feedback.rating.replace("_", " ").toUpperCase()}
               </Text>

@@ -1,8 +1,26 @@
 const { exec } = require("child_process");
 const { promisify } = require("util");
 const path = require("path");
+const fs = require("fs");
 
 const execAsync = promisify(exec);
+
+// Resolve the Python executable: prefer venv, fall back to system python
+const getPythonExecutable = () => {
+  if (process.env.PYTHON_PATH) return process.env.PYTHON_PATH;
+  const isWin = process.platform === "win32";
+  const venvPython = path.resolve(
+    __dirname,
+    "..",
+    "..",
+    "surfapp--ml-engine",
+    "venv",
+    isWin ? "Scripts\\python.exe" : "bin/python",
+  );
+  return fs.existsSync(venvPython) ? venvPython : "python";
+};
+
+const PYTHON_EXECUTABLE = getPythonExecutable();
 
 /**
  * Check if text contains toxic content using Python CLI
@@ -28,15 +46,15 @@ const checkToxicity = async (text) => {
       "..",
       "..",
       "surfapp--ml-engine",
-      "check_toxicity_cli.py"
+      "check_toxicity_cli.py",
     );
 
     // Use exec with callback to handle stderr properly
     const result = await new Promise((resolve, reject) => {
       exec(
-        `python "${scriptPath}" "${escapedText}"`,
+        `"${PYTHON_EXECUTABLE}" "${scriptPath}" "${escapedText}"`,
         {
-          timeout: 5000,
+          timeout: 15000,
           maxBuffer: 10 * 1024 * 1024,
         },
         (error, stdout, stderr) => {
@@ -60,7 +78,7 @@ const checkToxicity = async (text) => {
           } catch (parseError) {
             reject(parseError);
           }
-        }
+        },
       );
     });
 
