@@ -27,9 +27,11 @@ import { userAPI, postsAPI, authAPI } from "../../services/api";
 import { getStaticImageBaseUrl } from "../../utils/networkConfig";
 import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import { getUserSessions, getUserInsights } from "../../data/surfApi";
+import { useSurfTutorProfile } from "../../context/SurfTutorProfileContext.jsx";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const { clearProfile } = useSurfTutorProfile();
   const [userPosts, setUserPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -502,6 +504,106 @@ export default function ProfileScreen() {
             </View>
           </View>
         </View>
+
+        {/* AI Surf Tutor Profile Section */}
+        {user?.aiSurfTutor?.completed && (
+          <View className="px-4 mt-6">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-lg font-bold text-gray-900">
+                AI Surf Tutor Profile
+              </Text>
+              <TouchableOpacity
+                onPress={async () => {
+                  await clearProfile();
+                  router.push("/aiSurfTutor");
+                }}
+              >
+                <Text className="text-blue-600 font-semibold">Edit</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+              <View className="flex-row justify-between py-3 border-b border-gray-100">
+                <Text className="text-gray-600">Fitness Level</Text>
+                <Text className="text-gray-900 font-semibold">
+                  {user.aiSurfTutor.fitnessLevel}
+                </Text>
+              </View>
+              <View className="flex-row justify-between py-3 border-b border-gray-100">
+                <Text className="text-gray-600">Experience Level</Text>
+                <Text className="text-gray-900 font-semibold">
+                  {user.aiSurfTutor.experienceLevel}
+                </Text>
+              </View>
+              <View className="flex-row justify-between py-3 border-b border-gray-100">
+                <Text className="text-gray-600">Goal</Text>
+                <Text className="text-gray-900 font-semibold">
+                  {user.aiSurfTutor.goal}
+                </Text>
+              </View>
+              <View className="flex-row justify-between py-3 border-b border-gray-100">
+                <Text className="text-gray-600">Training Duration</Text>
+                <Text className="text-gray-900 font-semibold">
+                  {user.aiSurfTutor.trainingDuration}
+                </Text>
+              </View>
+              <View className="flex-row justify-between py-3 border-b border-gray-100">
+                <Text className="text-gray-600">Height</Text>
+                <Text className="text-gray-900 font-semibold">
+                  {user.aiSurfTutor.height} cm
+                </Text>
+              </View>
+              <View className="flex-row justify-between py-3 border-b border-gray-100">
+                <Text className="text-gray-600">Weight</Text>
+                <Text className="text-gray-900 font-semibold">
+                  {user.aiSurfTutor.weight} kg
+                </Text>
+              </View>
+              <View className="flex-row justify-between py-3 border-b border-gray-100">
+                <Text className="text-gray-600">Age</Text>
+                <Text className="text-gray-900 font-semibold">
+                  {user.aiSurfTutor.age} years
+                </Text>
+              </View>
+              <View className="flex-row justify-between py-3 border-b border-gray-100">
+                <Text className="text-gray-600">BMI</Text>
+                <Text className="text-gray-900 font-semibold">
+                  {user.aiSurfTutor.bmi?.toFixed(1) || 'N/A'}
+                </Text>
+              </View>
+              <View className="flex-row justify-between py-3 border-b border-gray-100">
+                <Text className="text-gray-600">Gender</Text>
+                <Text className="text-gray-900 font-semibold">
+                  {user.aiSurfTutor.gender}
+                </Text>
+              </View>
+              {user.aiSurfTutor.equipment && user.aiSurfTutor.equipment !== "None" && (
+                <View className="flex-row justify-between py-3 border-b border-gray-100">
+                  <Text className="text-gray-600">Equipment</Text>
+                  <Text className="text-gray-900 font-semibold">
+                    {user.aiSurfTutor.equipment}
+                  </Text>
+                </View>
+              )}
+              {user.aiSurfTutor.limitations && user.aiSurfTutor.limitations !== "None" && (
+                <View className="flex-row justify-between py-3">
+                  <Text className="text-gray-600">Limitations</Text>
+                  <Text className="text-gray-900 font-semibold">
+                    {user.aiSurfTutor.limitations}
+                  </Text>
+                </View>
+              )}
+              {(!user.aiSurfTutor.equipment || user.aiSurfTutor.equipment === "None") && (!user.aiSurfTutor.limitations || user.aiSurfTutor.limitations === "None") && (
+                <View className="flex-row justify-between py-3">
+                  <Text className="text-gray-600">Equipment</Text>
+                  <Text className="text-gray-900 font-semibold">
+                    None
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* Stats Section */}
         {insights && (
