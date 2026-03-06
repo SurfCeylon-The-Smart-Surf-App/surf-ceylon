@@ -16,6 +16,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import { useSurfTutorProfile } from '../context/SurfTutorProfileContext.jsx';
+import { userAPI } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 const { width } = Dimensions.get('window');
 
@@ -32,6 +34,7 @@ const { width } = Dimensions.get('window');
 export default function SurfTutorQuizScreen({ onComplete }) {
   const router = useRouter();
   const { saveProfile } = useSurfTutorProfile();
+  const { refreshUser } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
 
   // Quiz state
@@ -235,23 +238,44 @@ export default function SurfTutorQuizScreen({ onComplete }) {
 
   const handleSubmit = async () => {
     try {
+      const heightInMeters = parseFloat(height) / 100; // Convert cm to meters
+      const weightInKg = parseFloat(weight);
+      const bmi = weightInKg / (heightInMeters * heightInMeters);
+
       const profile = {
         fitnessLevel,
         experienceLevel,
         goal,
         trainingDuration,
         height: parseFloat(height),
-        weight: parseFloat(weight),
+        weight: weightInKg,
         age: parseInt(age),
         gender,
         equipment: equipment || 'None',
-        limitations: limitations.length > 0 ? limitations : undefined,
+        limitations: limitations && limitations.length > 0 ? limitations.join(', ') : '',
+        bmi: parseFloat(bmi.toFixed(2)),
         completed: true,
         completedAt: new Date().toISOString(),
       };
+
+      // Save to local storage
       await saveProfile(profile);
+
+      // Save to user profile in database
+      try {
+        await userAPI.updateProfile({
+          aiSurfTutor: profile,
+        });
+        // Refresh user data to get updated profile
+        await refreshUser();
+      } catch (apiError) {
+        console.error('Failed to save to user profile:', apiError);
+        // Continue even if API fails - we have local storage
+      }
+
       onComplete();
     } catch (error) {
+      console.error('Quiz submit error:', error);
       Alert.alert('Error', 'Failed to save profile. Please try again.');
     }
   };
