@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Check if ViroReact native modules are available (not in Expo Go)
 const isViroAvailable = !!NativeModules.VRTMaterialManager;
@@ -42,6 +43,9 @@ const SCALE_MAX = 1.2;
 const SCALE_STEP = 0.05;
 const ROTATION_STEP = 15;
 
+const AR_SESSIONS_KEY = "@ar_sessions";
+const AR_PROGRESS_KEY = "@ar_progress";
+
 async function requestAndroidCameraPermission() {
   if (Platform.OS !== "android") return false;
   const granted = await PermissionsAndroid.request(
@@ -67,6 +71,7 @@ export default function ARViewerScreen() {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [scale, setScale] = useState(AR_DEFAULTS.scale);
   const [rotationY, setRotationY] = useState(AR_DEFAULTS.rotationY);
+  const sessionStartTime = useRef(Date.now());
 
   const pose = useMemo(() => {
     if (params.poseId && typeof params.poseId === "string") {
@@ -143,8 +148,65 @@ export default function ARViewerScreen() {
       });
     return () => {
       mounted = false;
+      // Save AR session on unmount
+      saveARSession();
     };
   }, []);
+
+  // Save AR session progress
+  const saveARSession = async () => {
+    try {
+      const sessionDuration = Math.floor((Date.now() - sessionStartTime.current) / 1000); // in seconds
+      
+      if (sessionDuration < 5) return; // Don't save very short sessions
+
+      const session = {
+        id: `ar-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        techniqueId: params.modelKey || params.poseId || 'unknown',
+        techniqueName: poseTitle,
+        duration: sessionDuration,
+        timestamp: new Date().toISOString(),
+        difficulty: params.difficulty || 'Beginner',
+      };
+
+      // Save to AR sessions list
+      const existingData = await AsyncStorage.getItem(AR_SESSIONS_KEY);
+      const sessions = existingData ? JSON.parse(existingData) : [];
+      const updatedSessions = [session, ...sessions].slice(0, 50); // Keep last 50 sessions
+      await AsyncStorage.setItem(AR_SESSIONS_KEY, JSON.stringify(updatedSessions));
+
+      // Update AR progress summary
+      const progressData = await AsyncStorage.getItem(AR_PROGRESS_KEY);
+      const progress = progressData ? JSON.parse(progressData) : {
+        modules: {},
+        totalTime: 0,
+        sessions: 0,
+      };
+
+      // Update module-specific progress
+      const moduleId = params.modelKey || params.poseId || 'unknown';
+      if (!progress.modules[moduleId]) {
+        progress.modules[moduleId] = {
+          completed: 0,
+          totalTime: 0,
+          lastAccessed: null,
+        };
+      }
+      progress.modules[moduleId].completed += 1;
+      progress.modules[moduleId].totalTime += sessionDuration;
+      progress.modules[moduleId].lastAccessed = session.timestamp;
+
+      // Update overall progress
+      progress.totalTime += sessionDuration;
+      progress.sessions += 1;
+
+      await AsyncStorage.setItem(AR_PROGRESS_KEY, JSON.stringify(progress));
+
+      console.log('AR session saved:', session);
+    } catch (error) {
+      console.error('Error saving AR session:', error);
+    }
+  };
 
   const requestPermissionAgain = async () => {
     const granted = await requestAndroidCameraPermission();
@@ -182,7 +244,10 @@ export default function ARViewerScreen() {
         <View style={styles.headerRow}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={async () => {
+              await saveARSession();
+              router.back();
+            }}
           >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
