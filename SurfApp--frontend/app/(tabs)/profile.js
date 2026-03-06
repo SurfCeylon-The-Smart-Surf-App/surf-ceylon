@@ -653,6 +653,50 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        {/* Training Progress Section */}
+        <View className="px-4 mt-6">
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="text-lg font-bold text-gray-900">
+              Training Progress
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push("/aiTutor/Progress")}
+            >
+              <Text className="text-blue-600 font-semibold">View Details</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            className="bg-white rounded-lg p-4 shadow-sm border border-gray-100"
+            onPress={() => router.push("/aiTutor/Progress")}
+          >
+            <View className="flex-row items-center mb-3">
+              <View className="w-12 h-12 bg-blue-500 rounded-full items-center justify-center mr-3">
+                <Ionicons name="trending-up" size={24} color="#fff" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-gray-900 font-bold text-base">Track Your Journey</Text>
+                <Text className="text-gray-600 text-sm">Cardio workouts, AR sessions & badges</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+            </View>
+            <View className="flex-row justify-around pt-3 border-t border-gray-100">
+              <View className="items-center">
+                <Ionicons name="fitness" size={20} color="#FF6B6B" />
+                <Text className="text-xs text-gray-600 mt-1">Cardio</Text>
+              </View>
+              <View className="items-center">
+                <Ionicons name="cube-outline" size={20} color="#4ECDC4" />
+                <Text className="text-xs text-gray-600 mt-1">AR Coach</Text>
+              </View>
+              <View className="items-center">
+                <Ionicons name="trophy" size={20} color="#FFD93D" />
+                <Text className="text-xs text-gray-600 mt-1">Badges</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
         {/* Recent Sessions */}
         <View className="px-4 mt-6 mb-6">
           <View className="flex-row items-center justify-between mb-3">
