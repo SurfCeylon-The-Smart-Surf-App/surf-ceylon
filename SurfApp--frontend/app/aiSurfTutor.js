@@ -36,15 +36,6 @@ export default function AITutorHome() {
       color: "#4ECDC4",
       screen: "ARVisualization",
     },
-   
-    {
-      id: 4,
-      title: "Progress",
-      description: "Track your progress, badges, and achievements",
-      icon: "trending-up",
-      color: "#96CEB4",
-      screen: "Progress",
-    },
   ];
 
   const handleFeaturePress = (feature) => {
