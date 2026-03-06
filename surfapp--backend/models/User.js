@@ -129,6 +129,52 @@ const userSchema = new mongoose.Schema(
       },
     },
 
+    // AI Surf Tutor Profile
+    aiSurfTutor: {
+      fitnessLevel: {
+        type: String,
+        enum: ["Beginner", "Intermediate", "Pro", ""],
+        default: "",
+      },
+      experienceLevel: {
+        type: String,
+        enum: ["Beginner", "Intermediate", "Advanced", "Expert", ""],
+        default: "",
+      },
+      goal: {
+        type: String,
+        enum: [
+          "Warm up only",
+          "Improve endurance",
+          "Improve explosive pop-up speed",
+          "",
+        ],
+        default: "",
+      },
+      trainingDuration: {
+        type: String,
+        enum: ["5-10 minutes", "10-20 minutes", "20+ minutes", ""],
+        default: "",
+      },
+      height: { type: Number }, // in cm
+      weight: { type: Number }, // in kg
+      age: { type: Number },
+      gender: {
+        type: String,
+        enum: ["Male", "Female", ""],
+        default: "",
+      },
+      equipment: {
+        type: String,
+        enum: ["None", "Kettlebell", "Gym", ""],
+        default: "",
+      },
+      limitations: { type: String, default: "" },
+      bmi: { type: Number },
+      completed: { type: Boolean, default: false },
+      completedAt: { type: Date },
+    },
+
     // Stats
     stats: {
       totalSessions: { type: Number, default: 0 },
