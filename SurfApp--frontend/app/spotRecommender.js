@@ -11,13 +11,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import SpotCard from "../components/SpotCard";
 import axios from "axios";
 import { getStaticApiBaseUrl } from "../utils/networkConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from "../context/UserContext";
-import { filterSpotsByRadius, addDistanceToSpots } from "../data/locationUtils";
+import { addDistanceToSpots, filterSpotsByRadius } from "../data/locationUtils";
 
 export default function SpotRecommender() {
   const [spots, setSpots] = useState([]);
@@ -25,7 +25,22 @@ export default function SpotRecommender() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState("all");
   const router = useRouter();
+  const { region: incomingRegion } = useLocalSearchParams();
   const { userLocation } = useUser();
+
+  // Spots after applying the region / Near Me filter
+  const getRegionSpots = () => {
+    if (!incomingRegion || incomingRegion === "Near Me") {
+      if (userLocation) {
+        return filterSpotsByRadius(spots, userLocation, 20);
+      }
+      return spots;
+    }
+    return spots.filter(
+      (s) =>
+        s.region && s.region.toLowerCase() === incomingRegion.toLowerCase(),
+    );
+  };
 
   useEffect(() => {
     fetchSpots();
@@ -55,26 +70,16 @@ export default function SpotRecommender() {
 
       let fetchedSpots = response.data.spots || [];
 
-      // Filter spots within 10km radius if location is available
       if (userLocation) {
-        console.log(
-          "Filtering spots within 10km radius from user location:",
-          userLocation
-        );
-        fetchedSpots = filterSpotsByRadius(fetchedSpots, userLocation, 10);
         // Add distance information to each spot
         fetchedSpots = addDistanceToSpots(fetchedSpots, userLocation);
-        // Sort by distance (closest first) within same score category
+        // Sort by score, then by distance when scores are similar
         fetchedSpots.sort((a, b) => {
           if (Math.abs(a.score - b.score) < 5) {
-            // If scores are similar (within 5 points), sort by distance
             return (a.distance || 999) - (b.distance || 999);
           }
           return b.score - a.score;
         });
-        console.log(`Found ${fetchedSpots.length} spots within 10km radius`);
-      } else {
-        console.log("User location not available, showing all spots");
       }
 
       setSpots(fetchedSpots);
@@ -92,14 +97,16 @@ export default function SpotRecommender() {
   };
 
   const getFilteredSpots = () => {
-    if (filter === "all") return spots;
-    if (filter === "excellent") return spots.filter((s) => s.score >= 75);
+    const regionSpots = getRegionSpots();
+    if (filter === "all") return regionSpots;
+    if (filter === "excellent") return regionSpots.filter((s) => s.score >= 75);
     if (filter === "good")
-      return spots.filter((s) => s.score >= 50 && s.score < 75);
-    if (filter === "fair") return spots.filter((s) => s.score < 50);
-    return spots;
+      return regionSpots.filter((s) => s.score >= 50 && s.score < 75);
+    if (filter === "fair") return regionSpots.filter((s) => s.score < 50);
+    return regionSpots;
   };
 
+  const regionSpots = getRegionSpots();
   const filteredSpots = getFilteredSpots();
 
   if (loading) {
@@ -164,7 +171,9 @@ export default function SpotRecommender() {
               <Ionicons name="arrow-back" size={24} color="#ffffff" />
             </TouchableOpacity>
             <Text className="text-white text-xl font-bold">
-              Spot Recommender
+              {incomingRegion && incomingRegion !== "Near Me"
+                ? incomingRegion
+                : "Spot Recommender"}
             </Text>
             <View className="w-10" />
           </View>
@@ -178,31 +187,39 @@ export default function SpotRecommender() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16 }}
         >
-          <FilterButton label="All Spots" value="all" count={spots.length} />
+          <FilterButton
+            label="All Spots"
+            value="all"
+            count={regionSpots.length}
+          />
           <FilterButton
             label="Excellent"
             value="excellent"
-            count={spots.filter((s) => s.score >= 75).length}
+            count={regionSpots.filter((s) => s.score >= 75).length}
           />
           <FilterButton
             label="Good"
             value="good"
-            count={spots.filter((s) => s.score >= 50 && s.score < 75).length}
+            count={
+              regionSpots.filter((s) => s.score >= 50 && s.score < 75).length
+            }
           />
           <FilterButton
             label="Fair"
             value="fair"
-            count={spots.filter((s) => s.score < 50).length}
+            count={regionSpots.filter((s) => s.score < 50).length}
           />
         </ScrollView>
 
         {/* Location info */}
-        {userLocation && spots.length > 0 && (
+        {regionSpots.length > 0 && (
           <View className="px-4 pt-2">
             <View className="flex-row items-center">
               <Ionicons name="location" size={14} color="#6b7280" />
               <Text className="text-xs text-gray-600 ml-1">
-                Showing spots within 10km of your location
+                {!incomingRegion || incomingRegion === "Near Me"
+                  ? "Showing spots within 20km of your location"
+                  : `Showing all spots in ${incomingRegion}`}
               </Text>
             </View>
           </View>

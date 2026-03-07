@@ -82,7 +82,7 @@ const MapScreen = () => {
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
       },
-      1000
+      1000,
     );
   };
 
@@ -135,7 +135,7 @@ const MapScreen = () => {
             latitudeDelta: 0.05,
             longitudeDelta: 0.05,
           },
-          1000
+          1000,
         );
       }
     }
@@ -178,7 +178,6 @@ const MapScreen = () => {
       >
         {spots.map((spot) => {
           const isSelected = selectedSpot?.id === spot.id;
-          const size = isSelected ? 70 : 60;
           const color = getMarkerColor(spot.score);
 
           return (
@@ -189,27 +188,30 @@ const MapScreen = () => {
                 longitude: parseFloat(spot.coords[0]),
               }}
               onPress={() => handleMarkerPress(spot)}
+              anchor={{ x: 0.5, y: 1 }}
             >
-              <View
-                style={{
-                  width: size,
-                  height: size,
-                  backgroundColor: color,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderWidth: isSelected ? 3 : 2,
-                  borderColor: "white",
-                  overflow: "visible",
-                }}
-              >
-                <Text
+              <View style={styles.markerPin}>
+                {/* Badge Circle */}
+                <View
                   style={[
-                    styles.markerText,
-                    { fontSize: isSelected ? 16 : 14 },
+                    styles.markerBadge,
+                    {
+                      backgroundColor: color,
+                      transform: [{ scale: isSelected ? 1.2 : 1 }],
+                    },
                   ]}
                 >
-                  {Math.round(spot.score)}
-                </Text>
+                  <Text
+                    style={[
+                      styles.markerText,
+                      { fontSize: isSelected ? 16 : 13 },
+                    ]}
+                  >
+                    {Math.round(spot.score)}
+                  </Text>
+                </View>
+                {/* Pin Point */}
+                <View style={[styles.markerPoint, { borderTopColor: color }]} />
               </View>
             </Marker>
           );
@@ -396,8 +398,38 @@ const styles = StyleSheet.create({
   myLocationIcon: {
     fontSize: 28,
   },
+  markerPin: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  markerBadge: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#ffffff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  markerPoint: {
+    width: 0,
+    height: 0,
+    backgroundColor: "transparent",
+    borderStyle: "solid",
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 12,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    marginTop: -2,
+  },
   markerText: {
-    fontSize: 18,
+    fontSize: 13,
     fontWeight: "bold",
     color: "white",
   },

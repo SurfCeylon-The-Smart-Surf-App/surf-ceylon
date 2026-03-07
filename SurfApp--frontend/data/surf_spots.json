@@ -83,7 +83,7 @@
     "id": "11",
     "name": "Kabalana Left",
     "region": "South Coast",
-    "coords": [80.1177, 6.1289],
+    "coords": [80.3448, 5.9792],
     "bottomType": "Reef",
     "accessibility": "Medium"
   },
@@ -91,7 +91,7 @@
     "id": "12",
     "name": "Kabalana Right",
     "region": "South Coast",
-    "coords": [80.1185, 6.1295],
+    "coords": [80.3464, 5.9786],
     "bottomType": "Reef",
     "accessibility": "Medium"
   },
@@ -99,7 +99,7 @@
     "id": "13",
     "name": "Hiriketiya Bay",
     "region": "South Coast",
-    "coords": [80.7047, 5.9758],
+    "coords": [80.7078, 5.9615],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -107,7 +107,7 @@
     "id": "14",
     "name": "Dikwella",
     "region": "South Coast",
-    "coords": [80.7102, 5.9712],
+    "coords": [80.6868, 5.9613],
     "bottomType": "Reef",
     "accessibility": "Medium"
   },
@@ -115,7 +115,7 @@
     "id": "15",
     "name": "Jungle Beach (Unawatuna)",
     "region": "South Coast",
-    "coords": [80.2505, 6.0093],
+    "coords": [80.2392, 6.012],
     "bottomType": "Reef",
     "accessibility": "Medium"
   },
@@ -123,7 +123,7 @@
     "id": "16",
     "name": "Unawatuna Bay",
     "region": "South Coast",
-    "coords": [80.2482, 6.0108],
+    "coords": [80.2444, 6.0082],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -163,7 +163,7 @@
     "id": "21",
     "name": "Madiha Left",
     "region": "South Coast",
-    "coords": [80.5833, 5.9833],
+    "coords": [80.5077, 5.9375],
     "bottomType": "Reef",
     "accessibility": "Medium"
   },
@@ -171,7 +171,7 @@
     "id": "22",
     "name": "Madiha Right",
     "region": "South Coast",
-    "coords": [80.584, 5.9825],
+    "coords": [80.5107, 5.9369],
     "bottomType": "Reef",
     "accessibility": "Medium"
   },
@@ -195,7 +195,7 @@
     "id": "25",
     "name": "Polhena Beach",
     "region": "South Coast",
-    "coords": [80.5478, 5.9485],
+    "coords": [80.5256, 5.9362],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -211,7 +211,7 @@
     "id": "27",
     "name": "Talalla Beach",
     "region": "South Coast",
-    "coords": [80.5667, 5.9667],
+    "coords": [80.6222, 5.945],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -219,7 +219,7 @@
     "id": "28",
     "name": "Talalla Retreat",
     "region": "South Coast",
-    "coords": [80.5695, 5.9655],
+    "coords": [80.6248, 5.9462],
     "bottomType": "Reef",
     "accessibility": "Medium"
   },
@@ -227,7 +227,7 @@
     "id": "29",
     "name": "Goyambokka",
     "region": "South Coast",
-    "coords": [80.6572, 5.9685],
+    "coords": [80.7805, 6.0091],
     "bottomType": "Sand",
     "accessibility": "Medium"
   },
@@ -243,7 +243,7 @@
     "id": "31",
     "name": "Kudawella",
     "region": "South Coast",
-    "coords": [80.7823, 5.9932],
+    "coords": [80.731, 5.9824],
     "bottomType": "Reef",
     "accessibility": "Low"
   },
@@ -251,7 +251,7 @@
     "id": "32",
     "name": "Dewata Beach",
     "region": "South Coast",
-    "coords": [80.2903, 6.0015],
+    "coords": [80.2382, 6.0252],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -259,7 +259,7 @@
     "id": "33",
     "name": "Koggala Beach",
     "region": "South Coast",
-    "coords": [80.3291, 5.9928],
+    "coords": [80.3197, 5.9897],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -267,7 +267,7 @@
     "id": "34",
     "name": "Habaraduwa",
     "region": "South Coast",
-    "coords": [80.0587, 6.0721],
+    "coords": [80.2914, 5.9947],
     "bottomType": "Reef",
     "accessibility": "Medium"
   },
@@ -347,7 +347,7 @@
     "id": "44",
     "name": "Okanda",
     "region": "East Coast",
-    "coords": [81.7152, 6.6912],
+    "coords": [81.7703, 6.6519],
     "bottomType": "Reef",
     "accessibility": "Low"
   },
@@ -355,7 +355,7 @@
     "id": "45",
     "name": "Komari",
     "region": "East Coast",
-    "coords": [81.8403, 7.3692],
+    "coords": [81.8647, 6.9882],
     "bottomType": "Sand",
     "accessibility": "Medium"
   },
@@ -371,7 +371,7 @@
     "id": "47",
     "name": "Pasikudah Bay",
     "region": "East Coast",
-    "coords": [81.5656, 7.9372],
+    "coords": [81.5614, 7.9295],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -379,7 +379,7 @@
     "id": "48",
     "name": "Kalkudah",
     "region": "East Coast",
-    "coords": [81.5495, 7.9178],
+    "coords": [81.5604, 7.9157],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -387,7 +387,7 @@
     "id": "49",
     "name": "Nilaveli Beach",
     "region": "East Coast",
-    "coords": [81.2087, 8.7042],
+    "coords": [81.193, 8.6981],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -395,7 +395,7 @@
     "id": "50",
     "name": "Uppuveli Beach",
     "region": "East Coast",
-    "coords": [81.2214, 8.6089],
+    "coords": [81.2178, 8.6005],
     "bottomType": "Sand",
     "accessibility": "High"
   },
@@ -403,7 +403,7 @@
     "id": "51",
     "name": "Marble Beach",
     "region": "East Coast",
-    "coords": [81.2156, 8.7512],
+    "coords": [81.2105, 8.5123],
     "bottomType": "Sand",
     "accessibility": "Medium"
   },
@@ -595,7 +595,7 @@
     "id": "75",
     "name": "Jaffna Casuarina Beach",
     "region": "North Coast",
-    "coords": [80.1789, 9.7612],
+    "coords": [79.8877, 9.7631],
     "bottomType": "Sand",
     "accessibility": "Medium"
   },
@@ -619,7 +619,7 @@
     "id": "78",
     "name": "Nilaweli Point",
     "region": "East Coast",
-    "coords": [81.2098, 8.7156],
+    "coords": [81.1945, 8.7065],
     "bottomType": "Reef",
     "accessibility": "Medium"
   }

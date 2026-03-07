@@ -1113,14 +1113,19 @@ export default function ProfileScreen() {
           className="flex-1"
         >
           <SafeAreaView className="flex-1 bg-gray-50">
-            <View className="flex-row items-center justify-between px-4 py-4 bg-white border-b border-gray-200">
-              <Text className="text-lg font-bold text-gray-900">
-                Edit Preferences
-              </Text>
-              <TouchableOpacity onPress={() => setActiveModal(null)}>
-                <Ionicons name="close" size={24} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
+            <SafeAreaView
+              edges={["top"]}
+              className="bg-white border-b border-gray-200"
+            >
+              <View className="flex-row items-center justify-between px-4 py-4">
+                <Text className="text-lg font-bold text-gray-900">
+                  Edit Preferences
+                </Text>
+                <TouchableOpacity onPress={() => setActiveModal(null)}>
+                  <Ionicons name="close" size={24} color="#6b7280" />
+                </TouchableOpacity>
+              </View>
+            </SafeAreaView>
 
             <ScrollView className="p-4">
               <Text className="text-sm font-semibold text-gray-700 mb-3 mt-4">
