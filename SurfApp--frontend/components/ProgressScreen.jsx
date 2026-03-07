@@ -35,6 +35,8 @@ import { progressAPI } from "../services/api.js";
 const WORKOUT_PROGRESS_KEY = "@workout_progress";
 const CARDIO_BADGES_KEY = "@cardio_badges";
 const AR_BADGES_KEY = "@ar_badges";
+const AR_SESSIONS_KEY = "@ar_sessions";
+const AR_PROGRESS_KEY = "@ar_progress";
 
 // Helper function to calculate AR stats from progress data
 /**
@@ -60,6 +62,7 @@ function calculateARStats(progressData) {
 export default function ProgressScreen() {
   const router = useRouter();
   const [cardioWorkouts, setCardioWorkouts] = useState([]);
+  const [arSessions, setArSessions] = useState([]);
   const [earnedBadges, setEarnedBadges] = useState([]);
   const [arEarnedBadges, setArEarnedBadges] = useState([]);
   const [badgeProgress, setBadgeProgress] = useState({});
@@ -94,13 +97,24 @@ export default function ProgressScreen() {
       const progressData = await getBadgeProgress();
       setBadgeProgress(progressData);
 
-      // Load AR progress from progressAPI
+      // Load AR progress from AsyncStorage (our new implementation)
       try {
-        const progressResponse = await progressAPI.loadProgress();
-        const allProgress = progressResponse.progress || {};
-        setArProgress(allProgress);
+        const arProgressData = await AsyncStorage.getItem(AR_PROGRESS_KEY);
+        const localARProgress = arProgressData ? JSON.parse(arProgressData) : {
+          modules: {},
+          totalTime: 0,
+          sessions: 0,
+        };
+        setArProgress({ ar: localARProgress });
+
+        // Load AR sessions
+        const arSessionsData = await AsyncStorage.getItem(AR_SESSIONS_KEY);
+        const sessions = arSessionsData ? JSON.parse(arSessionsData) : [];
+        setArSessions(sessions);
       } catch (error) {
-        console.warn("Could not load AR progress:", error);
+        console.warn("Could not load AR progress from AsyncStorage:", error);
+        setArProgress({ ar: { modules: {}, totalTime: 0, sessions: 0 } });
+        setArSessions([]);
       }
     } catch (error) {
       console.error("Error loading progress data:", error);
@@ -377,16 +391,26 @@ export default function ProgressScreen() {
             {/* Completed Modules */}
             {arStatsData.completedModules.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>✅ Completed Modules</Text>
-                {arStatsData.completedModules.map((moduleId, idx) => (
-                  <View key={idx} style={styles.recordCard}>
-                    <Icon name="check-circle" size={24} color="#4CAF50" />
-                    <View style={styles.recordContent}>
-                      <Text style={styles.recordLabel}>{moduleId}</Text>
-                      <Text style={styles.recordValue}>Completed</Text>
+                <Text style={styles.sectionTitle}>✅ Studied Techniques</Text>
+                {arStatsData.completedModules.map((moduleId, idx) => {
+                  const moduleData = arProgress?.ar?.modules?.[moduleId] || {};
+                  const totalMinutes = Math.floor((moduleData.totalTime || 0) / 60);
+                  const sessions = moduleData.completed || 0;
+                  
+                  return (
+                    <View key={idx} style={styles.recordCard}>
+                      <Icon name="view-in-ar" size={24} color="#667eea" />
+                      <View style={styles.recordContent}>
+                        <Text style={styles.recordLabel}>
+                          {moduleId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </Text>
+                        <Text style={styles.recordValue}>
+                          {sessions} session{sessions !== 1 ? 's' : ''} • {totalMinutes} min
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             )}
 
@@ -484,63 +508,116 @@ export default function ProgressScreen() {
 
         {/* HISTORY TAB */}
         {activeTab === "history" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recent Cardio Workouts</Text>
-            {cardioWorkouts.length === 0 ? (
-              <Text style={styles.emptyText}>
-                No workouts yet. Start your first workout!
-              </Text>
-            ) : (
-              cardioWorkouts
-                .slice(-10)
-                .reverse()
-                .map((workout, index) => (
-                  <View key={index} style={styles.historyCard}>
-                    <View style={styles.historyHeader}>
-                      <Text style={styles.historyDate}>
-                        {new Date(workout.date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </Text>
-                      <View
-                        style={[
-                          styles.completionBadge,
-                          {
-                            backgroundColor:
-                              workout.completionRate >= 80
-                                ? "#4CAF50"
-                                : workout.completionRate >= 50
-                                ? "#FF9500"
-                                : "#FF3B30",
-                          },
-                        ]}
-                      >
-                        <Text style={styles.completionText}>
-                          {workout.completionRate}%
+          <>
+            {/* Cardio Workouts History */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>💪 Recent Cardio Workouts</Text>
+              {cardioWorkouts.length === 0 ? (
+                <Text style={styles.emptyText}>
+                  No workouts yet. Start your first workout!
+                </Text>
+              ) : (
+                cardioWorkouts
+                  .slice(-10)
+                  .reverse()
+                  .map((workout, index) => (
+                    <View key={`cardio-${index}`} style={styles.historyCard}>
+                      <View style={styles.historyHeader}>
+                        <Text style={styles.historyDate}>
+                          {new Date(workout.date).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </Text>
+                        <View
+                          style={[
+                            styles.completionBadge,
+                            {
+                              backgroundColor:
+                                workout.completionRate >= 80
+                                  ? "#4CAF50"
+                                  : workout.completionRate >= 50
+                                  ? "#FF9500"
+                                  : "#FF3B30",
+                            },
+                          ]}
+                        >
+                          <Text style={styles.completionText}>
+                            {workout.completionRate}%
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.historyPlan}>{workout.planName}</Text>
+                      <View style={styles.historyStats}>
+                        <Text style={styles.historyStatItem}>
+                          <Icon name="schedule" size={14} color="#666" />{" "}
+                          {workout.totalDurationActual || 0}min
+                        </Text>
+                        <Text style={styles.historyStatItem}>
+                          <Icon name="check-circle" size={14} color="#4CAF50" />{" "}
+                          {workout.activitiesCompleted}
+                        </Text>
+                        <Text style={styles.historyStatItem}>
+                          <Icon name="cancel" size={14} color="#FF3B30" />{" "}
+                          {workout.activitiesSkipped}
                         </Text>
                       </View>
                     </View>
-                    <Text style={styles.historyPlan}>{workout.planName}</Text>
-                    <View style={styles.historyStats}>
-                      <Text style={styles.historyStatItem}>
-                        <Icon name="schedule" size={14} color="#666" />{" "}
-                        {workout.totalDurationActual || 0}min
-                      </Text>
-                      <Text style={styles.historyStatItem}>
-                        <Icon name="check-circle" size={14} color="#4CAF50" />{" "}
-                        {workout.activitiesCompleted}
-                      </Text>
-                      <Text style={styles.historyStatItem}>
-                        <Icon name="cancel" size={14} color="#FF3B30" />{" "}
-                        {workout.activitiesSkipped}
-                      </Text>
+                  ))
+              )}
+            </View>
+
+            {/* AR Sessions History */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>🥽 Recent AR Sessions</Text>
+              {arSessions.length === 0 ? (
+                <Text style={styles.emptyText}>
+                  No AR sessions yet. Start exploring 3D visualizations!
+                </Text>
+              ) : (
+                arSessions
+                  .slice(-10)
+                  .reverse()
+                  .map((session, index) => (
+                    <View key={`ar-${index}`} style={styles.historyCard}>
+                      <View style={styles.historyHeader}>
+                        <Text style={styles.historyDate}>
+                          {new Date(session.timestamp).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </Text>
+                        <View
+                          style={[
+                            styles.completionBadge,
+                            {
+                              backgroundColor: "#667eea",
+                            },
+                          ]}
+                        >
+                          <Text style={styles.completionText}>
+                            {session.difficulty || "N/A"}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.historyPlan}>{session.techniqueName}</Text>
+                      <View style={styles.historyStats}>
+                        <Text style={styles.historyStatItem}>
+                          <Icon name="schedule" size={14} color="#666" />{" "}
+                          {Math.floor(session.duration / 60)}min {session.duration % 60}s
+                        </Text>
+                        <Text style={styles.historyStatItem}>
+                          <Icon name="view-in-ar" size={14} color="#667eea" />{" "}
+                          AR Session
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                ))
-            )}
-          </View>
+                  ))
+              )}
+            </View>
+          </>
         )}
       </ScrollView>
     </View></View>
