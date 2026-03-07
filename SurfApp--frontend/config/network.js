@@ -16,7 +16,7 @@ import { Platform } from "react-native";
  * 2. macOS/Linux: Run `ifconfig` or `ip addr` and find your IP
  * 3. The backend server must be running on this IP address
  */
-const LOCAL_NETWORK_IP = "172.20.10.3"; // Update this to your computer's local IP
+const LOCAL_NETWORK_IP = "172.20.124.182"; // Update this to your computer's local IP
 
 /**
  * Backend server port

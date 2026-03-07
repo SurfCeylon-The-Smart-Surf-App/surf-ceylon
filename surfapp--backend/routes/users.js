@@ -106,6 +106,35 @@ router.put(
       if (phone !== undefined) updateData.phone = phone;
       if (typeof isPrivate === "boolean") updateData.isPrivate = isPrivate;
 
+      // Handle AI Surf Tutor profile data
+      if (req.body.aiSurfTutor) {
+        const tutorData = req.body.aiSurfTutor;
+        
+        // Convert limitations array to string if needed
+        let limitationsStr = "";
+        if (tutorData.limitations) {
+          limitationsStr = Array.isArray(tutorData.limitations) 
+            ? tutorData.limitations.join(", ") 
+            : tutorData.limitations;
+        }
+
+        updateData.aiSurfTutor = {
+          fitnessLevel: tutorData.fitnessLevel || "",
+          experienceLevel: tutorData.experienceLevel || "",
+          goal: tutorData.goal || "",
+          trainingDuration: tutorData.trainingDuration || "",
+          height: tutorData.height ? parseFloat(tutorData.height) : undefined,
+          weight: tutorData.weight ? parseFloat(tutorData.weight) : undefined,
+          age: tutorData.age ? parseInt(tutorData.age) : undefined,
+          gender: tutorData.gender || "",
+          equipment: tutorData.equipment || "",
+          limitations: limitationsStr,
+          bmi: tutorData.bmi ? parseFloat(tutorData.bmi) : undefined,
+          completed: tutorData.completed || false,
+          completedAt: tutorData.completedAt ? new Date(tutorData.completedAt) : (tutorData.completed ? new Date() : undefined),
+        };
+      }
+
       // Handle profile picture upload
       if (req.file) {
         updateData.profilePicture = `/uploads/${req.file.filename}`;
@@ -128,7 +157,8 @@ router.put(
       console.error("Update profile error:", error);
       res.status(500).json({
         success: false,
-        message: "Server error",
+        message: error.message || "Server error",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       });
     }
   }

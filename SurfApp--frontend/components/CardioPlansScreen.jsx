@@ -16,8 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import SafeLinearGradient from "./SafeLinearGradient.jsx";
 import { cardioAPI } from "../services/aiTutorAPI.js";
-import { useCardioProfile } from "../context/CardioProfileContext.jsx";
-import CardioQuizScreen from "./CardioQuizScreen.jsx";
+import { useSurfTutorProfile } from "../context/SurfTutorProfileContext.jsx";
 import WorkoutExecutionScreen from "./WorkoutExecutionScreen.jsx";
 import PlanExplanationModal from "./PlanExplanationModal.jsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -177,8 +176,8 @@ export default function CardioPlansScreen() {
     isLoading: profileLoading,
     isQuizCompleted,
     refreshProfile,
-  } = useCardioProfile();
-  const [showQuiz, setShowQuiz] = useState(false);
+    clearProfile,
+  } = useSurfTutorProfile();
   const [selectedWorkout, setSelectedWorkout] = useState(null);
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState([]);
@@ -202,14 +201,6 @@ export default function CardioPlansScreen() {
       handleGetRecommendations();
     }
   }, [profileLoading, isQuizCompleted, profile]);
-
-  const handleQuizComplete = async () => {
-    setShowQuiz(false);
-    await refreshProfile();
-    setTimeout(() => {
-      handleGetRecommendations();
-    }, 100);
-  };
 
   /**
    * @returns {Promise<WorkoutProgress[]>}
@@ -426,10 +417,6 @@ export default function CardioPlansScreen() {
     );
   }
 
-  if (showQuiz || !isQuizCompleted) {
-    return <CardioQuizScreen onComplete={handleQuizComplete} />;
-  }
-
   return (
     <View className="flex-1">
       <StatusBar barStyle="light-content" />
@@ -456,8 +443,13 @@ export default function CardioPlansScreen() {
             <TouchableOpacity onPress={() => router.push("/cardio-history")}>
               <Icon name="history" size={24} color="#ffffff" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setShowQuiz(true)}>
-              <Icon name="refresh" size={24} color="#ffffff" />
+            <TouchableOpacity 
+              onPress={async () => {
+                await clearProfile();
+                router.push("/aiSurfTutor");
+              }}
+            >
+              <Icon name="edit" size={24} color="#ffffff" />
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -478,6 +470,15 @@ export default function CardioPlansScreen() {
                 <Text style={styles.profileName}>Your Profile</Text>
                 <Text style={styles.profileLevel}>{profile.fitnessLevel}</Text>
               </View>
+              <TouchableOpacity
+                onPress={async () => {
+                  await clearProfile();
+                  router.push("/aiSurfTutor");
+                }}
+                style={styles.profileEditButton}
+              >
+                <Icon name="edit" size={18} color="#4169E1" />
+              </TouchableOpacity>
             </View>
             <View style={styles.profileDetails}>
               <View style={styles.profileDetailItem}>
@@ -533,13 +534,13 @@ export default function CardioPlansScreen() {
             <Icon name="fitness-center" size={80} color="#e0e0e0" />
             <Text style={styles.emptyStateTitle}>No Plans Yet</Text>
             <Text style={styles.emptyStateText}>
-              Complete the quiz to get personalized workout recommendations
+              Tap the refresh button above to generate your personalized workout plans
             </Text>
             <TouchableOpacity
               style={styles.emptyStateButton}
-              onPress={() => setShowQuiz(true)}
+              onPress={handleGetRecommendations}
             >
-              <Text style={styles.emptyStateButtonText}>Take Fitness Quiz</Text>
+              <Text style={styles.emptyStateButtonText}>Generate Plans</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -658,6 +659,14 @@ const styles = StyleSheet.create({
   profileInfo: {
     marginLeft: 12,
     flex: 1,
+  },
+  profileEditButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#E6F0FF",
+    justifyContent: "center",
+    alignItems: "center",
   },
   profileName: {
     fontSize: 16,

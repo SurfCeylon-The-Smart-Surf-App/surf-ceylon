@@ -5,17 +5,18 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   ActivityIndicator,
   Alert,
   StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 // @ts-ignore
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { API_BASE_URL } from "../constants/config";
 import { TECHNIQUE_INSTRUCTIONS } from "../data/techniqueInstructions";
+import { useSurfTutorProfile } from "../context/SurfTutorProfileContext.jsx";
 
 const techniques = [
   {
@@ -111,23 +112,13 @@ const techniques = [
 ];
 
 export default function ARVisualizationScreen() {
+  const router = useRouter();
+  const { profile, clearProfile } = useSurfTutorProfile();
+  
   const [selectedTechnique, setSelectedTechnique] = useState(null);
-  const [showUserForm, setShowUserForm] = useState(false);
   const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(false);
   const [instructionsExpanded, setInstructionsExpanded] = useState(false);
-  
-  // User input state
-  const [userProfile, setUserProfile] = useState({
-    height_cm: '',
-    weight_kg: '',
-    age: '',
-    experience_level: 'Beginner',
-    gender: 'Male'
-  });
-  
-  const { useRouter } = require("expo-router");
-  const router = useRouter();
 
   // Map technique IDs to model keys for AR viewer
   const techniqueToModelKey = {
@@ -150,33 +141,14 @@ export default function ARVisualizationScreen() {
 
   const handleSelectTechnique = (techniqueId) => {
     setSelectedTechnique(techniqueId);
-    setShowUserForm(true);
     setRecommendations(null);
+    // Auto-fetch recommendations using profile data
+    handleGetRecommendations(techniqueId);
   };
 
-  const handleGetRecommendations = async () => {
-    // Validate inputs
-    if (!userProfile.height_cm || !userProfile.weight_kg || !userProfile.age) {
-      Alert.alert("Missing Information", "Please fill in all required fields (height, weight, age)");
-      return;
-    }
-
-    const height = parseFloat(userProfile.height_cm);
-    const weight = parseFloat(userProfile.weight_kg);
-    const age = parseInt(userProfile.age);
-
-    if (height < 100 || height > 250) {
-      Alert.alert("Invalid Height", "Please enter height between 100-250 cm");
-      return;
-    }
-
-    if (weight < 30 || weight > 200) {
-      Alert.alert("Invalid Weight", "Please enter weight between 30-200 kg");
-      return;
-    }
-
-    if (age < 10 || age > 100) {
-      Alert.alert("Invalid Age", "Please enter age between 10-100 years");
+  const handleGetRecommendations = async (techniqueId = selectedTechnique) => {
+    if (!profile) {
+      Alert.alert("Profile Required", "Please complete your profile first");
       return;
     }
 
@@ -189,12 +161,12 @@ export default function ARVisualizationScreen() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          height_cm: height,
-          weight_kg: weight,
-          age: age,
-          experience_level: userProfile.experience_level,
-          gender: userProfile.gender,
-          drill_id: selectedTechnique
+          height_cm: profile.height,
+          weight_kg: profile.weight,
+          age: profile.age,
+          experience_level: profile.experienceLevel,
+          gender: profile.gender,
+          drill_id: techniqueId
         })
       });
 
@@ -230,9 +202,50 @@ export default function ARVisualizationScreen() {
       params: {
         modelKey: modelKey,
         title: technique.name,
-        difficulty: userProfile.experience_level,
+        difficulty: profile?.experienceLevel || 'Beginner',
       },
     });
+  };
+
+  // Helper to render profile summary
+  const renderProfileSummary = () => {
+    if (!profile) return null;
+    
+    return (
+      <View style={styles.profileSummaryCard}>
+        <View style={styles.profileSummaryHeader}>
+          <Icon name="person" size={24} color="#2563eb" />
+          <Text style={styles.profileSummaryTitle}>Your Profile</Text>
+          <TouchableOpacity
+            onPress={async () => {
+              await clearProfile();
+              router.push("/aiSurfTutor");
+            }}
+            style={styles.profileEditButton}
+          >
+            <Icon name="edit" size={16} color="#2563eb" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.profileSummaryGrid}>
+          <View style={styles.profileSummaryItem}>
+            <Text style={styles.profileSummaryLabel}>Experience</Text>
+            <Text style={styles.profileSummaryValue}>{profile.experienceLevel}</Text>
+          </View>
+          <View style={styles.profileSummaryItem}>
+            <Text style={styles.profileSummaryLabel}>Height</Text>
+            <Text style={styles.profileSummaryValue}>{profile.height} cm</Text>
+          </View>
+          <View style={styles.profileSummaryItem}>
+            <Text style={styles.profileSummaryLabel}>Weight</Text>
+            <Text style={styles.profileSummaryValue}>{profile.weight} kg</Text>
+          </View>
+          <View style={styles.profileSummaryItem}>
+            <Text style={styles.profileSummaryLabel}>Age</Text>
+            <Text style={styles.profileSummaryValue}>{profile.age} yrs</Text>
+          </View>
+        </View>
+      </View>
+    );
   };
 
   return (
@@ -253,28 +266,45 @@ export default function ARVisualizationScreen() {
               <Text style={styles.headerTitle}>AI-Powered AR Coach</Text>
               <Text style={styles.headerSubtitle}>Personalized surfing recommendations</Text>
             </View>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={async () => {
+                await clearProfile();
+                router.push("/aiSurfTutor");
+              }}
+            >
+              <Icon name="edit" size={20} color="#fff" />
+            </TouchableOpacity>
           </View>
         </SafeAreaView>
       </LinearGradient>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-        {/* Step 1: Select Technique */}
-        {!showUserForm && (
+        {/* Profile Summary */}
+        {renderProfileSummary()}
+
+        {/* Loading State */}
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#2563eb" />
+            <Text style={styles.loadingText}>Getting AI Recommendations...</Text>
+          </View>
+        )}
+
+        {/* Technique Selection */}
+        {!selectedTechnique && !loading && (
           <>
             <Text style={styles.sectionTitle}>Choose Your Drill</Text>
             {techniques.map((technique) => (
               <TouchableOpacity
                 key={technique.id}
-                style={[
-                  styles.techniqueCard,
-                  selectedTechnique === technique.id && styles.techniqueCardSelected,
-                ]}
+                style={styles.techniqueCard}
                 onPress={() => handleSelectTechnique(technique.id)}
               >
                 <Icon
                   name={technique.icon}
                   size={40}
-                  color="#007AFF"
+                  color="#2563eb"
                   style={{ marginRight: 16 }}
                 />
                 <View style={styles.techniqueContent}>
@@ -283,151 +313,35 @@ export default function ARVisualizationScreen() {
                     {technique.description}
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={24} color="#007AFF" />
+                <Icon name="chevron-right" size={24} color="#2563eb" />
               </TouchableOpacity>
             ))}
           </>
         )}
 
-        {/* Step 2: User Profile Form */}
-        {showUserForm && !recommendations && (
-          <>
-            <TouchableOpacity
-              style={styles.changeButton}
-              onPress={() => {
-                setShowUserForm(false);
-                setSelectedTechnique(null);
-              }}
-            >
-              <Icon name="edit" size={18} color="#007AFF" />
-              <Text style={styles.changeButtonText}>Change Drill</Text>
-            </TouchableOpacity>
-
-            <View style={styles.selectedDrillBanner}>
-              <Icon name={techniques.find(t => t.id === selectedTechnique)?.icon} size={24} color="#fff" />
-              <Text style={styles.selectedDrillText}>
-                {techniques.find(t => t.id === selectedTechnique)?.name}
-              </Text>
-            </View>
-
-            <Text style={styles.sectionTitle}>Step 2: Your Profile</Text>
-            <Text style={styles.formHelp}>
-              This information helps our AI calculate the perfect surfboard setup for you
-            </Text>
-
-            <View style={styles.formCard}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Height (cm) *</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g., 175"
-                  keyboardType="numeric"
-                  value={userProfile.height_cm}
-                  onChangeText={(text) => setUserProfile({...userProfile, height_cm: text})}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Weight (kg) *</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g., 70"
-                  keyboardType="numeric"
-                  value={userProfile.weight_kg}
-                  onChangeText={(text) => setUserProfile({...userProfile, weight_kg: text})}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Age *</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g., 25"
-                  keyboardType="numeric"
-                  value={userProfile.age}
-                  onChangeText={(text) => setUserProfile({...userProfile, age: text})}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Experience Level *</Text>
-                <View style={styles.experienceButtons}>
-                  {['Beginner', 'Intermediate', 'Advanced', 'Pro'].map((level) => (
-                    <TouchableOpacity
-                      key={level}
-                      style={[
-                        styles.experienceButton,
-                        userProfile.experience_level === level && styles.experienceButtonActive
-                      ]}
-                      onPress={() => setUserProfile({...userProfile, experience_level: level})}
-                    >
-                      <Text style={[
-                        styles.experienceButtonText,
-                        userProfile.experience_level === level && styles.experienceButtonTextActive
-                      ]}>
-                        {level}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Gender</Text>
-                <View style={styles.genderButtons}>
-                  {['Male', 'Female'].map((gender) => (
-                    <TouchableOpacity
-                      key={gender}
-                      style={[
-                        styles.genderButton,
-                        userProfile.gender === gender && styles.genderButtonActive
-                      ]}
-                      onPress={() => setUserProfile({...userProfile, gender})}
-                    >
-                      <Text style={[
-                        styles.genderButtonText,
-                        userProfile.gender === gender && styles.genderButtonTextActive
-                      ]}>
-                        {gender}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-                onPress={handleGetRecommendations}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <>
-                    <Icon name="auto-awesome" size={24} color="#fff" style={{marginRight: 8}} />
-                    <Text style={styles.submitButtonText}>Get AI Recommendations</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-
-        {/* Step 3: Show Recommendations */}
-        {recommendations && (
+        {/* Show Recommendations */}
+        {recommendations && selectedTechnique && !loading && (
           <>
             <TouchableOpacity
               style={styles.changeButton}
               onPress={() => {
                 setRecommendations(null);
+                setSelectedTechnique(null);
               }}
             >
-              <Icon name="refresh" size={18} color="#007AFF" />
-              <Text style={styles.changeButtonText}>Recalculate</Text>
+              <Icon name="arrow-back" size={18} color="#2563eb" />
+              <Text style={styles.changeButtonText}>Choose Different Drill</Text>
             </TouchableOpacity>
 
+            <View style={styles.selectedDrillBanner}>
+              <Icon name={techniques.find(t => t.id === selectedTechnique)?.icon} size={28} color="#1e40af" />
+              <Text style={styles.selectedDrillText}>
+                {techniques.find(t => t.id === selectedTechnique)?.name}
+              </Text>
+            </View>
+
             <View style={styles.successBanner}>
-              <Icon name="check-circle" size={32} color="#4CAF50" />
+              <Icon name="check-circle" size={32} color="#10b981" />
               <Text style={styles.successTitle}>Your Personalized Setup</Text>
             </View>
 
@@ -574,6 +488,15 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
     marginRight: 8,
+  },
+  editButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
   },
   headerTextContainer: {
     flex: 1,
@@ -984,5 +907,73 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#065f46",
     lineHeight: 20,
+  },
+  profileSummaryCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  profileSummaryHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  profileSummaryTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1f2937",
+    marginLeft: 10,
+    flex: 1,
+  },
+  profileEditButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#eff6ff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  profileSummaryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  profileSummaryItem: {
+    flex: 1,
+    minWidth: "45%",
+    backgroundColor: "#f9fafb",
+    padding: 12,
+    borderRadius: 8,
+  },
+  profileSummaryLabel: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginBottom: 4,
+    fontWeight: "500",
+  },
+  profileSummaryValue: {
+    fontSize: 16,
+    color: "#2563eb",
+    fontWeight: "700",
+  },
+  loadingContainer: {
+    alignItems: "center",
+    padding: 40,
+    marginTop: 20,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "600",
   },
 });

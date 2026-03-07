@@ -5,14 +5,18 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useSurfTutorProfile } from "../context/SurfTutorProfileContext.jsx";
+import SurfTutorQuizScreen from "../components/SurfTutorQuizScreen.jsx";
 
 export default function AITutorHome() {
   const router = useRouter();
+  const { profile, isLoading, isQuizCompleted, refreshProfile, clearProfile } = useSurfTutorProfile();
 
   const features = [
     {
@@ -32,20 +36,30 @@ export default function AITutorHome() {
       color: "#4ECDC4",
       screen: "ARVisualization",
     },
-   
-    {
-      id: 4,
-      title: "Progress",
-      description: "Track your progress, badges, and achievements",
-      icon: "trending-up",
-      color: "#96CEB4",
-      screen: "Progress",
-    },
   ];
 
   const handleFeaturePress = (feature) => {
     router.push(`/aiTutor/${feature.screen}`);
   };
+
+  const handleQuizComplete = async () => {
+    await refreshProfile();
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-gray-50 items-center justify-center">
+        <ActivityIndicator size="large" color="#2563eb" />
+        <Text className="text-gray-600 mt-4 text-base">Loading your profile...</Text>
+      </View>
+    );
+  }
+
+  // Show quiz if not completed
+  if (!isQuizCompleted) {
+    return <SurfTutorQuizScreen onComplete={handleQuizComplete} />;
+  }
 
   return (
     <View className="flex-1">
@@ -61,9 +75,18 @@ export default function AITutorHome() {
             <TouchableOpacity onPress={() => router.back()} className="mr-3">
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-            <Text className="text-white text-2xl font-bold">
+            <Text className="text-white text-2xl font-bold flex-1">
               🏄 AI Surf Tutor
             </Text>
+            <TouchableOpacity 
+              onPress={async () => {
+                await clearProfile();
+                await refreshProfile();
+              }}
+              className="w-9 h-9 rounded-full bg-white/20 items-center justify-center"
+            >
+              <Ionicons name="create-outline" size={20} color="#fff" />
+            </TouchableOpacity>
           </View>
           <Text className="text-blue-100 text-sm">
             Your Personal Surfing Coach

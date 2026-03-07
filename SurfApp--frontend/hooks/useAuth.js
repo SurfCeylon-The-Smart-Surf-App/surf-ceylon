@@ -114,6 +114,19 @@ export const AuthProvider = ({ children }) => {
     AsyncStorage.setItem("userData", JSON.stringify(updatedUserData));
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await authAPI.getCurrentUser();
+      const freshUserData = response.data;
+      setUser(freshUserData);
+      await AsyncStorage.setItem("userData", JSON.stringify(freshUserData));
+      return { success: true, data: freshUserData };
+    } catch (error) {
+      console.error("Refresh user error:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
   const value = {
     user,
     isLoading,
@@ -122,6 +135,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
