@@ -19,25 +19,44 @@ import { getSpotsData } from "../../data/surfApi";
 import { filterSpotsByRadius } from "../../data/locationUtils";
 import { dummyNews } from "../../constants/dummyData";
 
+const REGIONS = [
+  "Near Me",
+  "South Coast",
+  "West Coast",
+  "East Coast",
+  "North Coast",
+  "North-West Coast",
+];
+
 export default function HomeScreen() {
   const [spots, setSpots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState("Near Me");
   const router = useRouter();
   const { userPreferences, userLocation, userId } = useUser();
 
   useEffect(() => {
     fetchSpots();
-  }, [userPreferences, userLocation]);
+  }, [userPreferences, userLocation, selectedRegion]);
 
   const fetchSpots = async () => {
     try {
       setLoading(true);
       let data = await getSpotsData(userPreferences, userLocation, userId);
 
-      // Filter spots within 10km radius if location is available
-      if (userLocation) {
-        data = filterSpotsByRadius(data, userLocation, 10);
+      if (selectedRegion === "Near Me") {
+        // Filter spots within 20km radius if location is available
+        if (userLocation) {
+          data = filterSpotsByRadius(data, userLocation, 20);
+        }
+      } else {
+        // Filter by selected region
+        data = data.filter(
+          (spot) =>
+            spot.region &&
+            spot.region.toLowerCase() === selectedRegion.toLowerCase(),
+        );
       }
 
       // Get top 3 spots for home screen
@@ -110,7 +129,7 @@ export default function HomeScreen() {
         >
           {/* Top Surf Spots Recommendations */}
           <View className="py-6">
-            <View className="flex-row justify-between items-center px-6 mb-4">
+            <View className="flex-row justify-between items-center px-6 mb-3">
               <View>
                 <Text className="text-xl font-bold text-gray-900">
                   Top Spots For You
@@ -119,10 +138,73 @@ export default function HomeScreen() {
                   Based on current conditions & your preferences
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => router.push("/spotRecommender")}>
-                <Text className="text-blue-600 font-medium">View All</Text>
-              </TouchableOpacity>
             </View>
+
+            {/* Near Me radius hint */}
+            {selectedRegion === "Near Me" && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingHorizontal: 16,
+                  paddingBottom: 6,
+                }}
+              >
+                <Ionicons name="radio-button-on" size={12} color="#2563eb" />
+                <Text style={{ fontSize: 12, color: "#2563eb", marginLeft: 4 }}>
+                  Showing surf spots within 20km of your location
+                </Text>
+              </View>
+            )}
+
+            {/* Location / Region selector */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingHorizontal: 16,
+                paddingBottom: 8,
+              }}
+            >
+              {REGIONS.map((region) => {
+                const isActive = selectedRegion === region;
+                return (
+                  <TouchableOpacity
+                    key={region}
+                    onPress={() => setSelectedRegion(region)}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingHorizontal: 14,
+                      paddingVertical: 7,
+                      borderRadius: 20,
+                      marginRight: 8,
+                      backgroundColor: isActive ? "#2563eb" : "#ffffff",
+                      borderWidth: 1,
+                      borderColor: isActive ? "#2563eb" : "#d1d5db",
+                    }}
+                  >
+                    {region === "Near Me" && (
+                      <Ionicons
+                        name="location"
+                        size={13}
+                        color={isActive ? "#ffffff" : "#6b7280"}
+                        style={{ marginRight: 4 }}
+                      />
+                    )}
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: isActive ? "600" : "400",
+                        color: isActive ? "#ffffff" : "#374151",
+                      }}
+                    >
+                      {region}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
 
             {loading ? (
               <View className="h-40 justify-center items-center">
@@ -134,12 +216,42 @@ export default function HomeScreen() {
                 {spots.map((spot) => (
                   <SpotCard key={spot.id} spot={spot} origin="home" />
                 ))}
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/spotRecommender",
+                      params: { region: selectedRegion },
+                    })
+                  }
+                  style={{
+                    marginHorizontal: 8,
+                    marginTop: 4,
+                    marginBottom: 8,
+                    paddingVertical: 12,
+                    borderRadius: 10,
+                    borderWidth: 1.5,
+                    borderColor: "#2563eb",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#2563eb",
+                      fontWeight: "600",
+                      fontSize: 14,
+                    }}
+                  >
+                    View All Spots
+                  </Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <View className="mx-6 bg-white rounded-lg p-6 items-center">
                 <Ionicons name="location-outline" size={40} color="#9ca3af" />
                 <Text className="text-gray-600 text-center mt-2">
-                  No spots available right now
+                  {selectedRegion === "Near Me"
+                    ? "No spots found within 20km of your location"
+                    : `No spots found for ${selectedRegion}`}
                 </Text>
               </View>
             )}

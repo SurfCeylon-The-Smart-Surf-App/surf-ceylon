@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL as API_BASE_URL } from "./config";
 import surfSpotsData from "./surf_spots.json";
 
-const REQUEST_TIMEOUT = 30000; // 30 seconds (increased for 31 spots)
+const REQUEST_TIMEOUT = 30000; // 30 seconds (increased for 78 spots)
 const MAX_RETRIES = 2;
 
 // Helper function to generate date labels starting from today
@@ -95,7 +95,7 @@ export const parseFromNav = (jsonString) => {
 
     console.log(
       "Parsing navigation param, original length:",
-      jsonString.length
+      jsonString.length,
     );
     if (jsonString.includes("NaN")) {
       console.warn("Found NaN in navigation params, sanitizing...");
@@ -115,7 +115,7 @@ export const parseFromNav = (jsonString) => {
 const fetchWithTimeout = async (
   url,
   options = {},
-  timeout = REQUEST_TIMEOUT
+  timeout = REQUEST_TIMEOUT,
 ) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -158,7 +158,7 @@ const fetchWithRetry = async (url, options = {}, retries = MAX_RETRIES) => {
 export async function getSpotsData(
   preferences,
   userLocation = null,
-  userId = null
+  userId = null,
 ) {
   try {
     // Validate preferences
@@ -191,7 +191,7 @@ export async function getSpotsData(
         const hasNaN = JSON.stringify(cachedSpots).includes("NaN");
         if (hasNaN) {
           console.log(
-            "Cache contains NaN values, clearing and fetching fresh data"
+            "Cache contains NaN values, clearing and fetching fresh data",
           );
           await AsyncStorage.removeItem(CACHE_KEY);
         } else {
@@ -207,11 +207,11 @@ export async function getSpotsData(
             console.log("Cache invalid (old structure), fetching fresh data");
           } else if (cacheAge < CACHE_DURATION) {
             console.log(
-              `Using cached spot data (age: ${Math.round(cacheAge / 1000)}s)`
+              `Using cached spot data (age: ${Math.round(cacheAge / 1000)}s)`,
             );
             // Sanitize cached data to ensure no NaN values and recalculate distance
             const sanitizedSpots = cachedSpots.map((spot) =>
-              sanitizeSpotData(spot)
+              sanitizeSpotData(spot),
             );
             return addDistanceToSpots(sanitizedSpots, userLocation);
           } else {
@@ -229,7 +229,7 @@ export async function getSpotsData(
       apiParams.userId = userId;
       console.log(
         "🎯 Including userId for session-based personalization:",
-        userId
+        userId,
       );
     }
 
@@ -261,7 +261,7 @@ export async function getSpotsData(
           spot.name &&
           spot.score !== undefined && // Changed from suitability (string) to score (number)
           spot.coords &&
-          Array.isArray(spot.coords)
+          Array.isArray(spot.coords),
       )
       .map((spot) => {
         // First ensure all required fields exist
@@ -292,7 +292,7 @@ export async function getSpotsData(
         JSON.stringify({
           data: validSpots,
           timestamp: Date.now(),
-        })
+        }),
       );
       console.log(`✅ Cached ${validSpots.length} spots`);
     } catch (cacheError) {
@@ -303,7 +303,7 @@ export async function getSpotsData(
     const spotsWithDistance = addDistanceToSpots(validSpots, userLocation);
 
     console.log(
-      `Returning ${spotsWithDistance.length} spots with distance info`
+      `Returning ${spotsWithDistance.length} spots with distance info`,
     );
     return spotsWithDistance;
   } catch (error) {
@@ -317,7 +317,7 @@ export async function getSpotsData(
         console.log("Returning stale cache due to API error");
         // Sanitize stale cache data
         const sanitizedSpots = cachedSpots.map((spot) =>
-          sanitizeSpotData(spot)
+          sanitizeSpotData(spot),
         );
         return addDistanceToSpots(sanitizedSpots, userLocation);
       }
@@ -339,7 +339,7 @@ export async function get7DayForecast(spotId = "2", viewMode = "daily") {
   try {
     // Backend exposes /api/forecast supporting either :spotName or ?spotId
     const response = await fetchWithRetry(
-      `${API_BASE_URL}/forecast?spotId=${spotId}&viewMode=${viewMode}`
+      `${API_BASE_URL}/forecast?spotId=${spotId}&viewMode=${viewMode}`,
     );
 
     if (!response.ok) {
@@ -492,7 +492,7 @@ export async function endSession(
   sessionId,
   rating,
   wouldReturn,
-  comments = ""
+  comments = "",
 ) {
   try {
     const response = await fetchWithTimeout(
@@ -501,7 +501,7 @@ export async function endSession(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating, wouldReturn, comments }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -524,7 +524,7 @@ export async function endSession(
 export async function getUserSessions(userId, limit = 20) {
   try {
     const response = await fetchWithTimeout(
-      `${API_BASE_URL}/sessions/user/${userId}?limit=${limit}`
+      `${API_BASE_URL}/sessions/user/${userId}?limit=${limit}`,
     );
 
     if (!response.ok) {
@@ -546,7 +546,7 @@ export async function getUserSessions(userId, limit = 20) {
 export async function getUserInsights(userId) {
   try {
     const response = await fetchWithTimeout(
-      `${API_BASE_URL}/sessions/user/${userId}/insights`
+      `${API_BASE_URL}/sessions/user/${userId}/insights`,
     );
 
     if (!response.ok) {

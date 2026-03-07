@@ -74,11 +74,11 @@ export default function ProfileScreen() {
     const sorted = [...sessions];
     if (sessionFilter === "newest") {
       return sorted.sort(
-        (a, b) => new Date(b.startTime) - new Date(a.startTime)
+        (a, b) => new Date(b.startTime) - new Date(a.startTime),
       );
     } else if (sessionFilter === "oldest") {
       return sorted.sort(
-        (a, b) => new Date(a.startTime) - new Date(b.startTime)
+        (a, b) => new Date(a.startTime) - new Date(b.startTime),
       );
     } else if (sessionFilter === "highest_rated") {
       return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
@@ -100,7 +100,7 @@ export default function ProfileScreen() {
         fetchUserPosts();
         loadUserData();
       }
-    }, [user])
+    }, [user]),
   );
 
   const loadUserData = async () => {
@@ -182,7 +182,7 @@ export default function ProfileScreen() {
 
       const totalLikes = posts.reduce(
         (sum, post) => sum + (post.likeCount || 0),
-        0
+        0,
       );
 
       setStats({
@@ -227,7 +227,7 @@ export default function ProfileScreen() {
     } catch (error) {
       Alert.alert(
         "Error",
-        error.response?.data?.message || "Failed to update profile"
+        error.response?.data?.message || "Failed to update profile",
       );
     }
   };
@@ -252,7 +252,7 @@ export default function ProfileScreen() {
     } catch (error) {
       Alert.alert(
         "Error",
-        error.response?.data?.message || "Failed to change password"
+        error.response?.data?.message || "Failed to change password",
       );
     }
   };
@@ -280,7 +280,7 @@ export default function ProfileScreen() {
     } catch (error) {
       Alert.alert(
         "Error",
-        error.response?.data?.message || "Failed to save preferences"
+        error.response?.data?.message || "Failed to save preferences",
       );
     }
   };
@@ -568,7 +568,7 @@ export default function ProfileScreen() {
               <View className="flex-row justify-between py-3 border-b border-gray-100">
                 <Text className="text-gray-600">BMI</Text>
                 <Text className="text-gray-900 font-semibold">
-                  {user.aiSurfTutor.bmi?.toFixed(1) || 'N/A'}
+                  {user.aiSurfTutor.bmi?.toFixed(1) || "N/A"}
                 </Text>
               </View>
               <View className="flex-row justify-between py-3 border-b border-gray-100">
@@ -577,30 +577,33 @@ export default function ProfileScreen() {
                   {user.aiSurfTutor.gender}
                 </Text>
               </View>
-              {user.aiSurfTutor.equipment && user.aiSurfTutor.equipment !== "None" && (
-                <View className="flex-row justify-between py-3 border-b border-gray-100">
-                  <Text className="text-gray-600">Equipment</Text>
-                  <Text className="text-gray-900 font-semibold">
-                    {user.aiSurfTutor.equipment}
-                  </Text>
-                </View>
-              )}
-              {user.aiSurfTutor.limitations && user.aiSurfTutor.limitations !== "None" && (
-                <View className="flex-row justify-between py-3">
-                  <Text className="text-gray-600">Limitations</Text>
-                  <Text className="text-gray-900 font-semibold">
-                    {user.aiSurfTutor.limitations}
-                  </Text>
-                </View>
-              )}
-              {(!user.aiSurfTutor.equipment || user.aiSurfTutor.equipment === "None") && (!user.aiSurfTutor.limitations || user.aiSurfTutor.limitations === "None") && (
-                <View className="flex-row justify-between py-3">
-                  <Text className="text-gray-600">Equipment</Text>
-                  <Text className="text-gray-900 font-semibold">
-                    None
-                  </Text>
-                </View>
-              )}
+              {user.aiSurfTutor.equipment &&
+                user.aiSurfTutor.equipment !== "None" && (
+                  <View className="flex-row justify-between py-3 border-b border-gray-100">
+                    <Text className="text-gray-600">Equipment</Text>
+                    <Text className="text-gray-900 font-semibold">
+                      {user.aiSurfTutor.equipment}
+                    </Text>
+                  </View>
+                )}
+              {user.aiSurfTutor.limitations &&
+                user.aiSurfTutor.limitations !== "None" && (
+                  <View className="flex-row justify-between py-3">
+                    <Text className="text-gray-600">Limitations</Text>
+                    <Text className="text-gray-900 font-semibold">
+                      {user.aiSurfTutor.limitations}
+                    </Text>
+                  </View>
+                )}
+              {(!user.aiSurfTutor.equipment ||
+                user.aiSurfTutor.equipment === "None") &&
+                (!user.aiSurfTutor.limitations ||
+                  user.aiSurfTutor.limitations === "None") && (
+                  <View className="flex-row justify-between py-3">
+                    <Text className="text-gray-600">Equipment</Text>
+                    <Text className="text-gray-900 font-semibold">None</Text>
+                  </View>
+                )}
             </View>
           </View>
         )}
@@ -659,9 +662,7 @@ export default function ProfileScreen() {
             <Text className="text-lg font-bold text-gray-900">
               Training Progress
             </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/aiTutor/Progress")}
-            >
+            <TouchableOpacity onPress={() => router.push("/aiTutor/Progress")}>
               <Text className="text-blue-600 font-semibold">View Details</Text>
             </TouchableOpacity>
           </View>
@@ -675,8 +676,12 @@ export default function ProfileScreen() {
                 <Ionicons name="trending-up" size={24} color="#fff" />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-900 font-bold text-base">Track Your Journey</Text>
-                <Text className="text-gray-600 text-sm">Cardio workouts, AR sessions & badges</Text>
+                <Text className="text-gray-900 font-bold text-base">
+                  Track Your Journey
+                </Text>
+                <Text className="text-gray-600 text-sm">
+                  Cardio workouts, AR sessions & badges
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
             </View>
@@ -789,14 +794,14 @@ export default function ProfileScreen() {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
-                    }
+                    },
                   )}
                 />
                 <DetailRow
                   label="Time"
                   value={new Date(selectedSession.startTime).toLocaleTimeString(
                     "en-US",
-                    { hour: "2-digit", minute: "2-digit" }
+                    { hour: "2-digit", minute: "2-digit" },
                   )}
                 />
                 <DetailRow
@@ -1113,14 +1118,19 @@ export default function ProfileScreen() {
           className="flex-1"
         >
           <SafeAreaView className="flex-1 bg-gray-50">
-            <View className="flex-row items-center justify-between px-4 py-4 bg-white border-b border-gray-200">
-              <Text className="text-lg font-bold text-gray-900">
-                Edit Preferences
-              </Text>
-              <TouchableOpacity onPress={() => setActiveModal(null)}>
-                <Ionicons name="close" size={24} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
+            <SafeAreaView
+              edges={["top"]}
+              className="bg-white border-b border-gray-200"
+            >
+              <View className="flex-row items-center justify-between px-4 py-4">
+                <Text className="text-lg font-bold text-gray-900">
+                  Edit Preferences
+                </Text>
+                <TouchableOpacity onPress={() => setActiveModal(null)}>
+                  <Ionicons name="close" size={24} color="#6b7280" />
+                </TouchableOpacity>
+              </View>
+            </SafeAreaView>
 
             <ScrollView className="p-4">
               <Text className="text-sm font-semibold text-gray-700 mb-3 mt-4">
@@ -1308,8 +1318,8 @@ export default function ProfileScreen() {
                   {filter === "newest"
                     ? "Newest"
                     : filter === "oldest"
-                    ? "Oldest"
-                    : "Highest Rated"}
+                      ? "Oldest"
+                      : "Highest Rated"}
                 </Text>
               </TouchableOpacity>
             ))}
