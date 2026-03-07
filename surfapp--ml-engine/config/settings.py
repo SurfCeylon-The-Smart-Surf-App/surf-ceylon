@@ -2,7 +2,7 @@
 import os
 
 # Toggle between real API and mock data
-# Set to True for faster testing with 31 spots (API calls would timeout)
+# Set to True for faster testing with 78 spots (API calls would timeout)
 # Set to False to use real StormGlass API data
 USE_MOCK_DATA = True  # Model 1 enabled - uses ML predictions with mock weather data
 

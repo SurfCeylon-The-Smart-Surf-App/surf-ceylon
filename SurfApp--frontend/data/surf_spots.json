@@ -1,33 +1,626 @@
 [
-  { "id": "1", "name": "Weligama", "region": "South Coast", "coords": [80.4264, 5.9721], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "2", "name": "Midigama", "region": "South Coast", "coords": [80.3833, 5.9611], "bottomType": "Reef", "accessibility": "Medium" },
-  { "id": "3", "name": "Hiriketiya", "region": "South Coast", "coords": [80.6863, 5.9758], "bottomType": "Sand", "accessibility": "Medium" },
-  { "id": "4", "name": "Unawatuna", "region": "South Coast", "coords": [80.2505, 6.0093], "bottomType": "Reef", "accessibility": "High" },
-  { "id": "5", "name": "Hikkaduwa", "region": "South Coast", "coords": [80.0998, 6.1376], "bottomType": "Reef", "accessibility": "High" },
-  { "id": "6", "name": "Madiha", "region": "South Coast", "coords": [80.5833, 5.9833], "bottomType": "Reef", "accessibility": "Medium" },
-  { "id": "7", "name": "Mirissa", "region": "South Coast", "coords": [80.4611, 5.9461], "bottomType": "Reef", "accessibility": "High" },
-  { "id": "8", "name": "Ahangama", "region": "South Coast", "coords": [80.3667, 5.9667], "bottomType": "Reef", "accessibility": "Medium" },
-  { "id": "9", "name": "Kabalana", "region": "South Coast", "coords": [80.1167, 6.1333], "bottomType": "Reef", "accessibility": "Medium" },
-  { "id": "10", "name": "Dewata", "region": "South Coast", "coords": [80.2833, 5.9833], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "11", "name": "Polhena", "region": "South Coast", "coords": [80.3500, 5.9500], "bottomType": "Reef", "accessibility": "Medium" },
-  { "id": "12", "name": "Talalla", "region": "South Coast", "coords": [80.5667, 5.9667], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "13", "name": "Arugam Bay", "region": "East Coast", "coords": [81.8293, 6.8434], "bottomType": "Sand", "accessibility": "Medium" },
-  { "id": "14", "name": "Pottuvil Point", "region": "East Coast", "coords": [81.8333, 6.8667], "bottomType": "Reef", "accessibility": "Low" },
-  { "id": "15", "name": "Whiskey Point", "region": "East Coast", "coords": [81.8250, 6.8333], "bottomType": "Reef", "accessibility": "Low" },
-  { "id": "16", "name": "Peanut Farm", "region": "East Coast", "coords": [81.8167, 6.8167], "bottomType": "Sand", "accessibility": "Medium" },
-  { "id": "17", "name": "Okanda", "region": "East Coast", "coords": [81.6574, 6.6604], "bottomType": "Reef", "accessibility": "Low" },
-  { "id": "18", "name": "Lighthouse Point", "region": "East Coast", "coords": [81.8400, 6.8500], "bottomType": "Reef", "accessibility": "Medium" },
-  { "id": "19", "name": "Crocodile Rock", "region": "East Coast", "coords": [81.8100, 6.8100], "bottomType": "Sand", "accessibility": "Medium" },
-  { "id": "20", "name": "Panama", "region": "East Coast", "coords": [81.7833, 6.7667], "bottomType": "Sand", "accessibility": "Low" },
-  { "id": "21", "name": "Kalmunai", "region": "East Coast", "coords": [81.8222, 7.4089], "bottomType": "Sand", "accessibility": "Medium" },
-  { "id": "22", "name": "Pasikudah", "region": "East Coast", "coords": [81.5581, 7.9286], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "23", "name": "Mount Lavinia", "region": "West Coast", "coords": [79.8633, 6.8400], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "24", "name": "Wellawatte", "region": "West Coast", "coords": [79.8589, 6.8667], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "25", "name": "Negombo", "region": "West Coast", "coords": [79.8358, 7.2083], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "26", "name": "Bentota", "region": "West Coast", "coords": [79.9958, 6.4258], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "27", "name": "Kalutara", "region": "West Coast", "coords": [79.9589, 6.5844], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "28", "name": "Wadduwa", "region": "West Coast", "coords": [79.9292, 6.6667], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "29", "name": "Beruwala", "region": "West Coast", "coords": [79.9831, 6.4786], "bottomType": "Sand", "accessibility": "High" },
-  { "id": "30", "name": "Kalpitiya", "region": "North-West Coast", "coords": [79.7667, 8.2333], "bottomType": "Sand", "accessibility": "Medium" },
-  { "id": "31", "name": "Mannar", "region": "North Coast", "coords": [79.9042, 8.9811], "bottomType": "Sand", "accessibility": "Low" }
+  {
+    "id": "1",
+    "name": "Weligama Bay",
+    "region": "South Coast",
+    "coords": [80.4264, 5.9721],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "2",
+    "name": "Weligama Big Rock",
+    "region": "South Coast",
+    "coords": [80.428, 5.9735],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "3",
+    "name": "Lazy Left",
+    "region": "South Coast",
+    "coords": [80.3722, 5.9685],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "4",
+    "name": "Lazy Right",
+    "region": "South Coast",
+    "coords": [80.3729, 5.9678],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "5",
+    "name": "Rams Right",
+    "region": "South Coast",
+    "coords": [80.3695, 5.9671],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "6",
+    "name": "Rams Left",
+    "region": "South Coast",
+    "coords": [80.3688, 5.9668],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "7",
+    "name": "Plantation",
+    "region": "South Coast",
+    "coords": [80.3655, 5.9655],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "8",
+    "name": "Coconut Point",
+    "region": "South Coast",
+    "coords": [80.364, 5.9645],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "9",
+    "name": "Gara Gala",
+    "region": "South Coast",
+    "coords": [80.3625, 5.964],
+    "bottomType": "Reef",
+    "accessibility": "Low"
+  },
+  {
+    "id": "10",
+    "name": "The Rock (Ahangama)",
+    "region": "South Coast",
+    "coords": [80.3681, 5.9722],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "11",
+    "name": "Kabalana Left",
+    "region": "South Coast",
+    "coords": [80.1177, 6.1289],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "12",
+    "name": "Kabalana Right",
+    "region": "South Coast",
+    "coords": [80.1185, 6.1295],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "13",
+    "name": "Hiriketiya Bay",
+    "region": "South Coast",
+    "coords": [80.7047, 5.9758],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "14",
+    "name": "Dikwella",
+    "region": "South Coast",
+    "coords": [80.7102, 5.9712],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "15",
+    "name": "Jungle Beach (Unawatuna)",
+    "region": "South Coast",
+    "coords": [80.2505, 6.0093],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "16",
+    "name": "Unawatuna Bay",
+    "region": "South Coast",
+    "coords": [80.2482, 6.0108],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "17",
+    "name": "Hikkaduwa Main Beach",
+    "region": "South Coast",
+    "coords": [80.0998, 6.1376],
+    "bottomType": "Reef",
+    "accessibility": "High"
+  },
+  {
+    "id": "18",
+    "name": "Hikkaduwa North Point",
+    "region": "South Coast",
+    "coords": [80.0985, 6.142],
+    "bottomType": "Reef",
+    "accessibility": "High"
+  },
+  {
+    "id": "19",
+    "name": "Benny's Beach",
+    "region": "South Coast",
+    "coords": [80.1012, 6.135],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "20",
+    "name": "Narigama",
+    "region": "South Coast",
+    "coords": [80.1025, 6.132],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "21",
+    "name": "Madiha Left",
+    "region": "South Coast",
+    "coords": [80.5833, 5.9833],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "22",
+    "name": "Madiha Right",
+    "region": "South Coast",
+    "coords": [80.584, 5.9825],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "23",
+    "name": "Mirissa Right Point",
+    "region": "South Coast",
+    "coords": [80.4698, 5.9466],
+    "bottomType": "Reef",
+    "accessibility": "High"
+  },
+  {
+    "id": "24",
+    "name": "Mirissa Beach",
+    "region": "South Coast",
+    "coords": [80.4611, 5.9461],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "25",
+    "name": "Polhena Beach",
+    "region": "South Coast",
+    "coords": [80.5478, 5.9485],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "26",
+    "name": "Matara Reef",
+    "region": "South Coast",
+    "coords": [80.5353, 5.9485],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "27",
+    "name": "Talalla Beach",
+    "region": "South Coast",
+    "coords": [80.5667, 5.9667],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "28",
+    "name": "Talalla Retreat",
+    "region": "South Coast",
+    "coords": [80.5695, 5.9655],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "29",
+    "name": "Goyambokka",
+    "region": "South Coast",
+    "coords": [80.6572, 5.9685],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "30",
+    "name": "Tangalla Bay",
+    "region": "South Coast",
+    "coords": [80.795, 6.0235],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "31",
+    "name": "Kudawella",
+    "region": "South Coast",
+    "coords": [80.7823, 5.9932],
+    "bottomType": "Reef",
+    "accessibility": "Low"
+  },
+  {
+    "id": "32",
+    "name": "Dewata Beach",
+    "region": "South Coast",
+    "coords": [80.2903, 6.0015],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "33",
+    "name": "Koggala Beach",
+    "region": "South Coast",
+    "coords": [80.3291, 5.9928],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "34",
+    "name": "Habaraduwa",
+    "region": "South Coast",
+    "coords": [80.0587, 6.0721],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "35",
+    "name": "Arugam Bay Main Point",
+    "region": "East Coast",
+    "coords": [81.8358, 6.8403],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "36",
+    "name": "Baby Point",
+    "region": "East Coast",
+    "coords": [81.8345, 6.8395],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "37",
+    "name": "Elephant Rock",
+    "region": "East Coast",
+    "coords": [81.842, 6.8445],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "38",
+    "name": "Pottuvil Point",
+    "region": "East Coast",
+    "coords": [81.8333, 6.8667],
+    "bottomType": "Reef",
+    "accessibility": "Low"
+  },
+  {
+    "id": "39",
+    "name": "Whiskey Point",
+    "region": "East Coast",
+    "coords": [81.825, 6.8333],
+    "bottomType": "Reef",
+    "accessibility": "Low"
+  },
+  {
+    "id": "40",
+    "name": "Peanut Farm",
+    "region": "East Coast",
+    "coords": [81.8167, 6.8167],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "41",
+    "name": "Lighthouse Point",
+    "region": "East Coast",
+    "coords": [81.8372, 6.8512],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "42",
+    "name": "Crocodile Rock",
+    "region": "East Coast",
+    "coords": [81.81, 6.81],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "43",
+    "name": "Panama",
+    "region": "East Coast",
+    "coords": [81.7833, 6.7667],
+    "bottomType": "Sand",
+    "accessibility": "Low"
+  },
+  {
+    "id": "44",
+    "name": "Okanda",
+    "region": "East Coast",
+    "coords": [81.7152, 6.6912],
+    "bottomType": "Reef",
+    "accessibility": "Low"
+  },
+  {
+    "id": "45",
+    "name": "Komari",
+    "region": "East Coast",
+    "coords": [81.8403, 7.3692],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "46",
+    "name": "Kalmunai Beach",
+    "region": "East Coast",
+    "coords": [81.8365, 7.4157],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "47",
+    "name": "Pasikudah Bay",
+    "region": "East Coast",
+    "coords": [81.5656, 7.9372],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "48",
+    "name": "Kalkudah",
+    "region": "East Coast",
+    "coords": [81.5495, 7.9178],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "49",
+    "name": "Nilaveli Beach",
+    "region": "East Coast",
+    "coords": [81.2087, 8.7042],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "50",
+    "name": "Uppuveli Beach",
+    "region": "East Coast",
+    "coords": [81.2214, 8.6089],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "51",
+    "name": "Marble Beach",
+    "region": "East Coast",
+    "coords": [81.2156, 8.7512],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "52",
+    "name": "Mount Lavinia Beach",
+    "region": "West Coast",
+    "coords": [79.8633, 6.84],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "53",
+    "name": "Dehiwala Beach",
+    "region": "West Coast",
+    "coords": [79.8625, 6.8525],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "54",
+    "name": "Wellawatte Beach",
+    "region": "West Coast",
+    "coords": [79.8589, 6.8667],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "55",
+    "name": "Bambalapitiya Beach",
+    "region": "West Coast",
+    "coords": [79.8545, 6.892],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "56",
+    "name": "Galle Face",
+    "region": "West Coast",
+    "coords": [79.8456, 6.9271],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "57",
+    "name": "Negombo Beach",
+    "region": "West Coast",
+    "coords": [79.8367, 7.2095],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "58",
+    "name": "Negombo Lagoon Break",
+    "region": "West Coast",
+    "coords": [79.8312, 7.1982],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "59",
+    "name": "Bentota Beach",
+    "region": "West Coast",
+    "coords": [79.9958, 6.4258],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "60",
+    "name": "Bentota River Mouth",
+    "region": "West Coast",
+    "coords": [79.9985, 6.4225],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "61",
+    "name": "Kalutara Beach",
+    "region": "West Coast",
+    "coords": [79.9589, 6.5844],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "62",
+    "name": "Wadduwa Beach",
+    "region": "West Coast",
+    "coords": [79.9292, 6.6667],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "63",
+    "name": "Moragalla Beach",
+    "region": "West Coast",
+    "coords": [79.9365, 6.652],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "64",
+    "name": "Beruwala Beach",
+    "region": "West Coast",
+    "coords": [79.9831, 6.4786],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "65",
+    "name": "Aluthgama Beach",
+    "region": "West Coast",
+    "coords": [80.0012, 6.4305],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "66",
+    "name": "Induruwa Beach",
+    "region": "West Coast",
+    "coords": [80.0875, 6.3645],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "67",
+    "name": "Kosgoda Beach",
+    "region": "West Coast",
+    "coords": [80.0325, 6.325],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "68",
+    "name": "Balapitiya Beach",
+    "region": "West Coast",
+    "coords": [80.0425, 6.2885],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "69",
+    "name": "Ambalangoda Beach",
+    "region": "West Coast",
+    "coords": [80.053, 6.236],
+    "bottomType": "Sand",
+    "accessibility": "High"
+  },
+  {
+    "id": "70",
+    "name": "Kalpitiya Dutch Bay",
+    "region": "North-West Coast",
+    "coords": [79.7667, 8.2333],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "71",
+    "name": "Kalpitiya Vella Island",
+    "region": "North-West Coast",
+    "coords": [79.752, 8.215],
+    "bottomType": "Sand",
+    "accessibility": "Low"
+  },
+  {
+    "id": "72",
+    "name": "Kappalady Lagoon",
+    "region": "North-West Coast",
+    "coords": [79.7445, 8.2055],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "73",
+    "name": "Mannar Mainland",
+    "region": "North Coast",
+    "coords": [79.9178, 8.9723],
+    "bottomType": "Sand",
+    "accessibility": "Low"
+  },
+  {
+    "id": "74",
+    "name": "Talaimannar",
+    "region": "North Coast",
+    "coords": [79.7234, 9.1289],
+    "bottomType": "Sand",
+    "accessibility": "Low"
+  },
+  {
+    "id": "75",
+    "name": "Jaffna Casuarina Beach",
+    "region": "North Coast",
+    "coords": [80.1789, 9.7612],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "76",
+    "name": "Point Pedro",
+    "region": "North Coast",
+    "coords": [80.2387, 9.8198],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "77",
+    "name": "Velvetiturai Beach",
+    "region": "North Coast",
+    "coords": [80.1723, 9.7945],
+    "bottomType": "Sand",
+    "accessibility": "Medium"
+  },
+  {
+    "id": "78",
+    "name": "Nilaweli Point",
+    "region": "East Coast",
+    "coords": [81.2098, 8.7156],
+    "bottomType": "Reef",
+    "accessibility": "Medium"
+  }
 ]
