@@ -175,7 +175,8 @@ export default function PlanExplanationModal({
               )}
 
               {/* Limitations */}
-              {quizAnswers.limitations && quizAnswers.limitations.length > 0 && 
+              {Array.isArray(quizAnswers.limitations) && 
+               quizAnswers.limitations.length > 0 && 
                !quizAnswers.limitations.includes('None') && (
                 <View style={styles.limitationsCard}>
                   <View style={styles.limitationsHeader}>
