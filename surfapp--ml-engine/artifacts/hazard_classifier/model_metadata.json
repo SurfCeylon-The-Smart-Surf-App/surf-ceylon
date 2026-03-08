@@ -1,7 +1,7 @@
 {
   "model_name": "hazard_classifier",
   "version": "1.0.0",
-  "created": "2026-02-27T15:19:20.727814",
+  "created": "2026-03-08T16:23:19.994436",
   "classes": [
     "shark",
     "jellyfish",
@@ -22,20 +22,20 @@
     "img_width": 224,
     "batch_size": 32,
     "epochs": 50,
-    "learning_rate": 0.001,
+    "learning_rate": 0.0005,
     "validation_split": 0.2,
-    "dropout_rate": 0.5,
+    "dropout_rate": 0.6,
     "min_images_per_class": 50
   },
   "class_distribution": {
-    "shark": 90,
-    "jellyfish": 78,
-    "rip_current": 75,
-    "sea_urchin": 89,
-    "large_waves": 62,
-    "reef_coral": 64,
-    "no_hazard": 94
+    "shark": 680,
+    "jellyfish": 923,
+    "rip_current": 324,
+    "sea_urchin": 668,
+    "large_waves": 219,
+    "reef_coral": 564,
+    "no_hazard": 571
   },
-  "accuracy": 0.1308411214953271,
+  "accuracy": 0.6297709923664122,
   "model_file": "hazard_classifier_best.keras"
 }

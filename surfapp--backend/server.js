@@ -50,6 +50,10 @@ const { connectDatabase, getConnectionStatus } = require("./config/database");
 connectDatabase().then(() => {
   const { loadSpotMetadata } = require("./config/spotMetadata");
   loadSpotMetadata();
+  
+  // Auto-seed surf spots for Risk Analyzer (only if database is empty)
+  const { seedSurfSpots } = require("./scripts/seedSurfSpots");
+  seedSurfSpots();
 });
 
 // Middleware to check MongoDB connection status

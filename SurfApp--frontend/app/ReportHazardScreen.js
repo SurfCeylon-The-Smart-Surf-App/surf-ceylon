@@ -20,9 +20,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { hazardReportsAPI, surfSpotsAPI } from '../services/risk_api';
 
 const HAZARD_TYPES = [
-  'Rip Current', 'High Surf', 'Reef Cuts', 'Jellyfish', 
-  'Sea Urchins', 'Strong Winds', 'Poor Visibility', 
-  'Overcrowding', 'Equipment Issues', 'Marine Life', 'Other'
+  'Rip Current', 'Large wave', 'Reef Cuts', 'Jellyfish', 'Shark',
+  'Sea Urchins',  'Other'
 ];
 
 export default function ReportHazardScreen() {
