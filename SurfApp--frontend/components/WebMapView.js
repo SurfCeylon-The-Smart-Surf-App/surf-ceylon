@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { Ionicons } from '@expo/vector-icons';
 
 /**
  * Web-based MapView using Leaflet
@@ -14,6 +15,16 @@ const WebMapView = ({ surfSpots, onSpotSelect, selectedSpot, selectedSkillLevel 
   // Sri Lanka center coordinates
   const INITIAL_LAT = 7.8731;
   const INITIAL_LNG = 80.7718;
+
+  // Function to center map on Sri Lanka
+  const handleCenterSriLanka = () => {
+    if (webViewRef.current) {
+      webViewRef.current.injectJavaScript(`
+        map.setView([${INITIAL_LAT}, ${INITIAL_LNG}], 8);
+        true;
+      `);
+    }
+  };
 
   // Generate HTML for the map
   const generateMapHTML = () => {
@@ -233,6 +244,11 @@ const WebMapView = ({ surfSpots, onSpotSelect, selectedSpot, selectedSkillLevel 
           </Text>
         </View>
       )}
+
+      {/* Location Button - Center on Sri Lanka */}
+      <TouchableOpacity style={styles.locationButton} onPress={handleCenterSriLanka}>
+        <Ionicons name="navigate" size={24} color="#2563eb" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -292,6 +308,22 @@ const styles = StyleSheet.create({
   selectedSpotRisk: {
     fontSize: 12,
     color: '#6b7280',
+  },
+  locationButton: {
+    position: 'absolute',
+    bottom: 100,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });
 
