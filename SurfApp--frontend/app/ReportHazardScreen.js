@@ -17,6 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { hazardReportsAPI, surfSpotsAPI } from '../services/risk_api';
 
 const HAZARD_TYPES = [
@@ -259,7 +260,12 @@ export default function ReportHazardScreen() {
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        <Text style={styles.headerTitle}>Report Hazard</Text>
+        <View style={styles.headerRow}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitleWithBack}>Report Hazard</Text>
+        </View>
         <Text style={styles.headerSubtitle}>Help keep surfers safe</Text>
       </LinearGradient>
 
@@ -421,6 +427,20 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     paddingHorizontal: 20,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  backButton: {
+    marginRight: 12,
+    padding: 4,
+  },
+  headerTitleWithBack: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -430,6 +450,7 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
+    marginLeft: 40,
   },
 
   content: { padding: 16 },
