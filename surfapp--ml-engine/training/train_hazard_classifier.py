@@ -66,9 +66,9 @@ DEFAULT_CONFIG = {
     'img_width': 224,
     'batch_size': 32,
     'epochs': 50,
-    'learning_rate': 0.001,
+    'learning_rate': 0.0005,
     'validation_split': 0.2,
-    'dropout_rate': 0.5,
+    'dropout_rate': 0.6,
     'min_images_per_class': 50
 }
 
@@ -117,17 +117,19 @@ def check_dataset():
 def create_data_generators(config):
     """Create training and validation data generators with augmentation."""
     
-    # Training data augmentation
+    # Training data augmentation (enhanced for better generalization)
     train_datagen = ImageDataGenerator(
         rescale=1./255,
         validation_split=config['validation_split'],
-        rotation_range=20,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        shear_range=0.15,
-        zoom_range=0.2,
+        rotation_range=30,
+        width_shift_range=0.25,
+        height_shift_range=0.25,
+        shear_range=0.2,
+        zoom_range=0.3,
         horizontal_flip=True,
-        brightness_range=[0.8, 1.2],
+        vertical_flip=True,
+        brightness_range=[0.7, 1.3],
+        channel_shift_range=30,
         fill_mode='nearest'
     )
     
@@ -166,50 +168,46 @@ def build_cnn_model(num_classes, config):
     """
     Build a Custom CNN model for hazard classification.
     Architecture designed for image classification with 7 classes.
+    Simplified to 3 Conv blocks to reduce overfitting.
     """
+    
+    # L2 regularization to reduce overfitting
+    l2_reg = keras.regularizers.l2(0.001)
     
     model = keras.Sequential([
         # Input layer
         layers.Input(shape=(config['img_height'], config['img_width'], 3)),
         
         # Block 1: Initial feature extraction
-        layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+        layers.Conv2D(32, (3, 3), activation='relu', padding='same', kernel_regularizer=l2_reg),
         layers.BatchNormalization(),
-        layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+        layers.Conv2D(32, (3, 3), activation='relu', padding='same', kernel_regularizer=l2_reg),
         layers.BatchNormalization(),
         layers.MaxPooling2D((2, 2)),
         layers.Dropout(0.25),
         
         # Block 2: Deeper features
-        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same', kernel_regularizer=l2_reg),
         layers.BatchNormalization(),
-        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same', kernel_regularizer=l2_reg),
         layers.BatchNormalization(),
         layers.MaxPooling2D((2, 2)),
         layers.Dropout(0.25),
         
         # Block 3: Complex patterns
-        layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+        layers.Conv2D(128, (3, 3), activation='relu', padding='same', kernel_regularizer=l2_reg),
         layers.BatchNormalization(),
-        layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
-        layers.BatchNormalization(),
-        layers.MaxPooling2D((2, 2)),
-        layers.Dropout(0.25),
-        
-        # Block 4: High-level features
-        layers.Conv2D(256, (3, 3), activation='relu', padding='same'),
-        layers.BatchNormalization(),
-        layers.Conv2D(256, (3, 3), activation='relu', padding='same'),
+        layers.Conv2D(128, (3, 3), activation='relu', padding='same', kernel_regularizer=l2_reg),
         layers.BatchNormalization(),
         layers.MaxPooling2D((2, 2)),
         layers.Dropout(0.25),
         
-        # Global pooling and classification
+        # Global pooling and classification (simplified)
         layers.GlobalAveragePooling2D(),
-        layers.Dense(512, activation='relu'),
+        layers.Dense(256, activation='relu', kernel_regularizer=l2_reg),
         layers.BatchNormalization(),
         layers.Dropout(config['dropout_rate']),
-        layers.Dense(256, activation='relu'),
+        layers.Dense(128, activation='relu', kernel_regularizer=l2_reg),
         layers.BatchNormalization(),
         layers.Dropout(config['dropout_rate']),
         
@@ -246,7 +244,7 @@ def train_model(model, train_gen, val_gen, config):
         # Early stopping
         EarlyStopping(
             monitor='val_loss',
-            patience=10,
+            patience=15,
             restore_best_weights=True,
             verbose=1
         ),
@@ -272,18 +270,21 @@ def train_model(model, train_gen, val_gen, config):
     steps_per_epoch = train_gen.samples // config['batch_size']
     validation_steps = val_gen.samples // config['batch_size']
     
-    # Handle class imbalance
+    # Handle class imbalance using sklearn's balanced class weights
+    from sklearn.utils.class_weight import compute_class_weight
     class_weights = None
     if train_gen.samples > 0:
-        total_samples = train_gen.samples
-        class_weights = {}
-        for i, class_name in enumerate(HAZARD_CLASSES):
-            class_dir = DATA_DIR / class_name
-            count = len(list(class_dir.glob("*.jpg"))) + len(list(class_dir.glob("*.png")))
-            if count > 0:
-                class_weights[i] = total_samples / (len(HAZARD_CLASSES) * count)
-            else:
-                class_weights[i] = 1.0
+        # Get class indices from generator
+        classes = train_gen.classes
+        unique_classes = np.unique(classes)
+        # Compute balanced class weights
+        weights = compute_class_weight(
+            class_weight='balanced',
+            classes=unique_classes,
+            y=classes
+        )
+        class_weights = dict(zip(unique_classes, weights))
+        print(f"\n⚖️  Class weights: {class_weights}")
     
     history = model.fit(
         train_gen,
