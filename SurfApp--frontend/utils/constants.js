@@ -82,14 +82,11 @@ export const FLAG_COLORS = {
 // Hazard Types
 export const HAZARD_TYPES = [
   "Rip Current",
-  "High Surf",
+  "Large Wave",
   "Reef Cuts",
   "Jellyfish",
   "Sea Urchins",
-  "Strong Winds",
-  "Poor Visibility",
-  "Overcrowding",
-  "Equipment Issues",
+  "Shark",
   "Marine Life",
   "Other",
 ];
