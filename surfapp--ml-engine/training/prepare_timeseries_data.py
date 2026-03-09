@@ -1,4 +1,7 @@
 """
+Converts raw collected JSON into sliding-window numpy arrays 
+(artifacts/timeseries_X_multioutput.npy + _y.npy) used by the LSTM trainer.
+
 Prepare time-series training data for multi-output 7-day forecasting
 Predicts: Wave Height, Wave Period, Swell Height, Swell Period, Wind Speed, Wind Direction
 Converts JSON to training sequences

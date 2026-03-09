@@ -26,7 +26,8 @@ export default function SpotRecommender() {
   const [filter, setFilter] = useState("all");
   const router = useRouter();
   const { region: incomingRegion } = useLocalSearchParams();
-  const { userLocation } = useUser();
+  const { userLocation, userPreferences, selectedSpot, setSelectedSpot } =
+    useUser();
 
   // Spots after applying the region / Near Me filter
   const getRegionSpots = () => {
@@ -44,7 +45,7 @@ export default function SpotRecommender() {
 
   useEffect(() => {
     fetchSpots();
-  }, [userLocation]); // Re-fetch when location changes
+  }, [userLocation, userPreferences?.skillLevel]); // Re-fetch when location or skill level changes
 
   const fetchSpots = async () => {
     try {
@@ -55,13 +56,33 @@ export default function SpotRecommender() {
       const user = userData ? JSON.parse(userData) : null;
 
       const params = {
-        skillLevel: user?.skillLevel || "Intermediate",
-        preferredWaveHeight: user?.preferences?.preferredWaveHeight || 1.5,
-        preferredWindSpeed: user?.preferences?.preferredWindSpeed || 15,
-        minWaveHeight: user?.preferences?.minWaveHeight || 0.5,
-        maxWaveHeight: user?.preferences?.maxWaveHeight || 2.5,
-        boardType: user?.preferences?.boardType || "Soft-top",
-        tidePreference: user?.preferences?.tidePreference || "Any",
+        // Prefer the always-current UserContext value; fall back to AsyncStorage
+        skillLevel:
+          userPreferences?.skillLevel || user?.skillLevel || "Intermediate",
+        preferredWaveHeight:
+          userPreferences?.preferredWaveHeight ||
+          user?.preferences?.preferredWaveHeight ||
+          1.5,
+        preferredWindSpeed:
+          userPreferences?.preferredWindSpeed ||
+          user?.preferences?.preferredWindSpeed ||
+          15,
+        minWaveHeight:
+          userPreferences?.minWaveHeight ||
+          user?.preferences?.minWaveHeight ||
+          0.5,
+        maxWaveHeight:
+          userPreferences?.maxWaveHeight ||
+          user?.preferences?.maxWaveHeight ||
+          2.5,
+        boardType:
+          userPreferences?.boardType ||
+          user?.preferences?.boardType ||
+          "Soft-top",
+        tidePreference:
+          userPreferences?.tidePreference ||
+          user?.preferences?.tidePreference ||
+          "Any",
         userId: user?._id || user?.id,
       };
 
@@ -83,6 +104,16 @@ export default function SpotRecommender() {
       }
 
       setSpots(fetchedSpots);
+
+      // If a spot is currently open in the detail screen, refresh its weights
+      // so that the detail screen reflects the new skill level without needing
+      // the user to go back and re-tap.
+      if (selectedSpot) {
+        const freshSpot = fetchedSpots.find(
+          (s) => s._id === selectedSpot._id || s.name === selectedSpot.name,
+        );
+        if (freshSpot) setSelectedSpot(freshSpot);
+      }
     } catch (error) {
       console.error("Error fetching spots:", error);
     } finally {

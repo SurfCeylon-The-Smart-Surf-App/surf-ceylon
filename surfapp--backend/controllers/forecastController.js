@@ -1,3 +1,9 @@
+/*
+Resolves spot coordinates from surf_spots.json by spotId query param or :spotName route param
+Spawns forecast_7day_service.py <lat> <lng> as child process
+Supports viewMode=daily or viewMode=hourly query param
+Has a hardcoded mock fallback if the Python process fails
+ */
 const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");

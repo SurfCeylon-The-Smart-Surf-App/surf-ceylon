@@ -22,16 +22,22 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../../hooks/useAuth";
 import { userAPI, postsAPI, authAPI } from "../../services/api";
 import { getStaticImageBaseUrl } from "../../utils/networkConfig";
 import { useRealTimeUpdates } from "../../hooks/useRealTimeUpdates";
 import { getUserSessions, getUserInsights } from "../../data/surfApi";
 import { useSurfTutorProfile } from "../../context/SurfTutorProfileContext.jsx";
+import { useUser } from "../../context/UserContext";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { clearProfile } = useSurfTutorProfile();
+  const {
+    setUserPreferences: setContextPreferences,
+    userPreferences: contextPreferences,
+  } = useUser();
   const [userPosts, setUserPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -51,13 +57,13 @@ export default function ProfileScreen() {
     new: "",
     confirm: "",
   });
-  const [userPreferences, setUserPreferences] = useState({
-    skillLevel: "Intermediate",
-    minWaveHeight: 1,
-    maxWaveHeight: 2,
-    tidePreference: "Any",
-    boardType: "Soft-top",
-  });
+  const [userPreferences, setUserPreferences] = useState(() => ({
+    skillLevel: contextPreferences?.skillLevel || "Intermediate",
+    minWaveHeight: contextPreferences?.minWaveHeight ?? 1,
+    maxWaveHeight: contextPreferences?.maxWaveHeight ?? 2,
+    tidePreference: contextPreferences?.tidePreference || "Any",
+    boardType: contextPreferences?.boardType || "Soft-top",
+  }));
   const [tempPreferences, setTempPreferences] = useState({});
   const [sessions, setSessions] = useState([]);
   const [insights, setInsights] = useState(null);
@@ -274,7 +280,24 @@ export default function ProfileScreen() {
       }
 
       await authAPI.updatePreferences(prefsToSave);
-      setUserPreferences(prefsToSave);
+      setUserPreferences(prefsToSave); // update local screen state
+      setContextPreferences(prefsToSave); // update UserContext → triggers spotRecommender re-fetch
+
+      // Persist skillLevel into the stored user object so spotRecommender
+      // and other screens that read AsyncStorage userData always see the
+      // latest value without requiring a fresh login.
+      const storedUser = await AsyncStorage.getItem("userData");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        await AsyncStorage.setItem(
+          "userData",
+          JSON.stringify({
+            ...parsedUser,
+            skillLevel: prefsToSave.skillLevel,
+            preferences: { ...parsedUser.preferences, ...prefsToSave },
+          }),
+        );
+      }
       setActiveModal(null);
       Alert.alert("Success", "Preferences updated successfully");
     } catch (error) {
