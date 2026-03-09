@@ -332,7 +332,7 @@ class WaveForecastTester:
         # Plot 1: Wave Height
         ax = axes[0, 0]
         for r in successful:
-            forecast = r['data']['forecast']
+            forecast = r['data']['daily']
             if isinstance(forecast, dict):
                 days = list(range(1, len(forecast.get('waveHeight', [])) + 1))
                 wave_heights = forecast.get('waveHeight', [])
@@ -350,7 +350,7 @@ class WaveForecastTester:
         # Plot 2: Wind Speed
         ax = axes[0, 1]
         for r in successful:
-            forecast = r['data']['forecast']
+            forecast = r['data']['daily']
             if isinstance(forecast, dict):
                 days = list(range(1, len(forecast.get('windSpeed', [])) + 1))
                 wind_speeds = forecast.get('windSpeed', [])
@@ -368,7 +368,7 @@ class WaveForecastTester:
         # Plot 3: Swell Period
         ax = axes[1, 0]
         for r in successful:
-            forecast = r['data']['forecast']
+            forecast = r['data']['daily']
             if isinstance(forecast, dict):
                 days = list(range(1, len(forecast.get('swellPeriod', [])) + 1))
                 swell_periods = forecast.get('swellPeriod', [])

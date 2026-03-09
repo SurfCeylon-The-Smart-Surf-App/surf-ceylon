@@ -129,27 +129,6 @@ const ScoreBreakdown = ({
     );
   };
 
-  /**
-   * Render adaptive weights
-   */
-  const renderWeights = () => {
-    if (!weights || Object.keys(weights).length === 0) return null;
-
-    return (
-      <View style={styles.weightsContainer}>
-        <Text style={styles.weightsTitle}>⚖️ Score Weights (Personalized)</Text>
-        <View style={styles.weightsGrid}>
-          {Object.entries(weights).map(([key, value]) => (
-            <View key={key} style={styles.weightItem}>
-              <Text style={styles.weightLabel}>{key}</Text>
-              <Text style={styles.weightValue}>{Math.round(value * 100)}%</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-    );
-  };
-
   if (!breakdown) {
     return (
       <View style={styles.container}>
@@ -197,33 +176,30 @@ const ScoreBreakdown = ({
           "Wave Quality",
           safeNumber(breakdown.wave),
           "water",
-          "Wave height, period, and swell quality"
+          "Wave height, period, and swell quality",
         )}
 
         {renderScoreItem(
           "Wind Conditions",
           safeNumber(breakdown.wind),
           "navigate",
-          "Wind speed and direction favorability"
+          "Wind speed and direction favorability",
         )}
 
         {renderScoreItem(
           "Safety",
           safeNumber(breakdown.safety),
           "shield-checkmark",
-          "Conditions matched to your skill level"
+          "Conditions matched to your skill level",
         )}
 
         {renderScoreItem(
           "Consistency",
           safeNumber(breakdown.consistency),
           "pulse",
-          "Wave period and wind stability"
+          "Wave period and wind stability",
         )}
       </View>
-
-      {/* Adaptive Weights */}
-      {renderWeights()}
 
       {/* Recommendations */}
       {renderRecommendations()}
@@ -336,31 +312,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6b7280",
     marginTop: 4,
-  },
-  weightsContainer: {
-    backgroundColor: "#fff",
-    padding: 16,
-    marginBottom: 16,
-  },
-  weightsTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#111827",
-    marginBottom: 12,
-  },
-  weightsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginHorizontal: -8,
-  },
-  weightItem: {
-    width: "50%",
-    padding: 8,
-  },
-  weightLabel: {
-    fontSize: 13,
-    color: "#6b7280",
-    textTransform: "capitalize",
   },
   weightValue: {
     fontSize: 16,

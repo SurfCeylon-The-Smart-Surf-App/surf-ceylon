@@ -28,7 +28,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor to handle errors
@@ -41,7 +41,7 @@ api.interceptors.response.use(
       await AsyncStorage.removeItem("userData");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // Auth APIs
@@ -49,7 +49,8 @@ export const authAPI = {
   register: (userData) => api.post("/auth/register", userData),
   login: (credentials) => api.post("/auth/login", credentials),
   getCurrentUser: () => api.get("/auth/me"),
-  updatePreferences: (preferences) => api.put("/auth/preferences", preferences),
+  updatePreferences: (preferences) =>
+    api.put("/auth/preferences", { preferences }),
   changePassword: (passwords) => api.put("/auth/password", passwords),
 };
 

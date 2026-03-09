@@ -70,8 +70,7 @@ class EnhancedSuitabilityCalculator {
     // 1. Wave Height Score
     const waveHeightScore = this.calculateWaveHeightScore(
       waveHeight,
-      spot.optimalWaveHeight,
-      userPreferences.learnedWaveHeight,
+      skillLevel,
     );
     breakdown.waveHeight = {
       score: waveHeightScore,
@@ -81,10 +80,7 @@ class EnhancedSuitabilityCalculator {
     };
 
     // 2. Wave Period Score
-    const wavePeriodScore = this.calculateWavePeriodScore(
-      wavePeriod,
-      10, // optimal period
-    );
+    const wavePeriodScore = this.calculateWavePeriodScore(wavePeriod);
     breakdown.wavePeriod = {
       score: wavePeriodScore,
       current: wavePeriod,
@@ -93,11 +89,11 @@ class EnhancedSuitabilityCalculator {
     };
 
     // 3. Wind Score
+    const offshoreWind = spot.offshoreWind ?? 270;
     const windScore = this.calculateWindScore(
       windSpeed,
       windDirection,
-      spot.offshoreWind || 270,
-      userPreferences.learnedWindSpeed,
+      offshoreWind,
     );
     breakdown.windSpeed = {
       score: windScore.speedScore,
@@ -108,7 +104,7 @@ class EnhancedSuitabilityCalculator {
     breakdown.windDirection = {
       score: windScore.directionScore,
       current: windDirection,
-      optimal: spot.offshoreWind || 270,
+      optimal: offshoreWind,
       unit: "°",
     };
 
@@ -282,7 +278,7 @@ class EnhancedSuitabilityCalculator {
    * Comprehensive safety score with skill-based evaluation
    */
   calculateSafetyScore(forecast, spot, userSkillLevel) {
-    const { waveHeight, windSpeed, windDirection, tide } = forecast;
+    const { waveHeight = 0, windSpeed = 0, windDirection = 0, tide } = forecast;
 
     let safetyScore = 100;
     const warnings = [];
@@ -382,7 +378,7 @@ class EnhancedSuitabilityCalculator {
    * Calculate consistency score
    */
   calculateConsistencyScore(forecast) {
-    const { wavePeriod, windSpeed, waveHeight } = forecast;
+    const { wavePeriod = 0, windSpeed = 0, waveHeight = 0 } = forecast;
 
     let consistencyScore = 50;
 
@@ -512,7 +508,7 @@ class EnhancedSuitabilityCalculator {
 
     // Direction scoring
     let directionScore = 0.7; // Default neutral
-    if (optimalDirection) {
+    if (optimalDirection != null) {
       const diff = Math.abs(windDirection - optimalDirection);
       const normalizedDiff = Math.min(diff, 360 - diff);
       if (normalizedDiff <= 45) directionScore = 1.0;

@@ -134,11 +134,11 @@ RandomForestRegressor(
 ### Model Performance
 
 ```
-Overall R² Score: 0.8068
-MAE (Mean Absolute Error): 0.1308m for wave height
-RMSE (Root Mean Squared Error): 0.1704m for wave height
+Overall R² Score: 0.9386
+MAE (Mean Absolute Error): 0.1221m for wave height
+RMSE (Root Mean Squared Error): 0.1591m for wave height
 
-Translation: Model predicts wave height within ±0.13m accuracy
+Translation: Model predicts wave height within ±0.12m accuracy
 ```
 
 ### Feature Engineering - Critical Component
@@ -842,7 +842,7 @@ if (user.stats.totalSessions % 5 === 0) {
 - ML model trained on **real historical data**
 - 200 decision trees for robust predictions
 - Physics-based feature engineering
-- ±0.13m wave height accuracy
+- ±0.12m wave height accuracy
 
 ### ✅ **Real-time**
 
@@ -1214,7 +1214,7 @@ The saved model file contains a dictionary with these keys:
 {
     'model': RandomForestRegressor,  # The trained scikit-learn model
     'feature_names': [...],          # List of 15 feature names
-    'target_names': [...],           # List of 4 target names
+    'target_names': [...],           # List of 3 target names
     'engineered_features': [...]     # List of 5 engineered features
 }
 ```
@@ -1232,7 +1232,7 @@ target_names = model_data['target_names']
 
 # Make predictions
 predictions = model.predict(features_dataframe)
-# Returns: [[waveHeight, wavePeriod, windSpeed, windDirection], ...]
+# Returns: [[waveHeight, windSpeed, windDirection], ...]
 ```
 
 ### Configuration Files
@@ -1260,7 +1260,6 @@ RANDOM_FOREST_ENGINEERED_FEATURES = [
 # Prediction targets
 RANDOM_FOREST_TARGETS = [
     'waveHeight',      # Predicted wave height (m)
-    'wavePeriod',      # Predicted wave period (s)
     'windSpeed',       # Predicted wind speed (m/s)
     'windDirection'    # Predicted wind direction (°)
 ]
@@ -1393,49 +1392,44 @@ MODEL PERFORMANCE
 ======================================================================
 
 waveHeight:
-  R² Score:  0.8923
-  MAE:       0.1842
-  RMSE:      0.2764
-
-wavePeriod:
-  R² Score:  0.8756
-  MAE:       0.8234
-  RMSE:      1.1245
+  R² Score:  0.8320
+  MAE:       0.1221
+  RMSE:      0.1591
 
 windSpeed:
-  R² Score:  0.8645
-  MAE:       1.2341
-  RMSE:      1.8923
+  R² Score:  0.9860
+  MAE:       0.1970
+  RMSE:      0.2725
 
 windDirection:
-  R² Score:  0.8112
-  MAE:       12.345
-  RMSE:      18.234
+  R² Score:  0.9978
+  MAE:       2.9126
+  RMSE:      4.2395
 
-Overall R² Score: 0.8659
+Overall R² Score: 0.9386
 
 FEATURE IMPORTANCE (Top 10)
 ======================================================================
-  swellEnergy                    | 0.1845 ██████████████████
-  swellHeight                    | 0.1523 ███████████████
-  totalSwellHeight               | 0.1234 ████████████
-  swellPeriod                    | 0.1156 ███████████
-  windSpeed                      | 0.0923 █████████
-  offshoreWind                   | 0.0876 ████████
-  windSwellInteraction           | 0.0734 ███████
-  secondarySwellHeight           | 0.0645 ██████
-  windDirection                  | 0.0587 █████
-  seaLevel                       | 0.0477 ████
+  windDirection                  | 0.5411 ████████████████████████████████████████████████████
+  offshoreWind                   | 0.3298 █████████████████████████████████
+  seaLevel                       | 0.0284 ██
+  swellEnergy                    | 0.0178 █
+  swellHeight                    | 0.0143 █
+  gust                           | 0.0136 █
+  windSwellInteraction           | 0.0124 █
+  swellDirection                 | 0.0059
+  swellPeriod                    | 0.0022
+  secondarySwellPeriod           | 0.0020
 
 ✅ Model saved successfully to '.../models/surf_forecast_model.joblib'
 ```
 
 **Good Performance Indicators:**
 
-- R² Score > 0.85 for all targets
-- MAE < 0.2m for wave height
-- MAE < 1.5s for wave period
-- swellEnergy is top feature (indicates good engineering)
+- R² Score > 0.83 for waveHeight, > 0.95 for wind targets
+- MAE < 0.15m for wave height
+- windDirection is #1 feature (54%+) — indicates good wind encoding
+- offshoreWind is #2 feature (33%+) — confirms engineered features are working
 
 ---
 
@@ -1449,19 +1443,17 @@ FEATURE IMPORTANCE (Top 10)
 // Track prediction accuracy over time
 const metrics = {
   // R² Score (0-1, higher is better)
-  r2_waveHeight: 0.89,
-  r2_wavePeriod: 0.88,
-  r2_windSpeed: 0.86,
-  r2_windDirection: 0.81,
+  r2_waveHeight: 0.832,
+  r2_windSpeed: 0.986,
+  r2_windDirection: 0.9978,
 
   // Mean Absolute Error (lower is better)
-  mae_waveHeight: 0.18, // meters
-  mae_wavePeriod: 0.82, // seconds
-  mae_windSpeed: 1.23, // m/s
-  mae_windDirection: 12.3, // degrees
+  mae_waveHeight: 0.1221, // meters
+  mae_windSpeed: 0.197, // m/s
+  mae_windDirection: 2.9126, // degrees
 
   // Overall performance
-  overall_r2: 0.87,
+  overall_r2: 0.9386,
 
   // Last trained
   lastTraining: "2026-01-04",
