@@ -1,4 +1,9 @@
-"""Spot Recommendation Service - Main Production Service"""
+"""Spot Recommendation Service - Main Production Service Business logic
+The Random Forest spot recommendation pipeline:
+Loads all spots from surf_spots.json (shared source of truth)
+For each spot: fetches live weather (or mock), applies feature engineering, runs Random Forest prediction
+Outputs { spots: [...] } — each spot enriched with forecast: { waveHeight, wavePeriod, windSpeed, windDirection, tide }"""
+
 import sys
 import json
 import os

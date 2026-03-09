@@ -1,4 +1,6 @@
-"""Model File Paths and Validation"""
+"""Model File Paths and Validation.
+Defines absolute disk paths for all model artifacts"""
+
 import os
 import sys
 

@@ -1,4 +1,6 @@
-"""API Keys Configuration and Rotation Logic"""
+"""API Keys Configuration and Rotation Logic.
+Implements round-robin key rotation logic with get_next_api_key() and rotate_to_next_key()."""
+
 import os
 
 # Multiple API keys for rotation (100 free-tier keys with 10 requests/day each = 1000 requests/day)

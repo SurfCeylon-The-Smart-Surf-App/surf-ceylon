@@ -1,5 +1,9 @@
 """wrapper/facade for LSTM model operations. 
-It handles loading, caching, and prediction."""
+It handles loading, caching, and prediction.
+Loads the Keras LSTM model + 2 StandardScaler joblib files (one for X, one for y) on first call. 
+Exposes load_lstm_model() → returns (model, scaler_x, scaler_y, feature_names). 
+Handles TensorFlow not being installed gracefully."""
+
 import sys
 import os
 import numpy as np

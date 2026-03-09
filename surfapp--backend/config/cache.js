@@ -1,4 +1,8 @@
-// Cache configuration for spot data
+/* 
+Cache configuration for spot data
+Simple in-memory cache with a 5-minute TTL to avoid re-running the Python ML script 
+on every request. getCachedData() / setCachedData() / clearCache().
+ */
 const cache = {
   data: null,
   timestamp: null,
