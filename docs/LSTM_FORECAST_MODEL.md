@@ -33,11 +33,11 @@ The **Multi-Output LSTM (Long Short-Term Memory)** model is designed to generate
 ### Predicted Features (6 Parameters)
 
 1. **Wave Height (m)** - Average wave height
-2. **Wave Period (s)** - Time between wave crests
-3. **Swell Height (m)** - Height of ocean swell
-4. **Swell Period (s)** - Period of ocean swell
-5. **Wind Speed (m/s)** - Surface wind speed
-6. **Wind Direction (°)** - Wind direction in degrees
+2. **Swell Height (m)** - Height of ocean swell
+3. **Swell Period (s)** - Period of ocean swell
+4. **Wind Speed (m/s)** - Surface wind speed
+5. **Wind Direction (°)** - Wind direction in degrees
+6. **Sea Level (m)** - Sea level / tidal component
 
 ---
 
@@ -91,7 +91,7 @@ Output: (batch_size, 168 timesteps, 6 features)
 
 ### Model Specifications
 
-- **Total Parameters**: ~150,000 trainable parameters
+- **Total Parameters**: 42,150 trainable parameters
 - **Activation Function**: `tanh` (LSTM default)
 - **Optimizer**: Adam with learning rate 0.001
 - **Loss Function**: Mean Squared Error (MSE)
@@ -406,14 +406,40 @@ LSTM_FEATURE_NAMES = os.path.join(BASE_DIR, 'models', 'wave_forecast_feature_nam
 
 ## Performance Metrics
 
-### Typical Model Performance
+### Test Set Evaluation (20% holdout, random_state=42)
 
-Based on test set evaluation (20% holdout):
+**Dataset**: 237,312 total sequences × 168 hours × 6 features  
+**Test set**: 47,463 sequences (20%)
 
-| Metric   | Wave Height | Wave Period | Swell Height | Swell Period | Wind Speed | Wind Direction |
-| -------- | ----------- | ----------- | ------------ | ------------ | ---------- | -------------- |
-| **MAE**  | 0.15 m      | 1.2 s       | 0.12 m       | 1.0 s        | 1.5 m/s    | 15°            |
-| **MAPE** | 12-15%      | 8-10%       | 10-12%       | 7-9%         | 15-20%     | 10-15%         |
+| Feature        | MAE        | RMSE       | MAPE  | Status         |
+| -------------- | ---------- | ---------- | ----- | -------------- |
+| Wave Height    | 0.1248 m   | 0.1630 m   | 8.5%  | ✅ Good        |
+| Swell Height   | 0.4391 m   | 0.5834 m   | 6.9%  | ⚠️ High error¹ |
+| Swell Period   | 0.1234 s   | 0.1595 s   | 11.9% | ✅ Good        |
+| Wind Speed     | 0.9342 m/s | 1.2942 m/s | 11.3% | ✅ Good        |
+| Wind Direction | 0.9204 °   | 1.2086 °   | 39.4% | ✅ Good        |
+| Sea Level      | -          | -          | -     | ⚠️ Unit issue² |
+
+**¹** Swell Height: MAPE of 6.9% is good but absolute MAE of 0.44m indicates larger absolute swells in raw data may inflate this.
+
+**²** Sea Level: The raw StormGlass `seaLevel` data appears to use centimetres rather than the expected metres, causing inflated sea level metrics. This does not affect wave height, swell, or wind predictions.
+
+### MAE by Forecast Horizon (Wave Height)
+
+Error is not monotonically increasing because the LSTM’s encoder-decoder structure predicts the full 168-hour window simultaneously rather than recursively.
+
+| Horizon | MAE (m) |
+| ------- | ------- |
+| H+1     | 0.2024  |
+| H+6     | 0.1325  |
+| H+12    | 0.1270  |
+| Day 1   | 0.1257  |
+| Day 2   | 0.1232  |
+| Day 3   | 0.1198  |
+| Day 4   | 0.1191  |
+| Day 5   | 0.1200  |
+| Day 6   | 0.1236  |
+| Day 7   | 0.1509  |
 
 ### Evaluation Metrics
 
