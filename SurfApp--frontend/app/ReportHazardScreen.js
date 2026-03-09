@@ -295,6 +295,7 @@ export default function ReportHazardScreen() {
             <Picker
               selectedValue={formData.surfSpotId}
               onValueChange={(value) => setFormData({...formData, surfSpotId: value})}
+              style={styles.picker}
             >
               {surfSpots.map((spot) => (
                 <Picker.Item key={spot._id} label={spot.name} value={spot._id} />
@@ -310,6 +311,7 @@ export default function ReportHazardScreen() {
             <Picker
               selectedValue={formData.hazardType}
               onValueChange={(value) => setFormData({...formData, hazardType: value})}
+              style={styles.picker}
             >
               {HAZARD_TYPES.map((type) => (
                 <Picker.Item key={type} label={type} value={type} />
@@ -462,6 +464,7 @@ const styles = StyleSheet.create({
   helpText: { fontSize: 12, color: '#6b7280', marginBottom: 8 },
   input: { backgroundColor: '#f9fafb', borderRadius: 8, padding: 12, fontSize: 14 },
   pickerContainer: { backgroundColor: '#f9fafb', borderRadius: 8, overflow: 'hidden' },
+  picker: { color: '#000000' },
   textArea: { backgroundColor: '#f9fafb', borderRadius: 8, padding: 12, fontSize: 14, minHeight: 120 },
   severityButtons: { flexDirection: 'row', justifyContent: 'space-between' },
   severityButton: { flex: 1, marginHorizontal: 4, paddingVertical: 12, borderRadius: 8, borderWidth: 2, borderColor: '#e5e7eb', backgroundColor: 'white', alignItems: 'center' },
