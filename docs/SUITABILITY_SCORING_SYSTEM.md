@@ -84,13 +84,12 @@ The model was trained on historical surf data from StormGlass API using data fro
    # Swell dominance (higher period = cleaner waves)
 ```
 
-#### Prediction Targets (4)
+#### Prediction Targets (3)
 
 ```javascript
 1. waveHeight      // Predicted wave face height (meters)
-2. wavePeriod      // Predicted wave period (seconds)
-3. windSpeed       // Predicted wind speed (m/s)
-4. windDirection   // Predicted wind direction (degrees)
+2. windSpeed       // Predicted wind speed (m/s)
+3. windDirection   // Predicted wind direction (degrees)
 ```
 
 ### Model Architecture
@@ -135,11 +134,11 @@ RandomForestRegressor(
 ### Model Performance
 
 ```
-Overall R² Score: ~0.85-0.90
-MAE (Mean Absolute Error): ~0.2m for wave height
-RMSE (Root Mean Squared Error): ~0.3m for wave height
+Overall R² Score: 0.8068
+MAE (Mean Absolute Error): 0.1308m for wave height
+RMSE (Root Mean Squared Error): 0.1704m for wave height
 
-Translation: Model predicts wave height within ±0.2m accuracy
+Translation: Model predicts wave height within ±0.13m accuracy
 ```
 
 ### Feature Engineering - Critical Component
@@ -195,30 +194,30 @@ Advanced (Performance-focused):
 #### 1. Wave Quality Score (0-100)
 
 ```javascript
-// Ideal wave height varies by skill
-const idealWaveHeight = {
-  Beginner: 0.8m,
-  Intermediate: 1.5m,
-  Advanced: 2.5m
+// Ideal wave height ranges by skill level
+const optimalRanges = {
+  Beginner: { min: 0.5, ideal: 1.0, max: 1.5 },
+  Intermediate: { min: 1.0, ideal: 1.5, max: 2.5 },
+  Advanced: { min: 1.5, ideal: 2.5, max: 5.0 },
 };
 
-// Score calculation
-waveDiff = |actualWave - idealWave|;
-
-if (waveDiff < 0.3m) {
-  score = 100;  // Perfect match!
-} else if (waveDiff < 0.5m) {
-  score = 85;   // Very good
-} else if (waveDiff < 1.0m) {
-  score = 70;   // Acceptable
+// Score calculation (returns 0-1, multiplied by 100 later)
+if (waveHeight < range.min) {
+  score = waveHeight / range.min; // Too small
+} else if (waveHeight <= range.ideal) {
+  score = 1.0; // Perfect!
+} else if (waveHeight <= range.max) {
+  // Good but getting large: linear penalty 1.0 → 0.7
+  score = 1.0 - ((waveHeight - range.ideal) / (range.max - range.ideal)) * 0.3;
 } else {
-  score = Math.max(0, 70 - (waveDiff * 20));  // Poor
+  // Too large: drops below 0.7
+  score = Math.max(0, 0.7 - ((waveHeight - range.max) / range.max) * 0.5);
 }
 
-// Example for Intermediate:
-// Actual: 1.3m, Ideal: 1.5m → Diff: 0.2m → Score: 100
-// Actual: 2.0m, Ideal: 1.5m → Diff: 0.5m → Score: 85
-// Actual: 3.0m, Ideal: 1.5m → Diff: 1.5m → Score: 40
+// Example for Intermediate (ideal 1.5m):
+// Actual: 1.3m → score: 1.0 (within ideal range)
+// Actual: 2.0m → score: 0.85 (slightly large)
+// Actual: 3.0m → score: 0.52 (exceeds max)
 ```
 
 #### 2. Wind Conditions Score (0-100)
@@ -228,57 +227,76 @@ if (waveDiff < 0.3m) {
 // Offshore wind = clean, glassy waves
 // Onshore wind = messy, choppy waves
 
-windScore = baseWindScore + offshoreBonus;
+windScore = (speedScore * 0.6 + directionScore * 0.4) * 100;
 
-// Base score from wind speed
-if (windSpeed < 10 km/h) {
-  baseScore = 100;  // Glassy conditions
-} else if (windSpeed < 20 km/h) {
-  baseScore = 80;   // Light wind
-} else if (windSpeed < 30 km/h) {
-  baseScore = 60;   // Moderate wind
+// Base score from wind speed (km/h)
+if (windSpeed < 5) {
+  speedScore = 0.6; // Too light (glassy but no swell)
+} else if (windSpeed <= 15) {
+  speedScore = 1.0; // Optimal
+} else if (windSpeed <= 25) {
+  speedScore = 0.7; // Moderate
+} else if (windSpeed <= 35) {
+  speedScore = 0.4; // Strong
 } else {
-  baseScore = 40;   // Strong wind
+  speedScore = 0.1; // Very strong (dangerous)
 }
 
-// Offshore bonus calculation (+20 points max)
-spotOffshore = 270°;  // South coast offshore direction
-angleDiff = |windDirection - spotOffshore|;
+// Direction scoring relative to spot's offshore direction
+angleDiff = min(|windDirection - offshoreDir|, 360 - |windDirection - offshoreDir|);
 
-if (angleDiff < 30°) {
-  offshoreBonus = 20;  // Directly offshore
-} else if (angleDiff < 60°) {
-  offshoreBonus = 10;  // Partially offshore
+if (angleDiff <= 45°) {
+  directionScore = 1.0;  // Directly offshore
+} else if (angleDiff <= 90°) {
+  directionScore = 0.8;  // Partially offshore
+} else if (angleDiff <= 135°) {
+  directionScore = 0.6;  // Side-shore
 } else {
-  offshoreBonus = 0;   // Side/onshore
+  directionScore = 0.4;  // Onshore
 }
 
-// Example:
-// Wind: 15 km/h at 280° → Base: 80, Offshore: +20 → Total: 100
-// Wind: 15 km/h at 90° → Base: 80, Offshore: 0 → Total: 80
+// Example (south coast spot, offshore direction 270°):
+// Wind: 14 km/h at 280° → speedScore=1.0, diff=10°, dirScore=1.0 → Total=100
+// Wind: 14 km/h at 90°  → speedScore=1.0, diff=180°, dirScore=0.4 → Total=64
 ```
 
 #### 3. Safety Score (0-100)
 
 ```javascript
-// Critical safety factors
-if (waveHeight > maxSafeForSkill) {
-  safetyScore = 0;  // Too dangerous!
-  canSurf = false;
+// Safety limits per skill level
+const safeWaveHeights = {
+  Beginner: { max: 1.5, ideal: 1.0 },
+  Intermediate: { max: 2.5, ideal: 1.8 },
+  Advanced: { max: 5.0, ideal: 2.5 },
+};
+
+// Start at 100, apply penalties
+let safetyScore = 100;
+
+// Wave height penalty
+if (waveHeight > skillThresholds.max) {
+  const excess = waveHeight - skillThresholds.max;
+  safetyScore -= Math.min(40, excess * 20); // Up to -40
+} else if (waveHeight > skillThresholds.ideal) {
+  safetyScore -= (waveHeight - skillThresholds.ideal) * 10;
 }
 
-if (windSpeed > 50 km/h) {
-  safetyScore = 0;  // Storm conditions!
-  canSurf = false;
+// Wind penalty
+if (windSpeed > 35) {
+  safetyScore -= 30; // Strong wind
+} else if (windSpeed > 25) {
+  safetyScore -= 15; // Moderate wind
 }
 
-// Normal conditions scoring
-baseScore = 100;
+// Additional Beginner-specific penalties
+// Strong offshore winds for beginners: -25
+// Reef/rock bottom for beginners: -10
 
-// Penalties
-if (waveHeight > preferredMax) baseScore -= 20;
-if (wavePeriod < 6s) baseScore -= 10;  // Short period = choppy
-if (windSpeed > 35 km/h) baseScore -= 15;
+// Low tide on reef penalty: -10 to -20
+// Rip current spots (Beginner): -15
+
+// canSurf determination
+canSurf = safetyScore >= 30;
 
 // Safety override: Cap score if dangerous
 if (!canSurf) {
@@ -289,28 +307,30 @@ if (!canSurf) {
 #### 4. Consistency Score (0-100)
 
 ```javascript
-// Long period = clean, consistent waves
-// Short period = choppy, inconsistent wind swell
+// Starts at 50, then adds/subtracts based on conditions
+let consistencyScore = 50;
 
-if (wavePeriod >= 12s) {
-  score = 100;  // Long period groundswell (best)
-} else if (wavePeriod >= 10s) {
-  score = 85;   // Good groundswell
-} else if (wavePeriod >= 8s) {
-  score = 70;   // Mixed swell
-} else if (wavePeriod >= 6s) {
-  score = 50;   // Wind swell
-} else {
-  score = 30;   // Choppy conditions
-}
+// Wave period (groundswell quality)
+if (wavePeriod >= 14s) consistencyScore += 35;  // Epic groundswell
+else if (wavePeriod >= 12s) consistencyScore += 25;  // Excellent
+else if (wavePeriod >= 10s) consistencyScore += 15;  // Good
+else if (wavePeriod >= 8s) consistencyScore += 5;   // OK
+else consistencyScore -= 20;                         // Choppy wind-swell
 
-// Wind stability bonus
-if (windSpeed < 15 km/h) {
-  score += 10;  // Light wind = stable conditions
-}
+// Wind stability
+if (windSpeed >= 8 && windSpeed <= 15) consistencyScore += 20;  // Ideal window
+else if (windSpeed >= 5 && windSpeed <= 20) consistencyScore += 10;
+else if (windSpeed < 5) consistencyScore += 5;   // Glassy
+else if (windSpeed > 30) consistencyScore -= 30;  // Storm
+else if (windSpeed > 20) consistencyScore -= 15;  // Choppy
 
-// Final score capped at 100
-score = Math.min(score, 100);
+// Wave height sweet spot
+if (waveHeight >= 1.0 && waveHeight <= 2.5) consistencyScore += 10;
+else if (waveHeight < 0.5) consistencyScore -= 10;  // Too small
+else if (waveHeight > 4.0) consistencyScore -= 10;  // Too large
+
+// Final score clamped between 0 and 100
+score = Math.max(0, Math.min(100, consistencyScore));
 ```
 
 ### Weighted Score Calculation
@@ -477,7 +497,7 @@ if (userPreferences.favoriteSpots?.includes(spot.name)) {
 // ────────────────────────────────────────────
 if (userPreferences.learnedWaveHeight) {
   const waveDiff = Math.abs(
-    currentWaveHeight - userPreferences.learnedWaveHeight
+    currentWaveHeight - userPreferences.learnedWaveHeight,
   );
 
   if (waveDiff <= 0.3) {
@@ -487,7 +507,7 @@ if (userPreferences.learnedWaveHeight) {
       type: "wave_match",
       points: 10,
       message: `🌊 Waves match your preferred ${userPreferences.learnedWaveHeight.toFixed(
-        1
+        1,
       )}m conditions!`,
     });
   }
@@ -498,7 +518,7 @@ if (userPreferences.learnedWaveHeight) {
 // ────────────────────────────────────────────
 if (userPreferences.learnedWindSpeed) {
   const windDiff = Math.abs(
-    currentWindSpeed - userPreferences.learnedWindSpeed
+    currentWindSpeed - userPreferences.learnedWindSpeed,
   );
 
   if (windDiff <= 5) {
@@ -508,7 +528,7 @@ if (userPreferences.learnedWindSpeed) {
       type: "wind_match",
       points: 5,
       message: `💨 Wind matches your preferred ${userPreferences.learnedWindSpeed.toFixed(
-        0
+        0,
       )} km/h conditions!`,
     });
   }
@@ -690,7 +710,7 @@ if (user.stats.totalSessions % 5 === 0) {
 │                                                              │
 │ 3d. Make Predictions                                        │
 │     predictions = model.predict(features_df)                │
-│     → [waveHeight, wavePeriod, windSpeed, windDirection]    │
+│     → [waveHeight, windSpeed, windDirection]                │
 │                                                              │
 │ 3e. Extract Tide                                            │
 │     if seaLevel < 0.3: tide = "Low"                         │
@@ -822,7 +842,7 @@ if (user.stats.totalSessions % 5 === 0) {
 - ML model trained on **real historical data**
 - 200 decision trees for robust predictions
 - Physics-based feature engineering
-- ±0.2m wave height accuracy
+- ±0.13m wave height accuracy
 
 ### ✅ **Real-time**
 
@@ -1133,13 +1153,11 @@ This will:
 To add a new scoring factor:
 
 1. Update `EnhancedSuitabilityCalculator.js`:
-
    - Add new factor calculation method
    - Update `getAdaptiveWeights()` to include new factor
    - Update weighted score calculation
 
 2. Update frontend components:
-
    - Add to `SuitabilityRadarChart.js` factors array
    - Add to `ScoreBreakdown.js` rendering
    - Update angles for balanced chart
@@ -1321,7 +1339,6 @@ python training/train_random_forest_model.py
 This script performs:
 
 1. **Data Loading**
-
    - Loads from local JSON files
    - Falls back to API if needed
    - Validates all required parameters present
@@ -1359,7 +1376,6 @@ This script performs:
    ```
 
 5. **Evaluation**
-
    - Calculate R², MAE, RMSE per target
    - Display feature importance
    - Show top 10 influential features
@@ -1566,7 +1582,7 @@ router.get("/health/ml", async (req, res) => {
     // Check if model file exists
     const modelPath = path.join(
       __dirname,
-      "../../surfapp--ml-engine/models/surf_forecast_model.joblib"
+      "../../surfapp--ml-engine/models/surf_forecast_model.joblib",
     );
     health.checks.modelLoaded = fs.existsSync(modelPath);
 
@@ -1575,7 +1591,7 @@ router.get("/health/ml", async (req, res) => {
       "https://api.stormglass.io/v2/weather/point?lat=5.972&lng=80.426",
       {
         headers: { Authorization: process.env.STORMGLASS_API_KEY },
-      }
+      },
     );
     health.checks.apiConnectivity = testResponse.ok;
 

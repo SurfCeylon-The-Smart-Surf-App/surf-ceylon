@@ -1,3 +1,8 @@
+/*
+generateDateLabels() — server-side equivalent 
+of the frontend label generator (Today/Tmrw/Mon/...).
+*/
+
 const moment = require("moment");
 
 function generateDateLabels() {

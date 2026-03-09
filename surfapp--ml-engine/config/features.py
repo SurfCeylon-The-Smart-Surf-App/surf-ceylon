@@ -1,4 +1,5 @@
-"""Feature Definitions for ML Models"""
+"""Feature Definitions for ML Models.
+Single source of truth for all feature names"""
 
 # Model 1 (Random Forest) - 10 base weather parameters from StormGlass API
 RANDOM_FOREST_BASE_FEATURES = [

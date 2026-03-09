@@ -1,3 +1,14 @@
+/*
+The main spots + recommendation controller. Full pipeline:
+
+Parses user preferences from query params (skillLevel, preferredWaveHeight, boardType, etc.)
+Loads session-based insights from MongoDB (last 50 sessions, learns preferred wave heights from 4–5 star-rated sessions)
+Checks a 5-minute in-memory cache — returns cached + recalculated enhanced scores if fresh
+If cache stale: spawns spot_recommender_service.py as a child process, pipes stdout
+Passes ML output through EnhancedSuitabilityCalculator to add suitability scores
+Sanitizes NaN/Infinity values, sorts by score, returns { spots: [...] }
+ */
+
 const { spawn } = require('child_process');
 const path = require('path');
 const moment = require('moment');

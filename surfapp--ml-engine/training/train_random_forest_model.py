@@ -1,3 +1,7 @@
+"""Loads collected JSON from data/, engineers features, 
+trains a multi-output RandomForestRegressor, 
+saves to models/surf_forecast_model.joblib."""
+
 import pandas as pd
 import joblib
 import os

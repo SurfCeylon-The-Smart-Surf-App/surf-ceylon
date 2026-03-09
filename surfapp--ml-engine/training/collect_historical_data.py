@@ -1,3 +1,7 @@
+"""One-time data collection script. 
+Uses all 100 API keys smartly allocated per spot (Weligama/Arugam Bay get 15 keys = ~4 years of data each). 
+Saves raw JSON to data/ directory."""
+
 import requests
 import json
 from datetime import datetime, timedelta, timezone

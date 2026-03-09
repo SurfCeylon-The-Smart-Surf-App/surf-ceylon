@@ -1,3 +1,8 @@
+/*
+Loads bottomType and accessibility from surf_spots.json into a 
+name-keyed lookup map used by the suitability calculator.
+*/
+
 const fs = require("fs");
 const path = require("path");
 

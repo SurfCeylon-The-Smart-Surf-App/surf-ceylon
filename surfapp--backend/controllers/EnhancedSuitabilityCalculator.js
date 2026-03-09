@@ -15,34 +15,6 @@ class EnhancedSuitabilityCalculator {
       tide: 0.1,
       timeOfDay: 0.05,
     };
-
-    // Historical crowd patterns
-    this.crowdPatterns = {
-      weekday: { morning: 0.3, afternoon: 0.5, evening: 0.2 },
-      weekend: { morning: 0.7, afternoon: 0.9, evening: 0.4 },
-    };
-
-    // Popular spots that attract more crowds
-    this.popularSpots = [
-      "Weligama",
-      "Arugam Bay",
-      "Hikkaduwa",
-      "Midigama",
-      "Lazy Left",
-      "Pottuvil Point",
-    ];
-
-    // Spot accessibility ratings
-    this.spotAccessibility = {
-      Weligama: "High",
-      Hikkaduwa: "High",
-      Midigama: "Medium",
-      "Arugam Bay": "Medium",
-      Hiriketiya: "Medium",
-      Okanda: "Low",
-      "Pottuvil Point": "Low",
-      "Whiskey Point": "Low",
-    };
   }
 
   /**
@@ -57,7 +29,7 @@ class EnhancedSuitabilityCalculator {
     spot,
     forecast,
     userPreferences = {},
-    currentTime
+    currentTime,
   ) {
     // Validate forecast exists
     if (!forecast || typeof forecast !== "object") {
@@ -75,7 +47,6 @@ class EnhancedSuitabilityCalculator {
     }
 
     const breakdown = {};
-    const warnings = [];
     const recommendations = [];
 
     // Get adaptive weights based on skill level
@@ -100,7 +71,7 @@ class EnhancedSuitabilityCalculator {
     const waveHeightScore = this.calculateWaveHeightScore(
       waveHeight,
       spot.optimalWaveHeight,
-      userPreferences.learnedWaveHeight
+      userPreferences.learnedWaveHeight,
     );
     breakdown.waveHeight = {
       score: waveHeightScore,
@@ -109,16 +80,10 @@ class EnhancedSuitabilityCalculator {
       unit: "m",
     };
 
-    if (waveHeight < 0.5) {
-      warnings.push("Very small waves - may be flat");
-    } else if (waveHeight > 3.0) {
-      warnings.push("Large waves - advanced surfers only");
-    }
-
     // 2. Wave Period Score
     const wavePeriodScore = this.calculateWavePeriodScore(
       wavePeriod,
-      10 // optimal period
+      10, // optimal period
     );
     breakdown.wavePeriod = {
       score: wavePeriodScore,
@@ -132,7 +97,7 @@ class EnhancedSuitabilityCalculator {
       windSpeed,
       windDirection,
       spot.offshoreWind || 270,
-      userPreferences.learnedWindSpeed
+      userPreferences.learnedWindSpeed,
     );
     breakdown.windSpeed = {
       score: windScore.speedScore,
@@ -146,10 +111,6 @@ class EnhancedSuitabilityCalculator {
       optimal: spot.offshoreWind || 270,
       unit: "°",
     };
-
-    if (windSpeed > 25) {
-      warnings.push("Strong winds - choppy conditions");
-    }
 
     // 4. Tide Score
     const tideScore = this.calculateTideScore(tideStatus, spot.optimalTide);
@@ -182,13 +143,11 @@ class EnhancedSuitabilityCalculator {
     let normalizedScore = weightedScore;
 
     // Region preference bonus
-    let regionBonus = 0;
     if (
       userPreferences.preferredRegion &&
       spot.region === userPreferences.preferredRegion
     ) {
-      regionBonus = 5;
-      normalizedScore += regionBonus;
+      normalizedScore += 5;
     }
 
     // Session-based bonuses
@@ -218,7 +177,7 @@ class EnhancedSuitabilityCalculator {
           type: "wave_match",
           points: 10,
           message: `🌊 Waves match your preferred ${userPreferences.learnedWaveHeight.toFixed(
-            1
+            1,
           )}m conditions!`,
         });
       }
@@ -233,7 +192,7 @@ class EnhancedSuitabilityCalculator {
           type: "wind_match",
           points: 5,
           message: `💨 Wind matches your preferred ${userPreferences.learnedWindSpeed.toFixed(
-            0
+            0,
           )} km/h conditions!`,
         });
       }
@@ -276,7 +235,7 @@ class EnhancedSuitabilityCalculator {
       breakdown,
       safetyData,
       spot,
-      time
+      time,
     );
     recommendations.push(...smartRecommendations);
 
@@ -320,133 +279,6 @@ class EnhancedSuitabilityCalculator {
   }
 
   /**
-   * Enhanced time-aware scoring with golden hours and timing bonuses
-   */
-  calculateEnhancedTimeScore(forecast, currentHour) {
-    const { windSpeed, windDirection, tide } = forecast;
-
-    let timeScore = 50;
-
-    // Golden hours (6-9 AM)
-    if (currentHour >= 6 && currentHour <= 9) {
-      timeScore += 20;
-    }
-
-    // Dawn patrol (5-7 AM + light winds)
-    if (currentHour >= 5 && currentHour <= 7 && windSpeed < 10) {
-      timeScore += 15;
-    }
-
-    // Offshore wind window
-    if (
-      windDirection >= 270 &&
-      windDirection <= 360 &&
-      currentHour >= 6 &&
-      currentHour <= 18
-    ) {
-      timeScore += 15;
-    }
-
-    // Midday penalty
-    if (currentHour >= 11 && currentHour <= 14) {
-      timeScore -= 10;
-    }
-
-    // Evening session bonus
-    if (currentHour >= 16 && currentHour <= 18) {
-      timeScore += 10;
-    }
-
-    // Tide timing bonuses
-    if (tide && tide.status === "Mid") {
-      if (currentHour >= 7 && currentHour <= 11) {
-        timeScore += 10;
-      }
-      if (currentHour >= 16 && currentHour <= 18) {
-        timeScore += 8;
-      }
-    }
-
-    // Low tide early morning warning
-    if (tide && tide.status === "Low" && currentHour >= 5 && currentHour <= 8) {
-      timeScore -= 5;
-    }
-
-    return Math.max(0, Math.min(100, timeScore));
-  }
-
-  /**
-   * Predict crowd level using multiple factors
-   */
-  predictCrowdLevel(spot, currentTime) {
-    const dayOfWeek = currentTime.day();
-    const hour = currentTime.hour();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    const month = currentTime.month();
-
-    let crowdFactor = isWeekend ? 0.7 : 0.3;
-
-    // Peak tourist season
-    const isHighSeason =
-      month >= 11 || month <= 2 || (month >= 6 && month <= 7);
-    if (isHighSeason) {
-      crowdFactor += 0.2;
-    }
-
-    // Popular spots
-    if (this.popularSpots.includes(spot.name)) {
-      crowdFactor += 0.2;
-    }
-
-    // Time-based adjustment
-    if (hour >= 8 && hour <= 16) {
-      crowdFactor += 0.3;
-    } else if (hour >= 5 && hour <= 7) {
-      crowdFactor -= 0.2;
-    } else if (hour >= 17 && hour <= 19) {
-      crowdFactor += 0.1;
-    } else {
-      crowdFactor -= 0.3;
-    }
-
-    // Accessibility factor
-    const accessibility = this.spotAccessibility[spot.name] || "Medium";
-    const accessibilityScore = {
-      High: 0.3,
-      Medium: 0.1,
-      Low: -0.2,
-    };
-    crowdFactor += accessibilityScore[accessibility];
-
-    // Region-specific patterns
-    if (spot.region === "East Coast" && month >= 4 && month <= 9) {
-      crowdFactor += 0.15;
-    }
-    if (spot.region === "South Coast" && (month >= 10 || month <= 3)) {
-      crowdFactor += 0.15;
-    }
-
-    crowdFactor = Math.max(0, Math.min(1, crowdFactor));
-
-    let level, score, description;
-    if (crowdFactor > 0.7) {
-      level = "High";
-      score = 30;
-      description = "Very crowded - expect competition for waves";
-    } else if (crowdFactor > 0.4) {
-      level = "Medium";
-      score = 60;
-      description = "Moderate crowds - still plenty of waves";
-    } else {
-      level = "Low";
-      score = 100;
-      description = "Empty or few surfers - enjoy the session!";
-    }
-
-    return { level, score, factor: crowdFactor, description };
-  }
-
-  /**
    * Comprehensive safety score with skill-based evaluation
    */
   calculateSafetyScore(forecast, spot, userSkillLevel) {
@@ -471,13 +303,13 @@ class EnhancedSuitabilityCalculator {
       const penalty = Math.min(40, excess * 20);
       safetyScore -= penalty;
       warnings.push(
-        `⚠️ Waves too large for ${userSkillLevel} (${waveHeight.toFixed(1)}m)`
+        `⚠️ Waves too large for ${userSkillLevel} (${waveHeight.toFixed(1)}m)`,
       );
     } else if (waveHeight > skillThresholds.ideal) {
       const excess = waveHeight - skillThresholds.ideal;
       safetyScore -= excess * 10;
       tips.push(
-        `💡 Waves on upper end for ${userSkillLevel} - exercise caution`
+        `💡 Waves on upper end for ${userSkillLevel} - exercise caution`,
       );
     }
 
@@ -486,8 +318,8 @@ class EnhancedSuitabilityCalculator {
       safetyScore -= 30;
       warnings.push(
         `🌬️ Strong winds (${windSpeed.toFixed(
-          1
-        )} km/h) - challenging conditions`
+          1,
+        )} km/h) - challenging conditions`,
       );
     } else if (windSpeed > 25) {
       safetyScore -= 15;
@@ -584,14 +416,14 @@ class EnhancedSuitabilityCalculator {
     breakdown,
     safetyData,
     spot,
-    currentTime
+    currentTime,
   ) {
     const recommendations = [];
 
     // Overall assessment
     if (score >= 80) {
       recommendations.push(
-        "🌊 Excellent conditions! This is a great choice right now."
+        "🌊 Excellent conditions! This is a great choice right now.",
       );
     } else if (score >= 65) {
       recommendations.push("✅ Good conditions - should be a fun session!");
@@ -599,14 +431,14 @@ class EnhancedSuitabilityCalculator {
       recommendations.push("👌 Fair conditions - manageable but not ideal.");
     } else {
       recommendations.push(
-        "⚠️ Challenging conditions - consider alternatives."
+        "⚠️ Challenging conditions - consider alternatives.",
       );
     }
 
     // Wave quality tips
     if (breakdown.consistency >= 70) {
       recommendations.push(
-        "📊 Consistent swell - expect clean, organized sets"
+        "📊 Consistent swell - expect clean, organized sets",
       );
     } else if (breakdown.consistency < 40) {
       recommendations.push("🌊 Choppy conditions - waves may be inconsistent");
@@ -617,7 +449,7 @@ class EnhancedSuitabilityCalculator {
       recommendations.push("💨 Offshore winds - excellent grooming conditions");
     } else if (breakdown.wind < 40) {
       recommendations.push(
-        "💨 Onshore winds - expect choppy, less favorable conditions"
+        "💨 Onshore winds - expect choppy, less favorable conditions",
       );
     }
 
@@ -629,60 +461,7 @@ class EnhancedSuitabilityCalculator {
     return recommendations.slice(0, 4);
   }
 
-  /**
-   * Generate detailed warnings with severity levels
-   */
-  generateDetailedWarnings(breakdown, safetyData, spot, forecast) {
-    const warnings = [];
-
-    if (forecast.windSpeed > 35) {
-      warnings.push({
-        severity: "high",
-        message: "Strong winds - dangerous conditions",
-        icon: "⚠️",
-      });
-    } else if (forecast.windSpeed > 25) {
-      warnings.push({
-        severity: "medium",
-        message: "Strong winds expected",
-        icon: "💨",
-      });
-    }
-
-    if (forecast.waveHeight > 3.5) {
-      warnings.push({
-        severity: "high",
-        message: "Large swell - experienced surfers only",
-        icon: "🌊",
-      });
-    } else if (forecast.waveHeight > 2.5) {
-      warnings.push({
-        severity: "medium",
-        message: "Large waves - caution advised",
-        icon: "🌊",
-      });
-    }
-
-    if (breakdown.safety < 40) {
-      warnings.push({
-        severity: "medium",
-        message: "Poor safety conditions - use caution",
-        icon: "⚠️",
-      });
-    }
-
-    if (breakdown.overall < 30) {
-      warnings.push({
-        severity: "low",
-        message: "Not recommended for surfing today",
-        icon: "❌",
-      });
-    }
-
-    return warnings;
-  }
-
-  // Original helper methods (kept from old version)
+  // Helper methods
 
   calculateWaveHeightScore(waveHeight, skillLevel = "Intermediate") {
     // Skill-based optimal wave height ranges
@@ -721,10 +500,14 @@ class EnhancedSuitabilityCalculator {
   calculateWindScore(windSpeed, windDirection, optimalDirection = null) {
     // Speed scoring (km/h)
     let speedScore;
-    if (windSpeed < 5) speedScore = 0.6; // Too light
-    else if (windSpeed <= 15) speedScore = 1.0; // Optimal
-    else if (windSpeed <= 25) speedScore = 0.7; // Moderate
-    else if (windSpeed <= 35) speedScore = 0.4; // Strong
+    if (windSpeed < 5)
+      speedScore = 0.6; // Too light
+    else if (windSpeed <= 15)
+      speedScore = 1.0; // Optimal
+    else if (windSpeed <= 25)
+      speedScore = 0.7; // Moderate
+    else if (windSpeed <= 35)
+      speedScore = 0.4; // Strong
     else speedScore = 0.1; // Very strong
 
     // Direction scoring
@@ -751,17 +534,6 @@ class EnhancedSuitabilityCalculator {
     };
 
     return tideMatch[tideStatus]?.[optimalTide] || 0.7;
-  }
-
-  calculateTimeScore(currentHour, optimalTime) {
-    // Morning (6-10): 1.0
-    // Midday (10-14): 0.6
-    // Afternoon (14-18): 0.8
-    // Other: 0.5
-    if (currentHour >= 6 && currentHour < 10) return 1.0;
-    if (currentHour >= 10 && currentHour < 14) return 0.6;
-    if (currentHour >= 14 && currentHour < 18) return 0.8;
-    return 0.5;
   }
 }
 

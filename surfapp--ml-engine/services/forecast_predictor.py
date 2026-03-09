@@ -1,4 +1,11 @@
-"""7-Day Forecast Service - Main Production Service"""
+"""7-Day Forecast Service - Main Production Service Business Logic
+The 7-day LSTM forecast pipeline:
+Fetches last 168 hours of real weather data (StormGlass API, key rotation)
+Falls back to generate_mock_timeseries_data() if API fails
+Runs LSTM to predict next 168 hours (6 variables); falls back to trend extrapolation if model unavailable
+Builds hourly_forecast (168 dicts) → aggregates to daily_forecast (7 dicts)
+Outputs JSON: { location, labels, daily:{waveHeight[], ...}, hourly:[...], metadata }"""
+
 import sys
 import json
 import numpy as np

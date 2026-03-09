@@ -1,4 +1,8 @@
-"""Random Forest Model Wrapper"""
+"""Random Forest Model Wrapper.
+Loads surf_forecast_model.joblib on first call and caches it in memory. 
+Exposes load_random_forest_model() and predict_with_random_forest(input_df). The model file is a dict; 
+the wrapper extracts the 'model' key."""
+
 import sys
 import os
 from config import RANDOM_FOREST_MODEL, validate_model_exists
