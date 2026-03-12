@@ -25,6 +25,7 @@ from .settings import (
     API_TIMEOUT,
     MAX_API_RETRIES,
     RETRY_DELAY_SECONDS,
+    MAX_RETRY_DELAY,
     REGIONS,
     ENABLE_RANDOM_FOREST,
     ENABLE_LSTM,
@@ -37,7 +38,7 @@ __all__ = [
     'rotate_to_next_key',
     'get_total_keys',
     'API_KEYS',
-    
+
     # Model Paths
     'RANDOM_FOREST_MODEL',
     'LSTM_MODEL',
@@ -46,7 +47,7 @@ __all__ = [
     'LSTM_FEATURE_NAMES',
     'validate_model_exists',
     'get_model_info',
-    
+
     # Features
     'RANDOM_FOREST_BASE_FEATURES',
     'RANDOM_FOREST_ENGINEERED_FEATURES',
@@ -57,12 +58,13 @@ __all__ = [
     'FEATURE_NAMES',
     'TARGET_NAMES',
     'FEATURE_COLS',
-    
+
     # Settings
     'USE_MOCK_DATA',
     'API_TIMEOUT',
     'MAX_API_RETRIES',
     'RETRY_DELAY_SECONDS',
+    'MAX_RETRY_DELAY',
     'REGIONS',
     'ENABLE_RANDOM_FOREST',
     'ENABLE_LSTM',
