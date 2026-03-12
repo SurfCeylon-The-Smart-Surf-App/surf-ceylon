@@ -7,11 +7,14 @@ import os
 USE_MOCK_DATA = True  # Model 1 enabled - uses ML predictions with mock weather data
 
 # API request timeout (seconds)
-API_TIMEOUT = 10
+# Increased for slow connections (e.g., university networks)
+# Format: (connect_timeout, read_timeout) or single value for both
+API_TIMEOUT = (15, 45)  # 15s to connect, 45s to read response
 
-# Retry configuration for API calls
-MAX_API_RETRIES = 3
-RETRY_DELAY_SECONDS = 1
+# Retry configuration for API calls with exponential backoff
+MAX_API_RETRIES = 3  # Retry each key up to 3 times before moving to next
+RETRY_DELAY_SECONDS = 2  # Initial delay, doubles with each retry
+MAX_RETRY_DELAY = 10  # Cap retry delay at 10 seconds
 
 # Region definitions for Sri Lanka
 REGIONS = {
