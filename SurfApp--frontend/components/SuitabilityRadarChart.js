@@ -44,7 +44,7 @@ const SuitabilityRadarChart = ({
   colorScheme = "default",
 }) => {
   const center = size / 2;
-  const radius = size / 2 - 50; // Leave space for labels
+  const radius = size / 2 - 92; // Extra space for longer labels
 
   // Color schemes
   const colors = {

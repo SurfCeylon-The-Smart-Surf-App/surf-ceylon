@@ -178,7 +178,7 @@ const ScoreBreakdown = ({
         <SuitabilityRadarChart
           scores={radarScores}
           overallScore={overallScore}
-          size={280}
+          size={320}
           colorScheme={colorScheme}
         />
       </View>
