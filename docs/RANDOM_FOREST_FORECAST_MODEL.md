@@ -268,7 +268,7 @@ SURF_PREDICTOR = load_random_forest_model()
 features, is_valid = fetch_weather_data_with_rotation(
     lat, lng,
     hours_ahead=48,
-    feature_names=RANDOM_FOREST_BASE_FEATURES   # the 10 base features
+    feature_names=RANDOM_FOREST_BASE_FEATURES   # the 6 base features
 )
 
 # Option B: Mock data if API is unavailable
@@ -396,25 +396,19 @@ All model artifacts are stored in `surfapp--ml-engine/models/`:
 
 ### Loading the Model
 
-```python
+````python
 # From the ml-engine root
 import joblib
 
 model_data = joblib.load('models/surf_forecast_model.joblib')
 model         = model_data['model']          # RandomForestRegressor instance
-feature_names = model_data['feature_names']  # list of 15 feature names
-target_names  = model_data['target_names']   # ['waveHeight', 'windSpeed', 'windDirection']
+feature_names = model_data['feature_names']  # list of 6 feature names
+target_names  = model_data['target_names']   # ['waveHeight']
 
 # Direct prediction
 import pandas as pd
 X = pd.DataFrame([your_feature_dict])[feature_names]
-y_pred = model.predict(X)   # shape: (1, 3)
-```
-
-### Model Wrapper (Production)
-
-The production code uses a wrapper in `models/random_forest.py`:
-
+y_pred = model.predict(X)   # shape: (1, 1)
 ```python
 from models import load_random_forest_model, predict_with_random_forest
 
@@ -422,7 +416,7 @@ predictor = load_random_forest_model()
 # predictor is None if file not found → fallback to mock
 
 predictions = predict_with_random_forest(input_df, model=predictor)
-```
+````
 
 ### Configuration File
 
@@ -560,35 +554,27 @@ import os
 model_data = joblib.load('models/surf_forecast_model.joblib')
 model = model_data['model']
 
-# Provide the 10 base weather features
+# Provide the 6 base weather features
 features = {
     'swellHeight': 1.5,
     'swellPeriod': 12.0,
     'swellDirection': 220.0,
     'windSpeed': 5.0,
     'windDirection': 270.0,
-    'seaLevel': 0.5,
-    'gust': 7.2,
     'secondarySwellHeight': 0.4,
-    'secondarySwellPeriod': 8.0,
-    'secondarySwellDirection': 180.0,
 }
 
-# Apply the same 5 feature engineering steps as training
+# Apply the same 3 feature engineering steps as training
 df = pd.DataFrame([features])
 df['swellEnergy']          = df['swellHeight']**2 * df['swellPeriod']
 df['offshoreWind']         = df['windSpeed'] * np.cos(np.radians(df['windDirection'] - 270))
 df['totalSwellHeight']     = df['swellHeight'] + df['secondarySwellHeight']
-df['windSwellInteraction'] = df['windSpeed'] * df['swellHeight']
-df['periodRatio']          = df['swellPeriod'] / (df['secondarySwellPeriod'] + 1)
 
 # Predict
 y_pred = model.predict(df[model_data['feature_names']])
 result = dict(zip(model_data['target_names'], y_pred[0]))
 
 print(f"Wave Height:    {result['waveHeight']:.2f} m")
-print(f"Wind Speed:     {result['windSpeed']:.2f} m/s  ({result['windSpeed']*3.6:.1f} km/h)")
-print(f"Wind Direction: {result['windDirection']:.1f}°")
 ```
 
 ### 3. Evaluate Model Accuracy (No Retraining)
@@ -653,16 +639,13 @@ const getSpotRecommendations = async (req, res) => {
 
 ### StormGlass API
 
-The model uses the **StormGlass Weather API** to fetch the 10 live weather features:
+The model uses the **StormGlass Weather API** to fetch the 6 live weather features:
 
 ```python
 # 100-key rotation for rate limit management
 params = [
     'swellHeight', 'swellPeriod', 'swellDirection',
-    'windSpeed', 'windDirection', 'seaLevel', 'gust',
-    'secondarySwellHeight', 'secondarySwellPeriod', 'secondarySwellDirection'
-]
-
+    'windSpeed', 'windDirection', 'secondarySwellHeight'
 response = requests.get(
     'https://api.stormglass.io/v2/weather/point',
     params={
@@ -715,28 +698,26 @@ python training/train_random_forest_model.py
 ### Feature Mismatch at Inference
 
 ```
-ValueError: X has 10 features, but RandomForestRegressor is expecting 15 features
+ValueError: X has 3 features, but RandomForestRegressor is expecting 6 features
 ```
 
 **Cause**: Missing feature engineering step at inference time.
 
-**Fix**: Always apply all 5 engineered features before calling `model.predict()`:
+**Fix**: Always apply all 3 engineered features before calling `model.predict()`:
 
 ```python
 df['swellEnergy']          = df['swellHeight']**2 * df['swellPeriod']
 df['offshoreWind']         = df['windSpeed'] * np.cos(np.radians(df['windDirection'] - 270))
 df['totalSwellHeight']     = df['swellHeight'] + df['secondarySwellHeight']
-df['windSwellInteraction'] = df['windSpeed'] * df['swellHeight']
-df['periodRatio']          = df['swellPeriod'] / (df['secondarySwellPeriod'] + 1)
 ```
 
 ---
 
 ### NaN / Inf in Predictions
 
-**Cause**: Input features contain NaN or Inf values (e.g., `periodRatio` when `secondarySwellPeriod` is 0).
+**Cause**: Input features contain NaN or Inf values.
 
-**Fix**: The `+1` guard in `periodRatio` prevents division by zero. For other features, sanitise inputs:
+**Fix**: Sanitise inputs:
 
 ```python
 import numpy as np
