@@ -144,7 +144,7 @@ const ScoreBreakdown = ({
 
   const totalSessionBonus =
     breakdown.sessionBonuses?.reduce((acc, b) => acc + (b.points || 0), 0) || 0;
-  const hasSessionBonus = totalSessionBonus > 0;
+  const hasSessionBonus = Array.isArray(breakdown.sessionBonuses);
   const sessionScore = hasSessionBonus
     ? Math.min(100, Math.round((totalSessionBonus / 30) * 100))
     : undefined;
