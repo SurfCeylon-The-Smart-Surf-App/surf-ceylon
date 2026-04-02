@@ -17,8 +17,10 @@ const ScoreBreakdown = ({
   /**
    * Helper to ensure safe numbers
    */
-  const safeNumber = (val) =>
-    typeof val === "number" && !isNaN(val) ? val : 0;
+  const safeNumber = (val) => {
+    const num = parseFloat(val);
+    return typeof num === "number" && !isNaN(num) ? num : 0;
+  };
 
   /**
    * Get color based on score value
@@ -140,6 +142,24 @@ const ScoreBreakdown = ({
   const overallScore = safeNumber(breakdown.overall);
   const colorScheme = getColorScheme(overallScore);
 
+  const totalSessionBonus =
+    breakdown.sessionBonuses?.reduce((acc, b) => acc + (b.points || 0), 0) || 0;
+  const hasSessionBonus = Array.isArray(breakdown.sessionBonuses);
+  const sessionScore = hasSessionBonus
+    ? Math.min(100, Math.round((totalSessionBonus / 30) * 100))
+    : undefined;
+
+  const radarScores = {
+    wave: safeNumber(breakdown.wave),
+    wind: safeNumber(breakdown.wind),
+    safety: safeNumber(breakdown.safety),
+    consistency: safeNumber(breakdown.consistency),
+  };
+
+  if (hasSessionBonus) {
+    radarScores.session = sessionScore;
+  }
+
   return (
     <View style={styles.container}>
       {/* Overall Score Header */}
@@ -156,14 +176,9 @@ const ScoreBreakdown = ({
       {/* Radar Chart */}
       <View style={styles.chartContainer}>
         <SuitabilityRadarChart
-          scores={{
-            wave: safeNumber(breakdown.wave),
-            wind: safeNumber(breakdown.wind),
-            safety: safeNumber(breakdown.safety),
-            consistency: safeNumber(breakdown.consistency),
-          }}
+          scores={radarScores}
           overallScore={overallScore}
-          size={280}
+          size={320}
           colorScheme={colorScheme}
         />
       </View>
@@ -199,6 +214,14 @@ const ScoreBreakdown = ({
           "pulse",
           "Wave period and wind stability",
         )}
+
+        {hasSessionBonus &&
+          renderScoreItem(
+            "Session Bonus",
+            sessionScore,
+            "star",
+            `Adds +${totalSessionBonus} points based on your preferences`,
+          )}
       </View>
 
       {/* Recommendations */}
