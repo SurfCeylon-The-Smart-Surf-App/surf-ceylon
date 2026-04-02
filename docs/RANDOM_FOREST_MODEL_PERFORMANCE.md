@@ -158,7 +158,7 @@ RandomForestRegressor(
     max_depth=15,            # Maximum 15 levels per tree
     min_samples_split=5,     # Need 5+ samples to split node
     min_samples_leaf=2,      # Minimum 2 samples per leaf
-    max_features='sqrt',     # √15 ≈ 4 features per tree
+    max_features='sqrt',     # √6 ≈ 2 features per tree
     random_state=42,         # Reproducible results
     n_jobs=-1               # Use all CPU cores
 )
@@ -191,7 +191,7 @@ RandomForestRegressor(
 
 **max_features='sqrt'**:
 
-- Each tree randomly uses √15 ≈ 4 features
+- Each tree randomly uses √6 ≈ 2 features
 - Increases diversity between trees
 - Improves ensemble effect (trees vote differently)
 
@@ -331,12 +331,11 @@ Outlier removal:
 FEATURE ENGINEERING
 ======================================================================
 ✓ Created swellEnergy (height² × period)
+✓ Created swellEnergy (height² × period)
 ✓ Created offshoreWind (speed × direction alignment)
 ✓ Created totalSwellHeight (primary + secondary)
-✓ Created windSwellInteraction (wind × swell)
-✓ Created periodRatio (primary/secondary period)
 
-✅ Final dataset: 31942 records with 15 features
+✅ Final dataset: 31942 records with 6 features
 
 ======================================================================
 MODEL PERFORMANCE

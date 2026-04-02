@@ -48,9 +48,9 @@ The suitability scoring system uses a **hybrid ML + rules-based approach** with 
 
 The model was trained on historical surf data from StormGlass API using data from Sri Lankan surf spots.
 
-#### Input Features (15 total)
+#### Input Features (6 total)
 
-**Base Features (10)** - Raw weather data from StormGlass API:
+**Base Features (6)** - Raw weather data from StormGlass API:
 
 ```javascript
 1. swellHeight          // Primary swell height (meters)
@@ -58,14 +58,10 @@ The model was trained on historical surf data from StormGlass API using data fro
 3. swellDirection       // Primary swell direction (degrees)
 4. windSpeed            // Wind speed (m/s)
 5. windDirection        // Wind direction (degrees)
-6. seaLevel             // Tide level (meters)
-7. gust                 // Wind gust speed (m/s)
-8. secondarySwellHeight // Secondary swell height (meters)
-9. secondarySwellPeriod // Secondary swell period (seconds)
-10. secondarySwellDirection // Secondary swell direction (degrees)
+6. secondarySwellHeight // Secondary swell height (meters)
 ```
 
-**Engineered Features (5)** - Calculated physics-based features:
+**Engineered Features (3)** - Calculated physics-based features:
 
 ```python
 1. swellEnergy = swellHeight² × swellPeriod
@@ -76,20 +72,12 @@ The model was trained on historical surf data from StormGlass API using data fro
 
 3. totalSwellHeight = swellHeight + secondarySwellHeight
    # Combined swell from multiple sources
-
-4. windSwellInteraction = windSpeed × swellHeight
-   # How wind affects wave quality
-
-5. periodRatio = swellPeriod / (secondarySwellPeriod + 1)
-   # Swell dominance (higher period = cleaner waves)
 ```
 
-#### Prediction Targets (3)
+#### Prediction Targets (1)
 
 ```javascript
 1. waveHeight      // Predicted wave face height (meters)
-2. windSpeed       // Predicted wind speed (m/s)
-3. windDirection   // Predicted wind direction (degrees)
 ```
 
 ### Model Architecture
@@ -100,7 +88,7 @@ RandomForestRegressor(
     max_depth=15,            # Prevent overfitting
     min_samples_split=5,     # Minimum samples to split node
     min_samples_leaf=2,      # Minimum samples per leaf
-    max_features='sqrt',     # Use √15 ≈ 4 features per tree
+    max_features='sqrt',     # Use √6 ≈ 2 features per tree
     random_state=42,
     n_jobs=-1               # Use all CPU cores
 )
@@ -689,20 +677,16 @@ if (user.stats.totalSessions % 5 === 0) {
 │ ML Service: surfapp--ml-engine/                             │
 │                                                              │
 │ 3a. Fetch Weather Data                                      │
-│     StormGlass API → 10 base features:                      │
+│     StormGlass API → 6 base features:                       │
 │     ├─ swellHeight, swellPeriod, swellDirection             │
-│     ├─ windSpeed, windDirection, seaLevel                   │
-│     ├─ gust, secondarySwellHeight                           │
-│     └─ secondarySwellPeriod, secondarySwellDirection        │
+│     └─ windSpeed, windDirection, secondarySwellHeight       │
 │                                                              │
 │ 3b. Feature Engineering                                     │
 │     calculate_engineered_features():                        │
 │     ├─ swellEnergy = height² × period                       │
 │     ├─ offshoreWind = windSpeed × cos(windDir - 270°)       │
-│     ├─ totalSwellHeight = primary + secondary               │
-│     ├─ windSwellInteraction = windSpeed × swellHeight       │
-│     └─ periodRatio = period / (secondary + 1)               │
-│     → Now have 15 features                                  │
+│     └─ totalSwellHeight = primary + secondary               │
+│     → Now have 6 final features                             │
 │                                                              │
 │ 3c. Load Model                                              │
 │     model = joblib.load('surf_forecast_model.joblib')       │
@@ -710,7 +694,7 @@ if (user.stats.totalSessions % 5 === 0) {
 │                                                              │
 │ 3d. Make Predictions                                        │
 │     predictions = model.predict(features_df)                │
-│     → [waveHeight, windSpeed, windDirection]                │
+│     → [waveHeight]                                          │
 │                                                              │
 │ 3e. Extract Tide                                            │
 │     if seaLevel < 0.3: tide = "Low"                         │
@@ -886,7 +870,7 @@ ML Layer (Python) ←→ Scoring Engine (Node.js) ←→ Frontend (React Native)
 #### 2. **Feature Engineering**
 
 - Encodes domain knowledge into ML
-- 5 engineered features from 10 base features
+- 3 engineered features from 6 base features
 - Captures wave physics (energy, wind effects)
 - Critical for model accuracy
 
@@ -1213,9 +1197,9 @@ The saved model file contains a dictionary with these keys:
 ```python
 {
     'model': RandomForestRegressor,  # The trained scikit-learn model
-    'feature_names': [...],          # List of 15 feature names
-    'target_names': [...],           # List of 3 target names
-    'engineered_features': [...]     # List of 5 engineered features
+    'feature_names': [...],          # List of 6 feature names
+    'target_names': [...],           # List of 1 target name
+    'engineered_features': [...]     # List of 3 engineered features
 }
 ```
 
@@ -1232,7 +1216,7 @@ target_names = model_data['target_names']
 
 # Make predictions
 predictions = model.predict(features_dataframe)
-# Returns: [[waveHeight, windSpeed, windDirection], ...]
+# Returns: [[waveHeight], ...]
 ```
 
 ### Configuration Files
@@ -1243,25 +1227,19 @@ predictions = model.predict(features_dataframe)
 # Base features from StormGlass API
 RANDOM_FOREST_BASE_FEATURES = [
     'swellHeight', 'swellPeriod', 'swellDirection',
-    'windSpeed', 'windDirection', 'seaLevel', 'gust',
-    'secondarySwellHeight', 'secondarySwellPeriod',
-    'secondarySwellDirection'
+    'windSpeed', 'windDirection', 'secondarySwellHeight'
 ]
 
 # Engineered features (calculated)
 RANDOM_FOREST_ENGINEERED_FEATURES = [
-    'swellEnergy',            # height² × period
     'offshoreWind',           # windSpeed × cos(windDir - 270°)
     'totalSwellHeight',       # primary + secondary swell
-    'windSwellInteraction',   # windSpeed × swellHeight
-    'periodRatio'             # swellPeriod / (secondaryPeriod + 1)
+    'swellEnergy'             # height² × period
 ]
 
 # Prediction targets
 RANDOM_FOREST_TARGETS = [
     'waveHeight',      # Predicted wave height (m)
-    'windSpeed',       # Predicted wind speed (m/s)
-    'windDirection'    # Predicted wind direction (°)
 ]
 ```
 
@@ -1309,7 +1287,7 @@ Retrain the Random Forest model when:
 
 1. **StormGlass API** (primary):
    - Historical weather data
-   - 10 base parameters
+   - 6 base parameters
    - Hourly resolution
 2. **Local JSON Files** (backup):
    - `data/weligama_historical_data_fixed.json`
