@@ -22,11 +22,10 @@ MODEL_PATH = os.path.join('models', MODEL_FILENAME)
 # These are the inputs the model will learn from.
 FEATURE_NAMES = [
     'swellHeight', 'swellPeriod', 'swellDirection', 'windSpeed',
-    'windDirection', 'seaLevel', 'gust', 'secondarySwellHeight',
-    'secondarySwellPeriod', 'secondarySwellDirection'
+    'windDirection', 'secondarySwellHeight'
 ]
 # These are the multiple outputs the model will predict.
-TARGET_NAMES = ['waveHeight', 'windSpeed', 'windDirection']
+TARGET_NAMES = ['waveHeight']
 
 # Engineered features will be added during preprocessing
 ENGINEERED_FEATURES = []
@@ -177,21 +176,21 @@ def preprocess_data(df):
         ENGINEERED_FEATURES.append('totalSwellHeight')
         print("✓ Created totalSwellHeight (primary + secondary)", file=sys.stderr)
 
-    # Wind-swell interaction
-    if 'windSpeed' in df.columns and 'swellHeight' in df.columns:
-        df['windSwellInteraction'] = df['windSpeed'] * df['swellHeight']
-        ENGINEERED_FEATURES.append('windSwellInteraction')
-        print("✓ Created windSwellInteraction (wind × swell)", file=sys.stderr)
+    # Keep ONLY the final 6 features + targets required for ML
+    cols_to_keep = [
+        'windSpeed', 'windDirection', 'swellDirection',
+        'swellEnergy', 'offshoreWind', 'totalSwellHeight'
+    ] + TARGET_NAMES
 
-    # Period ratio (indicates wave quality)
-    if 'swellPeriod' in df.columns and 'secondarySwellPeriod' in df.columns:
-        df['periodRatio'] = df['swellPeriod'] / \
-            (df['secondarySwellPeriod'] + 1)  # +1 to avoid division by zero
-        ENGINEERED_FEATURES.append('periodRatio')
-        print("✓ Created periodRatio (primary/secondary period)", file=sys.stderr)
+    # Fill missing calculated columns with 0
+    for col in cols_to_keep:
+        if col not in df.columns:
+            df[col] = 0
+
+    df = df[cols_to_keep]
 
     print(
-        f"\n✅ Final dataset: {len(df)} records with {len(FEATURE_NAMES) + len(ENGINEERED_FEATURES)} features", file=sys.stderr)
+        f"\n✅ Final dataset: {len(df)} records with {len(cols_to_keep) - len(TARGET_NAMES)} features", file=sys.stderr)
     return df
 
 
@@ -205,7 +204,11 @@ def train_model(df):
     df = preprocess_data(df)
 
     # Validate that all required columns are present
-    missing_features = set(FEATURE_NAMES) - set(df.columns)
+    final_feature_names = [
+        'windSpeed', 'windDirection', 'swellDirection',
+        'swellEnergy', 'offshoreWind', 'totalSwellHeight'
+    ]
+    missing_features = set(final_feature_names) - set(df.columns)
     missing_targets = set(TARGET_NAMES) - set(df.columns)
 
     if missing_features or missing_targets:
@@ -219,12 +222,10 @@ def train_model(df):
     print(f"Training samples: {len(df)}", file=sys.stderr)
 
     # Define the features (X) and the multiple targets (y)
-    # Include both original and engineered features
-    all_features = FEATURE_NAMES + ENGINEERED_FEATURES
-    X = df[all_features]
+    X = df[final_feature_names]
     y = df[TARGET_NAMES]
 
-    print(f"Features: {len(all_features)} ({len(FEATURE_NAMES)} original + {len(ENGINEERED_FEATURES)} engineered)", file=sys.stderr)
+    print(f"Features: {len(final_feature_names)}", file=sys.stderr)
     print(f"Targets: {len(TARGET_NAMES)}", file=sys.stderr)
 
     # Split data for training and testing
@@ -258,9 +259,14 @@ def train_model(df):
     print("="*70, file=sys.stderr)
 
     for i, target in enumerate(TARGET_NAMES):
-        r2 = r2_score(y_test.iloc[:, i], y_pred[:, i])
-        mae = mean_absolute_error(y_test.iloc[:, i], y_pred[:, i])
-        rmse = np.sqrt(mean_squared_error(y_test.iloc[:, i], y_pred[:, i]))
+        if len(TARGET_NAMES) == 1:
+            r2 = r2_score(y_test.iloc[:, i], y_pred)
+            mae = mean_absolute_error(y_test.iloc[:, i], y_pred)
+            rmse = np.sqrt(mean_squared_error(y_test.iloc[:, i], y_pred))
+        else:
+            r2 = r2_score(y_test.iloc[:, i], y_pred[:, i])
+            mae = mean_absolute_error(y_test.iloc[:, i], y_pred[:, i])
+            rmse = np.sqrt(mean_squared_error(y_test.iloc[:, i], y_pred[:, i]))
         print(f"\n{target}:")
         print(f"  R² Score:  {r2:.4f}")
         print(f"  MAE:       {mae:.4f}")
@@ -270,25 +276,10 @@ def train_model(df):
     overall_score = model.score(X_test, y_test)
     print(f"\nOverall R² Score: {overall_score:.4f}", file=sys.stderr)
 
-    # Feature importance analysis
-    print("\n" + "="*70, file=sys.stderr)
-    print("FEATURE IMPORTANCE (Top 10)", file=sys.stderr)
-    print("="*70, file=sys.stderr)
-
-    feature_importance = pd.DataFrame({
-        'feature': all_features,
-        'importance': model.estimators_[0].feature_importances_
-    }).sort_values('importance', ascending=False)
-
-    for idx, row in feature_importance.head(10).iterrows():
-        bar = '█' * int(row['importance'] * 100)
-        print(
-            f"  {row['feature']:30} | {row['importance']:.4f} {bar}", file=sys.stderr)
-
     # Save the trained model to disk
     model_data = {
         'model': model,
-        'feature_names': all_features,
+        'feature_names': final_feature_names,
         'target_names': TARGET_NAMES,
         'engineered_features': ENGINEERED_FEATURES
     }
