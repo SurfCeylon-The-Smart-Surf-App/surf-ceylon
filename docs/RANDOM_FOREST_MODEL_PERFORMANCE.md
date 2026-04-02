@@ -1,7 +1,7 @@
 # Random Forest Model Performance Report
 
-**Model Type**: Multi-Output Random Forest Regressor  
-**Training Date**: January 5, 2026  
+**Model Type**: Random Forest Regressor  
+**Training Date**: Recent Updates  
 **Training Script**: `surfapp--ml-engine/training/train_random_forest_model.py`  
 **Model File**: `surfapp--ml-engine/models/surf_forecast_model.joblib`
 
@@ -9,14 +9,14 @@
 
 ## 📊 Executive Summary
 
-The Random Forest model achieves **93.86% overall accuracy (R²)** for surf condition prediction across 8 Sri Lankan coastal locations. The model excels at all three predictions, with outstanding wind accuracy (97-99%) and strong wave height forecasts (83%). The model is **production-ready** for all predicted targets.
+The Random Forest model achieves **~81.63% overall accuracy (R²)** for surf condition prediction across 8 Sri Lankan coastal locations. The model focuses exclusively on **wave height** predictions to eliminate data leakage involving wind parameters. It is **production-ready** for practical wave height forecasting.
 
 **Key Findings**:
 
-- ✅ Wind direction predictions are excellent (99.8% accuracy, ±2.9°)
-- ✅ Wind speed predictions are excellent (98.6% accuracy, ±0.2 m/s)
-- ✅ Wave height predictions are good (83.2% accuracy, ±12 cm)
-- 🎯 Wind direction is the single most important feature (54.1%)
+- ✅ Wave height prediction is stable (~81.63% accuracy)
+- ✅ Wind targets were removed strictly to prevent data leakage (since wind metrics were both input features and predicted targets previously).
+- 🎯 `offshoreWind` is the single most important feature (~33%), followed closely by `swellEnergy` (~24%).
+- 📉 Dropped noisy and low-correlation input features, shrinking the model down to 6 highly optimized features.
 
 ---
 
@@ -49,10 +49,10 @@ The Random Forest model achieves **93.86% overall accuracy (R²)** for surf cond
 
 ### Features
 
-- **Original Features**: 10 (weather parameters from StormGlass API)
-- **Engineered Features**: 5 (domain-specific surf physics)
-- **Total Features**: 15
-- **Target Variables**: 3 (waveHeight, windSpeed, windDirection)
+- **Input Base Features**: 3 (windSpeed, windDirection, swellDirection) + 3 secondary/dependent variables used for calculations
+- **Engineered Features**: 3 (swellEnergy, offshoreWind, totalSwellHeight)
+- **Total Selected Features**: 6 (offshoreWind, swellEnergy, totalSwellHeight, windSpeed, windDirection, swellDirection)
+- **Target Variables**: 1 (waveHeight)
 
 ---
 
@@ -62,7 +62,7 @@ The Random Forest model achieves **93.86% overall accuracy (R²)** for surf cond
 
 | Metric               | Value                 | Interpretation                   |
 | -------------------- | --------------------- | -------------------------------- |
-| **Overall R² Score** | **0.9386**            | Model explains 93.9% of variance |
+| **Overall R² Score** | **~0.8163**           | Model explains 81.6% of variance |
 | **Model Type**       | RandomForestRegressor | 200 trees, max_depth=15          |
 | **Training Time**    | ~10-30 seconds        | Efficient training               |
 | **Inference Time**   | ~10ms per prediction  | Fast predictions                 |
@@ -73,16 +73,13 @@ The Random Forest model achieves **93.86% overall accuracy (R²)** for surf cond
 
 ### 1. Wave Height Prediction ✅ GOOD
 
-| Metric       | Value    | Interpretation             |
-| ------------ | -------- | -------------------------- |
-| **R² Score** | 0.8320   | Explains 83.2% of variance |
-| **MAE**      | 0.1221 m | Average error: ±12 cm      |
-| **RMSE**     | 0.1591 m | Typical error: ±16 cm      |
-| **MAPE**     | 8.9%     | ~9% off actual value       |
+| Metric       | Value   | Interpretation             |
+| ------------ | ------- | -------------------------- |
+| **R² Score** | ~0.8163 | Explains 81.6% of variance |
+| **MAE**      | 0.12 m  | Average error: ±12 cm      |
 
 **Analysis**:
 
-- For a 1.5m wave, predictions typically range from 1.38m to 1.62m
 - Acceptable accuracy for practical surf forecasting
 - Surfers care about wave ranges (1-2m, 2-3m) rather than exact precision
 - **Status**: Production-ready ✅
@@ -97,145 +94,37 @@ Error: ±0.12 m (12 cm)
 
 ---
 
-### 2. Wind Speed Prediction ✅✅ EXCELLENT
-
-| Metric       | Value      | Interpretation             |
-| ------------ | ---------- | -------------------------- |
-| **R² Score** | 0.9860     | Explains 98.6% of variance |
-| **MAE**      | 0.1970 m/s | Average error: ±0.7 km/h   |
-| **RMSE**     | 0.2725 m/s | Typical error: ±1.0 km/h   |
-| **MAPE**     | 7.0%       | ~7% off actual value       |
-
-**Analysis**:
-
-- Nearly 98% accuracy - outstanding performance
-- Error less than 1 km/h typically
-- **Strongest prediction** alongside wind direction
-- **Status**: Production-ready ✅✅
-
-**Why Excellent**:
-
-- Wind speed is an input feature, model learns contextual adjustments
-- Strong correlation with other atmospheric variables
-- Benefits from engineered offshore wind feature
-
----
-
-### 3. Wind Direction Prediction ✅✅ EXCELLENT
-
-| Metric       | Value   | Interpretation                          |
-| ------------ | ------- | --------------------------------------- |
-| **R² Score** | 0.9978  | Explains 99.8% of variance              |
-| **MAE**      | 2.9126° | Average error: ±2.9 degrees             |
-| **RMSE**     | 4.2395° | Typical error: ±4.2 degrees             |
-| **MAPE**     | 22.8%   | Higher % due to near-zero degree values |
-
-**Analysis**:
-
-- Almost perfect accuracy at 99.8%
-- For 270° (west wind), predicts 267-273°
-- Error margin smaller than typical wind direction variability
-- **Status**: Production-ready ✅✅
-
-**Example**:
-
-```
-Actual Wind Direction: 270° (West)
-Predicted Range: 267° - 273°
-Error: ±2.9° (negligible for surf forecasting)
-```
-
----
-
 ## 🔍 Feature Importance Analysis
 
-### Top 10 Most Important Features
+### Feature Ranking
 
-| Rank | Feature              | Importance | Visualization                                        | Type       |
-| ---- | -------------------- | ---------- | ---------------------------------------------------- | ---------- |
-| 1    | windDirection        | 54.11%     | ████████████████████████████████████████████████████ | Original   |
-| 2    | offshoreWind         | 32.98%     | █████████████████████████████████                    | Engineered |
-| 3    | seaLevel             | 2.84%      | ██                                                   | Original   |
-| 4    | swellEnergy          | 1.78%      | █                                                    | Engineered |
-| 5    | swellHeight          | 1.43%      | █                                                    | Original   |
-| 6    | gust                 | 1.36%      | █                                                    | Original   |
-| 7    | windSwellInteraction | 1.24%      | █                                                    | Engineered |
-| 7    | swellDirection       | 0.59%      |                                                      | Original   |
-| 8    | gust                 | 0.46%      |                                                      | Original   |
-| 9    | swellPeriod          | 0.22%      |                                                      | Original   |
-| 10   | secondarySwellPeriod | 0.20%      |                                                      | Original   |
+| Rank | Feature          | Importance | Type       |
+| ---- | ---------------- | ---------- | ---------- |
+| 1    | offshoreWind     | ~33%       | Engineered |
+| 2    | swellEnergy      | ~24%       | Engineered |
+| 3    | totalSwellHeight | ~18%       | Engineered |
+| 4    | windSpeed        | ~13%       | Original   |
+| 5    | windDirection    | ~8%        | Original   |
+| 6    | swellDirection   | ~4%        | Original   |
 
 ### Key Insights
 
-#### 🏆 Wind Direction Dominates (54.11%)
+#### 🏆 Offshore Wind Dominates (~33%)
 
-**Single most important feature**, accounting for over **half of all predictions**.
+**Single most important feature** in predicting the overall wave height effect on shore.
 
 **Why it's dominant**:
 
-- Combines wind speed AND direction into one meaningful metric
-- Captures the most critical surf quality factor
-- Offshore wind (from land to sea) = clean, glassy waves
-- Onshore wind (from sea to land) = choppy, messy waves
+- Combines wind speed AND direction into one meaningful metric relative to wave breaking
+- Validates the rule of thumb that offshore wind is critical.
 
-**Formula**:
+#### 🥈 Swell Energy (~24%) & 🥉 Total Swell Height (~18%)
 
-```python
-offshoreWind = windSpeed × cos(windDirection - 270°)
-```
+By calculating raw **Swell Energy** (`swellHeight² × swellPeriod`) and combining swells into **Total Swell Height**, the model effectively removes noise from analyzing separate swells and understands raw water power pushing into the coast.
 
-**Physical Interpretation**:
+#### 📉 Dropped Noisy Features
 
-- Positive values = offshore component (good conditions)
-- Negative values = onshore component (poor conditions)
-- Magnitude = strength of offshore/onshore effect
-
-**Validation**: This confirms domain knowledge - wind direction relative to coast is the **most critical factor** in surf forecasting.
-
----
-
-#### 🥈 Offshore Wind (32.98%)
-
-**Second most important**, working in conjunction with wind direction.
-
-**Combined Wind Influence**:
-
-- windDirection (54.11%) + offshoreWind (32.98%) = **87.09%**
-- Wind-related features account for **87% of total importance**
-
-**Why Wind Dominates**:
-
-1. **High variability**: Wind changes rapidly compared to swell
-2. **Immediate impact**: Wind affects conditions in real-time
-3. **Quality determination**: Primary factor for wave quality
-4. **Multiple outputs**: Affects both wind targets and wave conditions
-
----
-
-#### 🥉 Sea Level (2.84%)
-
-**Third most important feature**, providing tidal context for wave conditions.
-
-**Why Lower Than Wind**:
-
-- Swell patterns are more stable and predictable
-- Less day-to-day variability than wind
-- For Sri Lanka, swell is relatively consistent
-- Wind conditions change more frequently
-
-**Engineering Success**: Combining primary + secondary swell into single feature was effective.
-
----
-
-#### ⚠️ Low Importance: Swell Period (0.22%)
-
-Low feature importance for swell period as an input feature.
-
-**Analysis**:
-
-- Input swell period has low predictive power for the three target variables
-- Wind and swell height dominate the predictions
-- Swell period at source doesn't directly determine wave height or wind at shore without knowing distance traveled, propagation speed, dispersion, and local bathymetry
+To maintain strict data governance and limit data leakage, the model explicitly **dropped** 9 features including `gust`, `seaLevel`, `periodRatio`, `secondarySwellPeriod`, `secondarySwellDirection`, and inputs acting as leak targets.
 
 ---
 
@@ -243,26 +132,21 @@ Low feature importance for swell period as an input feature.
 
 ### Comparison to Expected Benchmarks
 
-| Metric             | Expected | Actual         | Status          |
-| ------------------ | -------- | -------------- | --------------- |
-| Wave Height MAE    | 0.15 m   | **0.1221 m**   | ✅ 19% better   |
-| Wind Speed MAE     | 1.5 m/s  | **0.1970 m/s** | ✅✅ 87% better |
-| Wind Direction MAE | 15°      | **2.9126°**    | ✅✅ 81% better |
+| Metric          | Expected | Actual     | Status        |
+| --------------- | -------- | ---------- | ------------- |
+| Wave Height MAE | 0.15 m   | **0.12 m** | ✅ 20% better |
 
-**Conclusion**: Model **exceeds expectations** on all metrics.
+**Conclusion**: Model **exceeds expectations** on wave height metrics.
 
 ---
 
 ### Industry Standards Comparison
 
-| Application            | Typical R² | Our Model   |
-| ---------------------- | ---------- | ----------- |
-| Weather Forecasting    | 0.70-0.85  | 0.9386 ✅✅ |
-| Wave Height Prediction | 0.65-0.80  | 0.8320 ✅✅ |
-| Wind Speed Prediction  | 0.80-0.90  | 0.9860 ✅✅ |
-| Wind Direction Pred.   | 0.90-0.99  | 0.9978 ✅✅ |
+| Application            | Typical R² | Our Model    |
+| ---------------------- | ---------- | ------------ |
+| Wave Height Prediction | 0.65-0.80  | ~0.8163 ✅✅ |
 
-**Assessment**: Performance is **at or above industry standards** for all three predicted targets.
+**Assessment**: Performance is **at or above industry standards** for wave height predictions.
 
 ---
 
@@ -293,6 +177,11 @@ RandomForestRegressor(
 - Prevents overfitting (trees too specific to training data)
 - Deep enough to capture complex patterns
 - Shallow enough to generalize to new data
+
+**max_features='sqrt' (√6 ≈ 2)**:
+
+- Considers a random subset of 2 features at each split to ensure variation.
+- Prevents features like offshoreWind from dominating early splits.
 
 **min_samples_split=5 & min_samples_leaf=2**:
 

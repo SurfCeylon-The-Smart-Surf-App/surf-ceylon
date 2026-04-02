@@ -248,7 +248,11 @@ def train_model(df):
     )
 
     print("\nTraining Random Forest model...", file=sys.stderr)
-    model.fit(X_train, y_train)
+    # If single target, ravel to 1D array to clear Scikit-Learn warning
+    if len(TARGET_NAMES) == 1:
+        model.fit(X_train, np.ravel(y_train))
+    else:
+        model.fit(X_train, y_train)
 
     # Calculate predictions
     y_pred = model.predict(X_test)
@@ -275,6 +279,25 @@ def train_model(df):
     # Overall model score
     overall_score = model.score(X_test, y_test)
     print(f"\nOverall R² Score: {overall_score:.4f}", file=sys.stderr)
+
+    # Feature importance analysis
+    print("\n" + "="*70, file=sys.stderr)
+    print("FEATURE IMPORTANCE", file=sys.stderr)
+    print("="*70, file=sys.stderr)
+
+    # Handle multi-output (estimators_[0]) vs single-output (feature_importances_)
+    importances = model.estimators_[0].feature_importances_ if len(
+        TARGET_NAMES) > 1 else model.feature_importances_
+
+    feature_importance = pd.DataFrame({
+        'feature': final_feature_names,
+        'importance': importances
+    }).sort_values('importance', ascending=False)
+
+    for idx, row in feature_importance.iterrows():
+        bar = '█' * int(row['importance'] * 100)
+        print(
+            f"  {row['feature']:30} | {row['importance']:.4f} {bar}", file=sys.stderr)
 
     # Save the trained model to disk
     model_data = {
