@@ -87,7 +87,7 @@ def run_ml_prediction(features):
             'waveHeight': round(float(predictions.get('waveHeight', 1.0)), 1),
             # Use from API input
             'wavePeriod': round(float(features.get('swellPeriod', 10.0)), 1),
-            # m/s to km/h (use API input since it's no longer predicted)
+            # m/s to km/h (use API input)
             'windSpeed': round(float(features.get('windSpeed', 15.0)) * 3.6, 1),
             # Use API input
             'windDirection': round(float(features.get('windDirection', 0)), 1),
