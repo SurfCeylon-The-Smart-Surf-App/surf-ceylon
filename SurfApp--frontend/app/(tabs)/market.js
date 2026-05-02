@@ -209,7 +209,18 @@ const ListingCard = ({
   onPress,
   onMessage,
 }) => {
-  const thumb = item.images && item.images.length > 0 ? item.images[0] : null;
+  const [activePhoto, setActivePhoto] = useState(0);
+  const hasMultiplePhotos = item.images && item.images.length > 1;
+
+  useEffect(() => {
+    if (!hasMultiplePhotos) return;
+    const interval = setInterval(() => {
+      setActivePhoto((prev) => (prev + 1) % item.images.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [hasMultiplePhotos, item.images.length]);
+
+  const thumb = item.images && item.images.length > 0 ? item.images[activePhoto] : null;
 
   return (
     <TouchableOpacity
@@ -237,21 +248,30 @@ const ListingCard = ({
             style={{ width: "100%", height: 160 }}
             resizeMode="cover"
           />
-          {item.images.length > 1 && (
+          {hasMultiplePhotos && (
             <View
               style={{
                 position: "absolute",
                 bottom: 8,
-                right: 8,
-                backgroundColor: "rgba(0,0,0,0.55)",
-                borderRadius: 12,
-                paddingHorizontal: 8,
-                paddingVertical: 3,
+                left: 0,
+                right: 0,
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 6,
               }}
             >
-              <Text style={{ color: "#fff", fontSize: 11, fontWeight: "700" }}>
-                +{item.images.length - 1} photos
-              </Text>
+              {item.images.map((_, idx) => (
+                <View
+                  key={idx}
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: 4,
+                    backgroundColor:
+                      idx === activePhoto ? "#ffffff" : "rgba(255,255,255,0.5)",
+                  }}
+                />
+              ))}
             </View>
           )}
         </View>
