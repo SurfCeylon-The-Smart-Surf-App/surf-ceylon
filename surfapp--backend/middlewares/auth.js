@@ -1,6 +1,9 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+/**
+ * Authenticate any logged-in user (Personal or Business)
+ */
 const auth = async (req, res, next) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
@@ -32,6 +35,9 @@ const auth = async (req, res, next) => {
   }
 };
 
+/**
+ * Restrict to admin users only
+ */
 const adminAuth = async (req, res, next) => {
   try {
     await auth(req, res, () => {
@@ -51,4 +57,27 @@ const adminAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { auth, adminAuth };
+/**
+ * Restrict to Business account type only
+ * Used for market listing CRUD operations
+ */
+const businessAuth = async (req, res, next) => {
+  try {
+    await auth(req, res, () => {
+      if (req.user.accountType !== "Business") {
+        return res.status(403).json({
+          status: "error",
+          message: "Access denied. Business account required to manage listings.",
+        });
+      }
+      next();
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+    });
+  }
+};
+
+module.exports = { auth, adminAuth, businessAuth };

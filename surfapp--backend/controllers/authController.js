@@ -24,6 +24,9 @@ exports.register = async (req, res) => {
       maxWaveHeight,
       tidePreference,
       boardType,
+      accountType,
+      businessName,
+      businessDescription,
     } = req.body;
 
     // Check if user exists by email
@@ -49,6 +52,9 @@ exports.register = async (req, res) => {
       email,
       password,
       skillLevel: skillLevel || "Beginner",
+      accountType: accountType || "Personal",
+      businessName: businessName || "",
+      businessDescription: businessDescription || "",
       preferences: {
         skillLevel: skillLevel || "Beginner",
         minWaveHeight: parseFloat(minWaveHeight) || 0.5,
@@ -69,10 +75,16 @@ exports.register = async (req, res) => {
       token,
       user: {
         _id: user._id,
+        id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
         skillLevel: user.skillLevel,
         preferences: user.preferences,
+        accountType: user.accountType,
+        businessName: user.businessName,
+        businessDescription: user.businessDescription,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -125,10 +137,16 @@ exports.login = async (req, res) => {
       token,
       user: {
         _id: user._id,
+        id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
         skillLevel: user.skillLevel,
         preferences: user.preferences,
+        accountType: user.accountType,
+        businessName: user.businessName,
+        businessDescription: user.businessDescription,
+        role: user.role,
       },
     });
   } catch (error) {

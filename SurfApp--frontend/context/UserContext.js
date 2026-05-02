@@ -393,6 +393,9 @@ export const UserProvider = ({ children }) => {
     activeSessionStartTime,
     setActiveSession,
     clearActiveSession,
+    // Role helpers
+    accountType: user?.accountType || "Personal",
+    isBusiness: user?.accountType === "Business",
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
