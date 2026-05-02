@@ -446,6 +446,20 @@ const ListingCard = ({
           /* Personal / non-owner: show Contact + Message */
           <View style={{ flexDirection: "row", gap: 8 }}>
             <TouchableOpacity
+              onPress={async (e) => {
+                e.stopPropagation?.();
+                if (!item.contactPhone) {
+                  Alert.alert("Unavailable", "No contact phone number provided for this listing.");
+                  return;
+                }
+                const phoneUrl = formatPhoneDisplay(item.contactPhone);
+                const supported = await Linking.canOpenURL(phoneUrl);
+                if (supported) {
+                  await Linking.openURL(phoneUrl);
+                } else {
+                  Alert.alert("Error", "Unable to make phone calls on this device.");
+                }
+              }}
               style={{
                 flex: 1,
                 backgroundColor: "#2563eb",
