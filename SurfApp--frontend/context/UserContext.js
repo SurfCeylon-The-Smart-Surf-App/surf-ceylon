@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from "react";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../data/config";
+import { DeviceEventEmitter } from "react-native";
 
 export const UserContext = createContext();
 
@@ -168,13 +169,19 @@ export const UserProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem("userToken");
-    await AsyncStorage.removeItem("userData");
+    await AsyncStorage.multiRemove([
+      "userToken",
+      "userData",
+      "activeSessionId",
+      "activeSessionSpot",
+      "activeSessionStartTime",
+    ]);
     setToken(null);
     setUser(null);
     setUserId(null);
     setActiveSessionId(null);
     setActiveSessionSpot(null);
+    setActiveSessionStartTime(null);
     setUserPreferences({
       skillLevel: "Beginner",
       minWaveHeight: 0.5,
@@ -182,6 +189,7 @@ export const UserProvider = ({ children }) => {
       tidePreference: "Any",
       boardType: "Soft-top",
     });
+    DeviceEventEmitter.emit("authStateChanged");
   };
 
   // Session management functions
@@ -273,6 +281,10 @@ export const UserProvider = ({ children }) => {
             ...prefs,
             skillLevel: parsedUser.skillLevel || "Beginner",
           });
+        } else {
+          setToken(null);
+          setUser(null);
+          setUserId(null);
         }
 
         // Restore active session if any
@@ -299,6 +311,13 @@ export const UserProvider = ({ children }) => {
       }
     };
     checkLogin();
+
+    const subscription = DeviceEventEmitter.addListener(
+      "authStateChanged",
+      checkLogin
+    );
+
+    return () => subscription.remove();
   }, []);
 
   const [userPreferences, setUserPreferences] = useState({

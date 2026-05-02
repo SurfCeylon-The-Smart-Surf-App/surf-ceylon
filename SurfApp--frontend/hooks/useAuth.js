@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { authAPI } from "../services/api";
 import { getStaticApiBaseUrl } from "../utils/networkConfig";
+import { DeviceEventEmitter } from "react-native";
 
 const AuthContext = createContext({});
 
@@ -20,25 +21,38 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
   const checkAuthStatus = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken");
       const userData = await AsyncStorage.getItem("userData");
 
       if (token && userData) {
-        setUser(JSON.parse(userData));
+        const parsed = JSON.parse(userData);
+        setUser(parsed);
         setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch (error) {
       console.error("Auth check error:", error);
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    checkAuthStatus();
+
+    const subscription = DeviceEventEmitter.addListener(
+      "authStateChanged",
+      checkAuthStatus
+    );
+
+    return () => subscription.remove();
+  }, []);
 
   const login = async (credentials) => {
     try {
@@ -55,6 +69,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(userData);
       setIsAuthenticated(true);
+      DeviceEventEmitter.emit("authStateChanged");
 
       return { success: true, data: userData };
     } catch (error) {
@@ -89,6 +104,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(newUser);
       setIsAuthenticated(true);
+      DeviceEventEmitter.emit("authStateChanged");
 
       return { success: true, data: newUser };
     } catch (error) {
@@ -99,10 +115,16 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem("userToken");
-      await AsyncStorage.removeItem("userData");
+      await AsyncStorage.multiRemove([
+        "userToken",
+        "userData",
+        "activeSessionId",
+        "activeSessionSpot",
+        "activeSessionStartTime",
+      ]);
       setUser(null);
       setIsAuthenticated(false);
+      DeviceEventEmitter.emit("authStateChanged");
       router.replace("/(auth)/login");
     } catch (error) {
       console.error("Logout error:", error);
@@ -112,6 +134,7 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (updatedUserData) => {
     setUser(updatedUserData);
     AsyncStorage.setItem("userData", JSON.stringify(updatedUserData));
+    DeviceEventEmitter.emit("authStateChanged");
   };
 
   const refreshUser = async () => {
@@ -120,6 +143,7 @@ export const AuthProvider = ({ children }) => {
       const freshUserData = response.data;
       setUser(freshUserData);
       await AsyncStorage.setItem("userData", JSON.stringify(freshUserData));
+      DeviceEventEmitter.emit("authStateChanged");
       return { success: true, data: freshUserData };
     } catch (error) {
       console.error("Refresh user error:", error);

@@ -1,6 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getStaticApiBaseUrl } from "../utils/networkConfig";
+import { DeviceEventEmitter } from "react-native";
 
 const API_BASE_URL = getStaticApiBaseUrl();
 
@@ -37,8 +38,14 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid, remove it
-      await AsyncStorage.removeItem("userToken");
-      await AsyncStorage.removeItem("userData");
+      await AsyncStorage.multiRemove([
+        "userToken",
+        "userData",
+        "activeSessionId",
+        "activeSessionSpot",
+        "activeSessionStartTime",
+      ]);
+      DeviceEventEmitter.emit("authStateChanged");
     }
     return Promise.reject(error);
   },
