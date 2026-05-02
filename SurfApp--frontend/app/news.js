@@ -174,6 +174,12 @@ export default function NewsScreen() {
           keyExtractor={(item, index) => item.link || index.toString()}
           contentContainerStyle={{ paddingTop: 8, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
+          /* Memory Optimizations for Emulator */
+          initialNumToRender={5}
+          maxToRenderPerBatch={5}
+          windowSize={5}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
           ListEmptyComponent={
             <View className="p-8 items-center">
               <Ionicons name="newspaper-outline" size={48} color="#9ca3af" />
