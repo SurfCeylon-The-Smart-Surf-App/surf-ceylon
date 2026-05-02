@@ -15,6 +15,7 @@ import {
   Platform,
   Image,
   Dimensions,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -26,6 +27,30 @@ import { API_ENDPOINTS } from "../../config/network";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 const MAX_PHOTOS = 5;
+
+const validateSriLankanPhone = (phone) => {
+  const cleaned = phone.replace(/[\s\-\(\)]/g, "");
+  const patterns = [
+    /^\+94\d{9}$/,
+    /^94\d{9}$/,
+    /^0\d{9}$/,
+  ];
+  return patterns.some((p) => p.test(cleaned));
+};
+
+const formatPhoneDisplay = (phone) => {
+  const cleaned = phone.replace(/[\s\-\(\)]/g, "");
+  if (cleaned.startsWith("+94")) {
+    return `tel:+${cleaned}`;
+  }
+  if (cleaned.startsWith("94")) {
+    return `tel:+${cleaned}`;
+  }
+  if (cleaned.startsWith("0")) {
+    return `tel:+94${cleaned.slice(1)}`;
+  }
+  return `tel:${phone}`;
+};
 
 // ─────────────────────────────────────────────
 // Constants
@@ -469,6 +494,7 @@ const ListingFormModal = ({
 }) => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [photos, setPhotos] = useState([]);
+  const [phoneError, setPhoneError] = useState("");
   const isEdit = !!initialData?._id;
 
   useEffect(() => {
@@ -491,11 +517,20 @@ const ListingFormModal = ({
         existing: true,
       }));
       setPhotos(existing);
+      setPhoneError("");
     }
   }, [visible, initialData]);
 
-  const handleChange = (field, value) =>
+  const handleChange = (field, value) => {
     setForm((p) => ({ ...p, [field]: value }));
+    if (field === "contactPhone") {
+      if (value.trim() && !validateSriLankanPhone(value)) {
+        setPhoneError("Enter a valid Sri Lankan number (e.g. 077 000 0000)");
+      } else {
+        setPhoneError("");
+      }
+    }
+  };
 
   const pickPhotos = async () => {
     const remaining = MAX_PHOTOS - photos.length;
@@ -542,6 +577,20 @@ const ListingFormModal = ({
       Alert.alert(
         "Missing Fields",
         "Please fill in title, description, price, and location.",
+      );
+      return;
+    }
+    if (!form.contactPhone.trim()) {
+      Alert.alert(
+        "Missing Phone Number",
+        "Contact phone number is required. Please enter a valid Sri Lankan phone number.",
+      );
+      return;
+    }
+    if (!validateSriLankanPhone(form.contactPhone)) {
+      Alert.alert(
+        "Invalid Phone Number",
+        "Please enter a valid Sri Lankan phone number. Examples:\n• 077 000 0000\n• +94 77 000 0000\n• 94 77 000 0000",
       );
       return;
     }
@@ -744,14 +793,78 @@ const ListingFormModal = ({
               </ScrollView>
             </View>
 
-            <FormField
-              label="Contact Phone"
-              field="contactPhone"
-              placeholder="+94 77 000 0000"
-              keyboardType="phone-pad"
-              value={form.contactPhone}
-              onChange={handleChange}
-            />
+            {/* Contact Phone – required */}
+            <View style={{ marginBottom: 14 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 6,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontWeight: "600",
+                    color: "#374151",
+                  }}
+                >
+                  Contact Phone
+                </Text>
+                <Text style={{ color: "#ef4444", marginLeft: 4 }}>*</Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  borderWidth: 1,
+                  borderColor: phoneError ? "#ef4444" : "#e5e7eb",
+                  borderRadius: 10,
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                  backgroundColor: phoneError ? "#fef2f2" : "#fafafa",
+                }}
+              >
+                <Ionicons name="call-outline" size={16} color="#9ca3af" />
+                <TextInput
+                  value={form.contactPhone}
+                  onChangeText={(v) => handleChange("contactPhone", v)}
+                  placeholder="+94 77 000 0000"
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="phone-pad"
+                  style={{
+                    flex: 1,
+                    marginLeft: 10,
+                    fontSize: 14,
+                    color: "#111827",
+                    paddingVertical: 0,
+                  }}
+                />
+              </View>
+              {phoneError ? (
+                <Text
+                  style={{
+                    color: "#ef4444",
+                    fontSize: 12,
+                    marginTop: 4,
+                    paddingLeft: 4,
+                  }}
+                >
+                  {phoneError}
+                </Text>
+              ) : (
+                <Text
+                  style={{
+                    color: "#9ca3af",
+                    fontSize: 11,
+                    marginTop: 4,
+                    paddingLeft: 4,
+                  }}
+                >
+                  Required. Sri Lankan numbers only (e.g. 077 000 0000)
+                </Text>
+              )}
+            </View>
             <FormField
               label="Contact Email"
               field="contactEmail"
@@ -782,7 +895,6 @@ const ListingDetailModal = ({
 }) => {
   const [imgIndex, setImgIndex] = useState(0);
 
-  // Reset carousel when a new listing opens
   useEffect(() => {
     if (visible) setImgIndex(0);
   }, [visible, listing]);
@@ -790,6 +902,10 @@ const ListingDetailModal = ({
   if (!listing) return null;
 
   const images = listing.images || [];
+  const showContactButtons = !isOwner && !isBusiness;
+  const showOwnerButtons = isOwner;
+
+  const buttonsHeight = showContactButtons ? 122 : showOwnerButtons ? 62 : 0;
 
   return (
     <Modal
@@ -798,11 +914,8 @@ const ListingDetailModal = ({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView
-        edges={["top"]}
-        style={{ flex: 1, backgroundColor: "#fff" }}
-      >
-        {/* ── Header bar ── */}
+      <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: "#fff" }}>
+        {/* Fixed Header */}
         <View
           style={{
             flexDirection: "row",
@@ -812,6 +925,7 @@ const ListingDetailModal = ({
             paddingVertical: 14,
             borderBottomWidth: 1,
             borderBottomColor: "#f1f5f9",
+            zIndex: 2,
           }}
         >
           <TouchableOpacity onPress={onClose}>
@@ -830,79 +944,81 @@ const ListingDetailModal = ({
           >
             {listing.title}
           </Text>
-          {/* Placeholder to balance the close button */}
           <View style={{ width: 24 }} />
         </View>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 48 }}
-        >
-          {/* ── Photo carousel ── */}
-          {images.length > 0 ? (
-            <View>
-              <ScrollView
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onMomentumScrollEnd={(e) => {
-                  const idx = Math.round(
-                    e.nativeEvent.contentOffset.x / SCREEN_W,
-                  );
-                  setImgIndex(idx);
-                }}
-              >
-                {images.map((uri, i) => (
-                  <Image
-                    key={i}
-                    source={{ uri }}
-                    style={{ width: SCREEN_W, height: 260 }}
-                    resizeMode="cover"
-                  />
-                ))}
-              </ScrollView>
-
-              {/* Dot indicators */}
-              {images.length > 1 && (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    gap: 6,
-                    marginTop: 12,
-                  }}
-                >
-                  {images.map((_, i) => (
-                    <View
-                      key={i}
-                      style={{
-                        width: i === imgIndex ? 20 : 6,
-                        height: 6,
-                        borderRadius: 3,
-                        backgroundColor: i === imgIndex ? "#2563eb" : "#d1d5db",
-                      }}
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
-          ) : (
-            <View
-              style={{
-                height: 200,
-                backgroundColor: "#f1f5f9",
-                alignItems: "center",
-                justifyContent: "center",
+        {/* Fixed Image Carousel */}
+        {images.length > 0 ? (
+          <View style={{ zIndex: 1 }}>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={(e) => {
+                const idx = Math.round(
+                  e.nativeEvent.contentOffset.x / SCREEN_W,
+                );
+                setImgIndex(idx);
               }}
             >
-              <Ionicons name="image-outline" size={52} color="#d1d5db" />
-              <Text style={{ color: "#d1d5db", fontSize: 13, marginTop: 8 }}>
-                No photos available
-              </Text>
-            </View>
-          )}
+              {images.map((uri, i) => (
+                <Image
+                  key={i}
+                  source={{ uri }}
+                  style={{ width: SCREEN_W, height: 260 }}
+                  resizeMode="cover"
+                />
+              ))}
+            </ScrollView>
+            {images.length > 1 && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 6,
+                  marginTop: 12,
+                }}
+              >
+                {images.map((_, i) => (
+                  <View
+                    key={i}
+                    style={{
+                      width: i === imgIndex ? 20 : 6,
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: i === imgIndex ? "#2563eb" : "#d1d5db",
+                    }}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
+        ) : (
+          <View
+            style={{
+              height: 200,
+              backgroundColor: "#f1f5f9",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ionicons name="image-outline" size={52} color="#d1d5db" />
+            <Text style={{ color: "#d1d5db", fontSize: 13, marginTop: 8 }}>
+              No photos available
+            </Text>
+          </View>
+        )}
 
-          <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
+        {/* Scrollable Details */}
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 20,
+              paddingBottom: buttonsHeight + 32,
+            }}
+          >
             {/* Category badge + price */}
             <View
               style={{
@@ -1051,118 +1167,145 @@ const ListingDetailModal = ({
                 })}
               />
             </View>
+          </ScrollView>
+        </View>
 
-            {/* CTAs – only for personal (non-owner) users */}
-            {!isOwner && !isBusiness && (
-              <>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#2563eb",
-                    paddingVertical: 16,
-                    borderRadius: 14,
-                    alignItems: "center",
-                    marginBottom: 12,
-                  }}
-                >
-                  <Text
-                    style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}
-                  >
-                    📞 Contact / Enquire Now
-                  </Text>
-                </TouchableOpacity>
+        {/* Fixed Buttons at Bottom */}
+        {showContactButtons && (
+          <View
+            style={{
+              paddingHorizontal: 20,
+              paddingTop: 12,
+              paddingBottom: 20,
+              borderTopWidth: 1,
+              borderTopColor: "#f1f5f9",
+              backgroundColor: "#fff",
+              zIndex: 2,
+            }}
+          >
+            <TouchableOpacity
+              onPress={async () => {
+                const phoneUrl = formatPhoneDisplay(listing.contactPhone);
+                const supported = await Linking.canOpenURL(phoneUrl);
+                if (supported) {
+                  await Linking.openURL(phoneUrl);
+                } else {
+                  Alert.alert("Error", "Unable to make phone calls on this device.");
+                }
+              }}
+              style={{
+                backgroundColor: "#2563eb",
+                paddingVertical: 16,
+                borderRadius: 14,
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>
+                Contact / Enquire Now
+              </Text>
+            </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={() => {
-                    onClose();
-                    setTimeout(() => onMessage && onMessage(listing), 300);
-                  }}
-                  style={{
-                    backgroundColor: "#f1f5f9",
-                    paddingVertical: 14,
-                    borderRadius: 14,
-                    alignItems: "center",
-                    marginBottom: 16,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#374151",
-                      fontSize: 15,
-                      fontWeight: "600",
-                    }}
-                  >
-                    💬 Message Business
-                  </Text>
-                </TouchableOpacity>
-              </>
-            )}
-
-            {/* Owner controls */}
-            {isOwner && (
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    onClose();
-                    setTimeout(() => onEdit(listing), 300);
-                  }}
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                    backgroundColor: "#fff7ed",
-                    paddingVertical: 13,
-                    borderRadius: 13,
-                    borderWidth: 1.5,
-                    borderColor: "#fbbf24",
-                  }}
-                >
-                  <Ionicons name="pencil" size={16} color="#d97706" />
-                  <Text
-                    style={{
-                      color: "#d97706",
-                      fontWeight: "700",
-                      fontSize: 15,
-                    }}
-                  >
-                    Edit
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => {
-                    onClose();
-                    setTimeout(() => onDelete(listing), 300);
-                  }}
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
-                    backgroundColor: "#fff5f5",
-                    paddingVertical: 13,
-                    borderRadius: 13,
-                    borderWidth: 1.5,
-                    borderColor: "#fca5a5",
-                  }}
-                >
-                  <Ionicons name="trash" size={16} color="#ef4444" />
-                  <Text
-                    style={{
-                      color: "#ef4444",
-                      fontWeight: "700",
-                      fontSize: 15,
-                    }}
-                  >
-                    Delete
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
+            <TouchableOpacity
+              onPress={() => {
+                onClose();
+                setTimeout(() => onMessage && onMessage(listing), 300);
+              }}
+              style={{
+                backgroundColor: "#f1f5f9",
+                paddingVertical: 14,
+                borderRadius: 14,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#374151",
+                  fontSize: 15,
+                  fontWeight: "600",
+                }}
+              >
+                Message Business
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
+        )}
+
+        {showOwnerButtons && (
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 10,
+              paddingHorizontal: 20,
+              paddingTop: 12,
+              paddingBottom: 20,
+              borderTopWidth: 1,
+              borderTopColor: "#f1f5f9",
+              backgroundColor: "#fff",
+              zIndex: 2,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                onClose();
+                setTimeout(() => onEdit(listing), 300);
+              }}
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                backgroundColor: "#fff7ed",
+                paddingVertical: 13,
+                borderRadius: 13,
+                borderWidth: 1.5,
+                borderColor: "#fbbf24",
+              }}
+            >
+              <Ionicons name="pencil" size={16} color="#d97706" />
+              <Text
+                style={{
+                  color: "#d97706",
+                  fontWeight: "700",
+                  fontSize: 15,
+                }}
+              >
+                Edit
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                onClose();
+                setTimeout(() => onDelete(listing), 300);
+              }}
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                backgroundColor: "#fff5f5",
+                paddingVertical: 13,
+                borderRadius: 13,
+                borderWidth: 1.5,
+                borderColor: "#fca5a5",
+              }}
+            >
+              <Ionicons name="trash" size={16} color="#ef4444" />
+              <Text
+                style={{
+                  color: "#ef4444",
+                  fontWeight: "700",
+                  fontSize: 15,
+                }}
+              >
+                Delete
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </SafeAreaView>
     </Modal>
   );
@@ -1438,7 +1581,7 @@ export default function MarketScreen() {
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              alignItems: "flex-start",
+              alignItems: "center",
             }}
           >
             <View>
@@ -1465,6 +1608,7 @@ export default function MarketScreen() {
                 backgroundColor: "rgba(255,255,255,0.2)",
                 borderWidth: 1,
                 borderColor: "rgba(255,255,255,0.3)",
+                marginBottom: 18,
               }}
             >
               <Text style={{ color: "#fff", fontSize: 12, fontWeight: "700" }}>
@@ -1516,64 +1660,76 @@ export default function MarketScreen() {
       <View style={{ flex: 1 }}>
         {activeTab === "browse" ? (
           <>
-            {/* Search */}
+            {/* Fixed Search + Filters Section */}
             <View
               style={{
-                paddingHorizontal: 20,
-                paddingTop: 16,
-                paddingBottom: 8,
+                backgroundColor: "#f8fafc",
+                zIndex: 1,
+                elevation: 3,
+                borderBottomWidth: 1,
+                borderBottomColor: "#e5e7eb",
               }}
             >
+              {/* Search Bar */}
               <View
                 style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  backgroundColor: "#fff",
-                  borderRadius: 12,
-                  paddingHorizontal: 14,
-                  paddingVertical: 10,
-                  borderWidth: 1,
-                  borderColor: "#e5e7eb",
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 4,
-                  elevation: 2,
+                  paddingHorizontal: 20,
+                  paddingTop: 12,
+                  paddingBottom: 8,
                 }}
               >
-                <Ionicons name="search" size={18} color="#9ca3af" />
-                <TextInput
-                  value={searchText}
-                  onChangeText={setSearchText}
-                  placeholder="Search surf schools, instructors..."
-                  placeholderTextColor="#9ca3af"
+                <View
                   style={{
-                    flex: 1,
-                    marginLeft: 10,
-                    fontSize: 14,
-                    color: "#111827",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    backgroundColor: "#fff",
+                    borderRadius: 12,
+                    paddingHorizontal: 14,
+                    paddingVertical: 10,
+                    borderWidth: 1,
+                    borderColor: "#e5e7eb",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 4,
+                    elevation: 2,
                   }}
-                />
-                {searchText.length > 0 && (
-                  <TouchableOpacity onPress={() => setSearchText("")}>
-                    <Ionicons name="close-circle" size={18} color="#9ca3af" />
-                  </TouchableOpacity>
-                )}
+                >
+                  <Ionicons name="search" size={18} color="#9ca3af" />
+                  <TextInput
+                    value={searchText}
+                    onChangeText={setSearchText}
+                    placeholder="Search surf schools, instructors..."
+                    placeholderTextColor="#9ca3af"
+                    style={{
+                      flex: 1,
+                      marginLeft: 10,
+                      fontSize: 14,
+                      color: "#111827",
+                    }}
+                  />
+                  {searchText.length > 0 && (
+                    <TouchableOpacity onPress={() => setSearchText("")}>
+                      <Ionicons name="close-circle" size={18} color="#9ca3af" />
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
-            </View>
 
-            {/* Category pills – fixed height so it never shifts layout */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ height: 48 }}
-              contentContainerStyle={{
-                paddingHorizontal: 20,
-                alignItems: "center",
-              }}
-            >
-              {CATEGORIES.map(renderCategoryPill)}
-            </ScrollView>
+              {/* Category pills */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ height: 48 }}
+                contentContainerStyle={{
+                  paddingHorizontal: 20,
+                  alignItems: "center",
+                  paddingBottom: 8,
+                }}
+              >
+                {CATEGORIES.map(renderCategoryPill)}
+              </ScrollView>
+            </View>
 
             {/* Listings */}
             {loading ? (
