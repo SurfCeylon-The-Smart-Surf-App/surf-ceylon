@@ -10,15 +10,19 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
   Modal,
   Image,
+  Keyboard,
+  TouchableWithoutFeedback,
+  Platform,
 } from "react-native";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetFlatList,
+} from "@gorhom/bottom-sheet";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useWindowDimensions, StatusBar } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../hooks/useAuth";
 import { postsAPI } from "../services/api";
@@ -40,21 +44,55 @@ const CommentsBottomSheet = ({
   const [editingComment, setEditingComment] = useState(null);
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [selectedComment, setSelectedComment] = useState(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const { user } = useAuth();
   const bottomSheetRef = useRef(null);
-  const snapPoints = useMemo(() => ["25%", "75%"], []);
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+
+  const snapPoints = useMemo(() => {
+    const topOffset = Platform.OS === "ios" ? insets.top : StatusBar.currentHeight || 24;
+    const fullHeight = windowHeight - topOffset;
+    return [fullHeight];
+  }, [windowHeight, insets]);
 
   useEffect(() => {
-    if (isVisible) {
+    const showListener = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+      }
+    );
+    const hideListener = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => {
+        setKeyboardHeight(0);
+      }
+    );
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isVisible && postId) {
       bottomSheetRef.current?.expand();
       fetchComments();
-    } else {
+    } else if (!isVisible) {
       bottomSheetRef.current?.close();
+      setNewComment("");
+      setEditingComment(null);
+      setSelectedComment(null);
+      setShowActionMenu(false);
+      Keyboard.dismiss();
+      setKeyboardHeight(0);
     }
-  }, [isVisible]);
+  }, [isVisible, postId]);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     if (!postId) return;
 
     setIsLoading(true);
@@ -63,7 +101,6 @@ const CommentsBottomSheet = ({
       const fetchedComments = response.data.data.comments || [];
       setComments(fetchedComments);
 
-      // Sync the actual comment count with parent
       if (onCommentCountSync && fetchedComments.length !== commentCount) {
         onCommentCountSync(fetchedComments.length);
       }
@@ -73,7 +110,7 @@ const CommentsBottomSheet = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [postId, commentCount, onCommentCountSync]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -81,7 +118,6 @@ const CommentsBottomSheet = ({
     setIsSubmitting(true);
     try {
       if (editingComment) {
-        // Update existing comment
         const response = await postsAPI.updateComment(editingComment._id, {
           content: newComment.trim(),
         });
@@ -96,10 +132,9 @@ const CommentsBottomSheet = ({
         setNewComment("");
         setEditingComment(null);
 
-        // Show toxicity warning if detected and delete comment
         if (isToxic) {
           Alert.alert(
-            "⚠️ Toxic Content Detected",
+            "Toxic Content Detected",
             `Your comment contains inappropriate or offensive language (${(
               confidence * 100
             ).toFixed(1)}% confidence). The comment will be removed.`,
@@ -113,7 +148,7 @@ const CommentsBottomSheet = ({
                       prev.filter((c) => c._id !== updatedComment._id)
                     );
                     if (onCommentAdded) {
-                      onCommentAdded(false); // Decrement count
+                      onCommentAdded(false);
                     }
                   } catch (error) {
                     console.error("Error deleting toxic comment:", error);
@@ -124,7 +159,6 @@ const CommentsBottomSheet = ({
           );
         }
       } else {
-        // Add new comment
         const response = await postsAPI.addComment(postId, {
           content: newComment.trim(),
         });
@@ -136,10 +170,9 @@ const CommentsBottomSheet = ({
         setComments((prev) => [newCommentData, ...prev]);
         setNewComment("");
 
-        // Show toxicity warning if detected and delete comment
         if (isToxic) {
           Alert.alert(
-            "⚠️ Toxic Content Detected",
+            "Toxic Content Detected",
             `Your comment contains inappropriate or offensive language (${(
               confidence * 100
             ).toFixed(1)}% confidence). The comment will be removed.`,
@@ -152,7 +185,6 @@ const CommentsBottomSheet = ({
                     setComments((prev) =>
                       prev.filter((c) => c._id !== newCommentData._id)
                     );
-                    // Don't notify parent since we're removing it
                   } catch (error) {
                     console.error("Error deleting toxic comment:", error);
                   }
@@ -161,26 +193,22 @@ const CommentsBottomSheet = ({
             ]
           );
         } else {
-          // Only notify parent if comment is not toxic
           if (onCommentAdded) {
             onCommentAdded();
           }
         }
       }
     } catch (error) {
-      // Check if it's a toxicity error (400 status)
       if (
         error.response?.status === 400 &&
         error.response?.data?.message?.includes("inappropriate")
       ) {
-        // Don't log toxicity errors as they're expected behavior
         Alert.alert(
           "Inappropriate Content",
           "Your comment contains inappropriate language and cannot be posted. Please revise your message.",
           [{ text: "OK" }]
         );
       } else {
-        // Log actual errors
         console.error("Error with comment:", error);
         Alert.alert(
           "Error",
@@ -192,23 +220,26 @@ const CommentsBottomSheet = ({
     }
   };
 
-  const handleLongPress = (comment) => {
-    const isCommentAuthor = comment.author._id === user?._id;
-    const isPostOwner = postAuthorId === user?._id;
+  const handleLongPress = useCallback(
+    (comment) => {
+      const isCommentAuthor = comment.author?._id === user?._id;
+      const isPostOwner = postAuthorId === user?._id;
 
-    if (isCommentAuthor || isPostOwner) {
-      setSelectedComment(comment);
-      setShowActionMenu(true);
-    }
-  };
+      if (isCommentAuthor || isPostOwner) {
+        setSelectedComment(comment);
+        setShowActionMenu(true);
+      }
+    },
+    [user?._id, postAuthorId]
+  );
 
-  const handleEditComment = () => {
+  const handleEditComment = useCallback(() => {
     setNewComment(selectedComment.content);
     setEditingComment(selectedComment);
     setShowActionMenu(false);
-  };
+  }, [selectedComment]);
 
-  const handleDeleteComment = async () => {
+  const handleDeleteComment = useCallback(() => {
     setShowActionMenu(false);
     Alert.alert(
       "Delete Comment",
@@ -225,7 +256,7 @@ const CommentsBottomSheet = ({
                 prev.filter((c) => c._id !== selectedComment._id)
               );
               if (onCommentAdded) {
-                onCommentAdded(false); // Pass false to decrement
+                onCommentAdded(false);
               }
             } catch (error) {
               console.error("Error deleting comment:", error);
@@ -235,67 +266,123 @@ const CommentsBottomSheet = ({
         },
       ]
     );
-  };
+  }, [selectedComment, onCommentAdded]);
 
   const handleCancelEdit = () => {
     setNewComment("");
     setEditingComment(null);
   };
 
-  const renderComment = ({ item }) => {
-    // Use current user data if this comment is from the logged-in user
-    const isOwnComment = item.author?._id === user?._id;
-    const commentAuthor = isOwnComment ? user : item.author;
-    const profilePicture = commentAuthor?.profilePicture;
+  const renderComment = useCallback(
+    ({ item }) => {
+      const isOwnComment = item.author?._id === user?._id;
+      const commentAuthor = isOwnComment ? user : item.author;
+      const profilePicture = commentAuthor?.profilePicture;
 
-    return (
-      <TouchableOpacity
-        onLongPress={() => handleLongPress(item)}
-        delayLongPress={500}
-        activeOpacity={0.7}
-      >
-        <View className="flex-row p-4 border-b border-gray-100">
-          {/* Avatar */}
-          {profilePicture ? (
-            <Image
-              source={{ uri: `${getStaticImageBaseUrl()}${profilePicture}` }}
-              className="w-8 h-8 rounded-full mr-3"
-              resizeMode="cover"
-            />
-          ) : (
-            <View className="w-8 h-8 bg-gray-300 rounded-full mr-3 items-center justify-center">
-              <Text className="text-gray-600 font-semibold text-xs">
-                {commentAuthor?.name?.charAt(0) || "U"}
-              </Text>
-            </View>
-          )}
+      return (
+        <TouchableOpacity
+          onLongPress={() => handleLongPress(item)}
+          delayLongPress={500}
+          activeOpacity={0.7}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              padding: 16,
+              borderBottomWidth: 1,
+              borderBottomColor: "#f3f4f6",
+            }}
+          >
+            {profilePicture ? (
+              <Image
+                source={{
+                  uri: `${getStaticImageBaseUrl()}${profilePicture}`,
+                }}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  marginRight: 12,
+                }}
+                resizeMode="cover"
+              />
+            ) : (
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#d1d5db",
+                  marginRight: 12,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text style={{ color: "#4b5563", fontWeight: "600", fontSize: 12 }}>
+                  {commentAuthor?.name?.charAt(0) || "U"}
+                </Text>
+              </View>
+            )}
 
-          {/* Comment Content */}
-          <View className="flex-1">
-            <View className="bg-gray-100 rounded-xl px-3 py-2">
-              <Text className="font-semibold text-gray-900 text-sm">
-                {commentAuthor?.name || "Unknown User"}
-              </Text>
-              <Text className="text-gray-800 mt-1">{item.content}</Text>
-            </View>
+            <View style={{ flex: 1 }}>
+              <View
+                style={{
+                  backgroundColor: "#f3f4f6",
+                  borderRadius: 12,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                }}
+              >
+                <Text style={{ fontWeight: "600", color: "#111827", fontSize: 14 }}>
+                  {commentAuthor?.name || "Unknown User"}
+                </Text>
+                <Text style={{ color: "#1f2937", marginTop: 4, fontSize: 14 }}>
+                  {item.content}
+                </Text>
+              </View>
 
-            {/* Comment Actions */}
-            <View className="flex-row items-center mt-2 ml-3">
-              <TouchableOpacity className="mr-4">
-                <Text className="text-gray-600 font-medium text-sm">Like</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="mr-4">
-                <Text className="text-gray-600 font-medium text-sm">Reply</Text>
-              </TouchableOpacity>
-              <Text className="text-gray-500 text-xs">
-                {new Date(item.createdAt).toLocaleDateString()}
-              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 8,
+                  marginLeft: 12,
+                }}
+              >
+                <TouchableOpacity style={{ marginRight: 16 }}>
+                  <Text style={{ color: "#4b5563", fontWeight: "500", fontSize: 14 }}>
+                    Like
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={{ marginRight: 16 }}>
+                  <Text style={{ color: "#4b5563", fontWeight: "500", fontSize: 14 }}>
+                    Reply
+                  </Text>
+                </TouchableOpacity>
+                <Text style={{ color: "#6b7280", fontSize: 12 }}>
+                  {new Date(item.createdAt).toLocaleDateString()}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+        </TouchableOpacity>
+      );
+    },
+    [user, handleLongPress]
+  );
+
+  const renderEmptyComponent = useCallback(
+    () => (
+      <View style={{ alignItems: "center", justifyContent: "center", paddingVertical: 48 }}>
+        <Ionicons name="chatbubble-outline" size={48} color="#d1d5db" />
+        <Text style={{ color: "#6b7280", marginTop: 8 }}>No comments yet</Text>
+        <Text style={{ color: "#9ca3af", fontSize: 14 }}>Be the first to comment</Text>
+      </View>
+    ),
+    []
+  );
+
+  const keyExtractor = useCallback((item) => item._id, []);
 
   const handleSheetChanges = useCallback(
     (index) => {
@@ -306,91 +393,147 @@ const CommentsBottomSheet = ({
     [onClose]
   );
 
+  const handleDismiss = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const inputContainerHeight = editingComment ? 108 : 60;
+  const headerHeight = 53;
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
       index={isVisible ? 0 : -1}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
+      onDismiss={handleDismiss}
       enablePanDownToClose={true}
       backgroundStyle={{ backgroundColor: "#ffffff" }}
       handleIndicatorStyle={{ backgroundColor: "#d1d5db" }}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      android_keyboardInputMode="adjustResize"
     >
-      <BottomSheetView className="flex-1">
-        {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">
-          <Text className="text-lg font-semibold text-gray-900">
+      <View style={{ flex: 1, width: windowWidth }}>
+        {/* SECTION 1: Fixed Header */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            borderBottomWidth: 1,
+            borderBottomColor: "#e5e7eb",
+            zIndex: 1,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "600", color: "#111827" }}>
             Comments ({comments.length})
           </Text>
-          <TouchableOpacity onPress={onClose}>
+          <TouchableOpacity onPress={onClose} style={{ padding: 4 }}>
             <Ionicons name="close" size={24} color="#6b7280" />
           </TouchableOpacity>
         </View>
 
-        {/* Comments List */}
-        <View className="flex-1">
-          {isLoading ? (
-            <View className="flex-1 items-center justify-center">
-              <ActivityIndicator size="large" color="#2563eb" />
-            </View>
-          ) : (
-            <FlatList
-              data={comments}
-              renderItem={renderComment}
-              keyExtractor={(item) => item._id}
-              showsVerticalScrollIndicator={false}
-              ListEmptyComponent={() => (
-                <View className="flex-1 items-center justify-center py-12">
-                  <Ionicons
-                    name="chatbubble-outline"
-                    size={48}
-                    color="#d1d5db"
-                  />
-                  <Text className="text-gray-500 mt-2">No comments yet</Text>
-                  <Text className="text-gray-400 text-sm">
-                    Be the first to comment
-                  </Text>
-                </View>
-              )}
-            />
-          )}
-        </View>
+        {/* SECTION 2: Scrollable Comments (fills remaining space) */}
+        {isLoading ? (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <ActivityIndicator size="large" color="#2563eb" />
+          </View>
+        ) : (
+          <BottomSheetFlatList
+            data={comments}
+            renderItem={renderComment}
+            keyExtractor={keyExtractor}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={renderEmptyComponent}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: inputContainerHeight + 16 }}
+            style={{ flex: 1 }}
+            removeClippedSubviews={false}
+          />
+        )}
 
-        {/* Comment Input */}
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={100}
+        {/* SECTION 3: Fixed Input (absolute at bottom) */}
+        <View
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            borderTopWidth: 1,
+            borderTopColor: "#e5e7eb",
+            backgroundColor: "#ffffff",
+            zIndex: 2,
+            paddingBottom: keyboardHeight > 0 ? 0 : undefined,
+          }}
         >
           {editingComment && (
-            <View className="flex-row items-center justify-between px-4 py-2 bg-blue-50 border-t border-blue-200">
-              <Text className="text-blue-700 text-sm">Editing comment</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                backgroundColor: "#eff6ff",
+                borderTopWidth: 1,
+                borderTopColor: "#bfdbfe",
+              }}
+            >
+              <Text style={{ color: "#1d4ed8", fontSize: 14 }}>Editing comment</Text>
               <TouchableOpacity onPress={handleCancelEdit}>
-                <Text className="text-blue-700 font-semibold text-sm">
+                <Text style={{ color: "#1d4ed8", fontWeight: "600", fontSize: 14 }}>
                   Cancel
                 </Text>
               </TouchableOpacity>
             </View>
           )}
-          <View className="flex-row items-center px-4 py-3 border-t border-gray-200 bg-white">
-            {/* User Avatar */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+            }}
+          >
             {user?.profilePicture ? (
               <Image
                 source={{
                   uri: `${getStaticImageBaseUrl()}${user.profilePicture}`,
                 }}
-                className="w-8 h-8 rounded-full mr-3"
+                style={{ width: 32, height: 32, borderRadius: 16, marginRight: 12 }}
                 resizeMode="cover"
               />
             ) : (
-              <View className="w-8 h-8 bg-gray-300 rounded-full mr-3 items-center justify-center">
-                <Text className="text-gray-600 font-semibold text-xs">
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#d1d5db",
+                  marginRight: 12,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text style={{ color: "#4b5563", fontWeight: "600", fontSize: 12 }}>
                   {user?.name?.charAt(0) || "U"}
                 </Text>
               </View>
             )}
 
-            {/* Text Input */}
-            <View className="flex-1 bg-gray-100 rounded-full px-4 py-2 mr-3">
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "#f3f4f6",
+                borderRadius: 20,
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                marginRight: 12,
+              }}
+            >
               <TextInput
                 value={newComment}
                 onChangeText={setNewComment}
@@ -398,20 +541,21 @@ const CommentsBottomSheet = ({
                 placeholderTextColor="#9ca3af"
                 multiline
                 maxLength={500}
-                className="text-gray-900"
-                style={{ maxHeight: 100 }}
+                style={{ color: "#111827", maxHeight: 100 }}
               />
             </View>
 
-            {/* Send Button */}
             <TouchableOpacity
               onPress={handleAddComment}
               disabled={!newComment.trim() || isSubmitting}
-              className={`w-8 h-8 rounded-full items-center justify-center ${
-                newComment.trim() && !isSubmitting
-                  ? "bg-blue-600"
-                  : "bg-gray-300"
-              }`}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: newComment.trim() && !isSubmitting ? "#2563eb" : "#d1d5db",
+              }}
             >
               {isSubmitting ? (
                 <ActivityIndicator size="small" color="#ffffff" />
@@ -424,45 +568,8 @@ const CommentsBottomSheet = ({
               )}
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
-
-        {/* Action Menu Modal */}
-        <Modal
-          visible={showActionMenu}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowActionMenu(false)}
-        >
-          <TouchableOpacity
-            className="flex-1 bg-black/50 justify-center items-center"
-            activeOpacity={1}
-            onPress={() => setShowActionMenu(false)}
-          >
-            <View className="bg-white rounded-2xl mx-8 w-64 overflow-hidden">
-              {selectedComment?.author._id === user?._id && (
-                <TouchableOpacity
-                  className="flex-row items-center px-4 py-4 border-b border-gray-200"
-                  onPress={handleEditComment}
-                >
-                  <Ionicons name="create-outline" size={24} color="#3b82f6" />
-                  <Text className="ml-3 text-gray-900 text-base font-medium">
-                    Edit Comment
-                  </Text>
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                className="flex-row items-center px-4 py-4"
-                onPress={handleDeleteComment}
-              >
-                <Ionicons name="trash-outline" size={24} color="#ef4444" />
-                <Text className="ml-3 text-red-600 text-base font-medium">
-                  Delete Comment
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </Modal>
-      </BottomSheetView>
+        </View>
+      </View>
     </BottomSheet>
   );
 };

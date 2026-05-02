@@ -24,7 +24,7 @@ import { getStaticImageBaseUrl } from "../../utils/networkConfig";
 import * as MediaLibrary from "expo-media-library";
 import { useAuth } from "../../hooks/useAuth";
 import { postsAPI, userAPI } from "../../services/api";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, useNavigation } from "expo-router";
 import CommentsBottomSheet from "../../components/CommentsBottomSheet";
 
 export default function CommunityScreen() {
@@ -53,6 +53,22 @@ export default function CommunityScreen() {
   const [editPostContent, setEditPostContent] = useState("");
 
   const { user } = useAuth();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: commentsVisible
+        ? { display: "none" }
+        : {
+            backgroundColor: "#ffffff",
+            borderTopWidth: 1,
+            borderTopColor: "#e5e7eb",
+            height: 60,
+            paddingBottom: 8,
+            paddingTop: 8,
+          },
+    });
+  }, [commentsVisible, navigation]);
 
   // Debounced search function
   const debouncedSearch = (query) => {
