@@ -15,7 +15,7 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -54,6 +54,7 @@ export default function CommunityScreen() {
 
   const { user } = useAuth();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     navigation.setOptions({
@@ -63,12 +64,12 @@ export default function CommunityScreen() {
             backgroundColor: "#ffffff",
             borderTopWidth: 1,
             borderTopColor: "#e5e7eb",
-            height: 60,
-            paddingBottom: 8,
+            height: 60 + insets.bottom,
+            paddingBottom: insets.bottom,
             paddingTop: 8,
           },
     });
-  }, [commentsVisible, navigation]);
+  }, [commentsVisible, navigation, insets]);
 
   // Debounced search function
   const debouncedSearch = (query) => {
