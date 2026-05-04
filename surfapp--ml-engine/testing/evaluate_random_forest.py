@@ -107,6 +107,17 @@ def preprocess(df):
     df = df.drop_duplicates()
     print(f"  Removed {before - len(df):,} duplicates")
 
+    # 1.5 Handle missing values (filling with median to match training)
+    all_cols = BASE_FEATURES + TARGET_NAMES
+    missing_filled = 0
+    for col in all_cols:
+        if col in df.columns and df[col].isna().sum() > 0:
+            df[col].fillna(df[col].median(), inplace=True)
+            missing_filled += 1
+    if missing_filled > 0:
+        print(
+            f"  Filled missing values with median in {missing_filled} columns")
+
     # 2. Remove outliers using IQR on all feature + target columns
     print("  Removing outliers...")
     all_cols = BASE_FEATURES + TARGET_NAMES
