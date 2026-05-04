@@ -27,25 +27,18 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # ─── Feature / Target definitions (must match training script) ────────────────
 BASE_FEATURES = [
     'swellHeight', 'swellPeriod', 'swellDirection', 'windSpeed',
-    'windDirection', 'seaLevel', 'gust', 'secondarySwellHeight',
-    'secondarySwellPeriod', 'secondarySwellDirection'
+    'windDirection', 'secondarySwellHeight'
 ]
-TARGET_NAMES = ['waveHeight', 'windSpeed', 'windDirection']
+TARGET_NAMES = ['waveHeight']
 TARGET_LABELS = {
-    'waveHeight':    'Wave Height',
-    'windSpeed':     'Wind Speed',
-    'windDirection': 'Wind Direction'
+    'waveHeight':    'Wave Height'
 }
 TARGET_UNITS = {
-    'waveHeight':    'm',
-    'windSpeed':     'm/s',
-    'windDirection': '°'
+    'waveHeight':    'm'
 }
 # Industry-standard acceptable MAE thresholds
 BENCHMARK_MAE = {
-    'waveHeight':    0.20,   # ±20 cm
-    'windSpeed':     1.50,   # ±1.5 m/s
-    'windDirection': 15.0    # ±15°
+    'waveHeight':    0.20   # ±20 cm
 }
 
 
@@ -132,12 +125,10 @@ def preprocess(df):
     df['offshoreWind'] = df['windSpeed'] * \
         np.cos(np.radians(df['windDirection'] - 270))
     df['totalSwellHeight'] = df['swellHeight'] + df['secondarySwellHeight']
-    df['windSwellInteraction'] = df['windSpeed'] * df['swellHeight']
-    df['periodRatio'] = df['swellPeriod'] / (df['secondarySwellPeriod'] + 1)
 
-    all_features = BASE_FEATURES + [
-        'swellEnergy', 'offshoreWind', 'totalSwellHeight',
-        'windSwellInteraction', 'periodRatio'
+    all_features = [
+        'windSpeed', 'windDirection', 'swellDirection',
+        'swellEnergy', 'offshoreWind', 'totalSwellHeight'
     ]
     print(f"  Clean records: {len(df):,} | Features: {len(all_features)}")
     return df, all_features
