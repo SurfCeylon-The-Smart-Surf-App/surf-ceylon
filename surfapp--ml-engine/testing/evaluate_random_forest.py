@@ -207,11 +207,13 @@ def main():
     print("  " + "─" * 70)
 
     for i, target in enumerate(TARGET_NAMES):
-        r2_val = r2_score(y_test.iloc[:, i], y_pred[:, i])
-        mae_val = mean_absolute_error(y_test.iloc[:, i], y_pred[:, i])
-        rmse_val = float(np.sqrt(mean_squared_error(
-            y_test.iloc[:, i], y_pred[:, i])))
-        mape_val = mape(y_test.iloc[:, i].values, y_pred[:, i])
+        y_true_col = y_test.iloc[:, i] if len(y_test.shape) > 1 else y_test
+        y_pred_col = y_pred[:, i] if len(y_pred.shape) > 1 else y_pred
+
+        r2_val = r2_score(y_true_col, y_pred_col)
+        mae_val = mean_absolute_error(y_true_col, y_pred_col)
+        rmse_val = float(np.sqrt(mean_squared_error(y_true_col, y_pred_col)))
+        mape_val = mape(y_true_col.values, y_pred_col)
         unit = TARGET_UNITS[target]
         bench = BENCHMARK_MAE[target]
         status = "✅ Exceeds benchmark" if mae_val < bench else "⚠️  Above benchmark"
