@@ -105,6 +105,7 @@ export const postsAPI = {
   updateComment: (commentId, data) =>
     api.put(`/posts/comments/${commentId}`, data),
   deleteComment: (commentId) => api.delete(`/posts/comments/${commentId}`),
+  likeComment: (commentId) => api.post(`/posts/comments/${commentId}/like`),
   updatePost: (postId, postData) => api.put(`/posts/${postId}`, postData),
   deletePost: (postId) => api.delete(`/posts/${postId}`),
 };

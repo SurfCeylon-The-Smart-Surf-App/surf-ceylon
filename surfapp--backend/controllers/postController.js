@@ -517,6 +517,53 @@ const deletePost = async (req, res) => {
   }
 };
 
+// Toggle like on a comment
+const toggleLikeComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user._id;
+
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({
+        status: "error",
+        message: "Comment not found",
+      });
+    }
+
+    const existingLike = comment.likes.find(
+      (like) => like.user.toString() === userId.toString()
+    );
+
+    if (existingLike) {
+      comment.likes = comment.likes.filter(
+        (like) => like.user.toString() !== userId.toString()
+      );
+    } else {
+      comment.likes.push({ user: userId });
+    }
+
+    await comment.save();
+    await comment.populate("author", "name username avatar");
+
+    res.json({
+      status: "success",
+      message: existingLike ? "Comment unliked" : "Comment liked",
+      data: {
+        comment,
+        liked: !existingLike,
+        likeCount: comment.likes.length,
+      },
+    });
+  } catch (error) {
+    console.error("Toggle like comment error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+    });
+  }
+};
+
 // Update a comment
 const updateComment = async (req, res) => {
   try {
@@ -635,4 +682,5 @@ module.exports = {
   deleteComment,
   updatePost,
   deletePost,
+  toggleLikeComment,
 };

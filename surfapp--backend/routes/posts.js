@@ -13,6 +13,7 @@ const {
   deleteComment,
   updatePost,
   deletePost,
+  toggleLikeComment,
 } = require("../controllers/postController");
 const { auth } = require("../middlewares/auth");
 const upload = require("../middlewares/upload");
@@ -98,6 +99,11 @@ router.put("/comments/:commentId", auth, commentValidation, updateComment);
 // @desc    Delete a comment
 // @access  Private (Comment author or Post owner)
 router.delete("/comments/:commentId", auth, deleteComment);
+
+// @route   POST /api/posts/comments/:commentId/like
+// @desc    Like/Unlike a comment
+// @access  Private
+router.post("/comments/:commentId/like", auth, toggleLikeComment);
 
 // @route   PUT /api/posts/:postId
 // @desc    Update post
