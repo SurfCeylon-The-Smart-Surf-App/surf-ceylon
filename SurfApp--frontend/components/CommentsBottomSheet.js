@@ -219,7 +219,7 @@ const CommentCard = ({
   const likeCount = item.likeCount || item.likes?.length || 0;
   const hasReplies = item.replies && item.replies.length > 0;
   const isPostAuthor = commentAuthor?._id === postAuthorId;
-  const displayedReplies = isExpanded ? item.replies : (item.replies || []).slice(0, 2);
+  const displayedReplies = isExpanded ? item.replies : [];
 
   const timeAgo = (date) => {
     const now = new Date();
@@ -302,38 +302,38 @@ const CommentCard = ({
               >
                 <Text style={styles.actionLink}>Reply</Text>
               </TouchableOpacity>
+
+              {hasReplies && (
+                <TouchableOpacity
+                  onPress={() => onToggleReplies(item._id)}
+                  style={styles.actionButton}
+                  activeOpacity={0.6}
+                >
+                  <Ionicons
+                    name={isExpanded ? "chevron-up" : "chevron-down"}
+                    size={12}
+                    color={COLORS.textLink}
+                  />
+                  <Text style={styles.viewRepliesActionText}>
+                    {isExpanded
+                      ? "Hide replies"
+                      : `View ${item.replies.length} ${item.replies.length === 1 ? "reply" : "replies"}`}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </TouchableOpacity>
       </View>
 
-      {hasReplies && (
+      {hasReplies && isExpanded && (
         <View style={styles.repliesContainer}>
           <View style={styles.threadLine} />
-          {displayedReplies.map((reply) => (
+          {item.replies.map((reply) => (
             <View key={reply._id} style={styles.replyWrapper}>
               {renderReply(reply, item._id)}
             </View>
           ))}
-          {item.replies.length > 2 && (
-            <TouchableOpacity
-              onPress={() => onToggleReplies(item._id)}
-              style={styles.viewRepliesButton}
-              activeOpacity={0.6}
-            >
-              <View style={styles.viewRepliesLine} />
-              <Ionicons
-                name={isExpanded ? "chevron-up" : "chevron-down"}
-                size={14}
-                color={COLORS.textLink}
-              />
-              <Text style={styles.viewRepliesText}>
-                {isExpanded
-                  ? `Hide replies`
-                  : `View ${item.replies.length} replies`}
-              </Text>
-            </TouchableOpacity>
-          )}
         </View>
       )}
     </View>
@@ -984,8 +984,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
-    borderWidth: 1,
-    borderColor: COLORS.borderLight,
   },
   commentRow: {
     flexDirection: "row",
@@ -1106,12 +1104,11 @@ const styles = StyleSheet.create({
   replyWrapper: {
     marginLeft: 40,
   },
-  viewRepliesButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 48,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+  viewRepliesActionText: {
+    color: COLORS.textLink,
+    fontSize: 13,
+    fontWeight: "600",
+    marginLeft: 4,
   },
   viewRepliesLine: {
     position: "absolute",
@@ -1121,12 +1118,6 @@ const styles = StyleSheet.create({
     width: 2,
     backgroundColor: COLORS.border,
     borderRadius: 1,
-  },
-  viewRepliesText: {
-    color: COLORS.textLink,
-    fontSize: 13,
-    fontWeight: "600",
-    marginLeft: 4,
   },
 
   replyRow: {
