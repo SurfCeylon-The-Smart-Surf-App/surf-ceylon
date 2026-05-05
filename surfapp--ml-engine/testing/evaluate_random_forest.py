@@ -27,25 +27,18 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # ─── Feature / Target definitions (must match training script) ────────────────
 BASE_FEATURES = [
     'swellHeight', 'swellPeriod', 'swellDirection', 'windSpeed',
-    'windDirection', 'seaLevel', 'gust', 'secondarySwellHeight',
-    'secondarySwellPeriod', 'secondarySwellDirection'
+    'windDirection', 'secondarySwellHeight'
 ]
-TARGET_NAMES = ['waveHeight', 'windSpeed', 'windDirection']
+TARGET_NAMES = ['waveHeight']
 TARGET_LABELS = {
-    'waveHeight':    'Wave Height',
-    'windSpeed':     'Wind Speed',
-    'windDirection': 'Wind Direction'
+    'waveHeight':    'Wave Height'
 }
 TARGET_UNITS = {
-    'waveHeight':    'm',
-    'windSpeed':     'm/s',
-    'windDirection': '°'
+    'waveHeight':    'm'
 }
 # Industry-standard acceptable MAE thresholds
 BENCHMARK_MAE = {
-    'waveHeight':    0.20,   # ±20 cm
-    'windSpeed':     1.50,   # ±1.5 m/s
-    'windDirection': 15.0    # ±15°
+    'waveHeight':    0.20   # ±20 cm
 }
 
 
@@ -114,6 +107,17 @@ def preprocess(df):
     df = df.drop_duplicates()
     print(f"  Removed {before - len(df):,} duplicates")
 
+    # 1.5 Handle missing values (filling with median to match training)
+    all_cols = BASE_FEATURES + TARGET_NAMES
+    missing_filled = 0
+    for col in all_cols:
+        if col in df.columns and df[col].isna().sum() > 0:
+            df[col].fillna(df[col].median(), inplace=True)
+            missing_filled += 1
+    if missing_filled > 0:
+        print(
+            f"  Filled missing values with median in {missing_filled} columns")
+
     # 2. Remove outliers using IQR on all feature + target columns
     print("  Removing outliers...")
     all_cols = BASE_FEATURES + TARGET_NAMES
@@ -132,12 +136,10 @@ def preprocess(df):
     df['offshoreWind'] = df['windSpeed'] * \
         np.cos(np.radians(df['windDirection'] - 270))
     df['totalSwellHeight'] = df['swellHeight'] + df['secondarySwellHeight']
-    df['windSwellInteraction'] = df['windSpeed'] * df['swellHeight']
-    df['periodRatio'] = df['swellPeriod'] / (df['secondarySwellPeriod'] + 1)
 
-    all_features = BASE_FEATURES + [
-        'swellEnergy', 'offshoreWind', 'totalSwellHeight',
-        'windSwellInteraction', 'periodRatio'
+    all_features = [
+        'windSpeed', 'windDirection', 'swellDirection',
+        'swellEnergy', 'offshoreWind', 'totalSwellHeight'
     ]
     print(f"  Clean records: {len(df):,} | Features: {len(all_features)}")
     return df, all_features
@@ -216,11 +218,13 @@ def main():
     print("  " + "─" * 70)
 
     for i, target in enumerate(TARGET_NAMES):
-        r2_val = r2_score(y_test.iloc[:, i], y_pred[:, i])
-        mae_val = mean_absolute_error(y_test.iloc[:, i], y_pred[:, i])
-        rmse_val = float(np.sqrt(mean_squared_error(
-            y_test.iloc[:, i], y_pred[:, i])))
-        mape_val = mape(y_test.iloc[:, i].values, y_pred[:, i])
+        y_true_col = y_test.iloc[:, i] if len(y_test.shape) > 1 else y_test
+        y_pred_col = y_pred[:, i] if len(y_pred.shape) > 1 else y_pred
+
+        r2_val = r2_score(y_true_col, y_pred_col)
+        mae_val = mean_absolute_error(y_true_col, y_pred_col)
+        rmse_val = float(np.sqrt(mean_squared_error(y_true_col, y_pred_col)))
+        mape_val = mape(y_true_col.values, y_pred_col)
         unit = TARGET_UNITS[target]
         bench = BENCHMARK_MAE[target]
         status = "✅ Exceeds benchmark" if mae_val < bench else "⚠️  Above benchmark"
