@@ -33,11 +33,11 @@ The **Multi-Output LSTM (Long Short-Term Memory)** model is designed to generate
 ### Predicted Features (6 Parameters)
 
 1. **Wave Height (m)** - Average wave height
-2. **Swell Height (m)** - Height of ocean swell
-3. **Swell Period (s)** - Period of ocean swell
-4. **Wind Speed (m/s)** - Surface wind speed
-5. **Wind Direction (°)** - Wind direction in degrees
-6. **Sea Level (m)** - Sea level / tidal component
+2. **Wave Period (s)** - Period of waves
+3. **Swell Height (m)** - Height of ocean swell
+4. **Swell Period (s)** - Period of ocean swell
+5. **Wind Speed (m/s)** - Surface wind speed
+6. **Wind Direction (°)** - Wind direction in degrees
 
 ---
 
@@ -411,18 +411,16 @@ LSTM_FEATURE_NAMES = os.path.join(BASE_DIR, 'models', 'wave_forecast_feature_nam
 **Dataset**: 237,312 total sequences × 168 hours × 6 features  
 **Test set**: 47,463 sequences (20%)
 
-| Feature        | MAE        | RMSE       | MAPE  | Status         |
-| -------------- | ---------- | ---------- | ----- | -------------- |
-| Wave Height    | 0.1248 m   | 0.1630 m   | 8.5%  | ✅ Good        |
-| Swell Height   | 0.4391 m   | 0.5834 m   | 6.9%  | ⚠️ High error¹ |
-| Swell Period   | 0.1234 s   | 0.1595 s   | 11.9% | ✅ Good        |
-| Wind Speed     | 0.9342 m/s | 1.2942 m/s | 11.3% | ✅ Good        |
-| Wind Direction | 0.9204 °   | 1.2086 °   | 39.4% | ✅ Good        |
-| Sea Level      | -          | -          | -     | ⚠️ Unit issue² |
+| Feature            | MAE     | RMSE    | MAPE   | Status         |
+| ------------------ | ------- | ------- | ------ | -------------- |
+| Wave Height (m)    | 0.1248  | 0.1630  | 8.5%   | ✅ Good        |
+| Wave Period (s)    | 0.4391  | 0.5834  | 6.9%   | ✅ Good        |
+| Swell Height (m)   | 0.1234  | 0.1595  | 11.9%  | ✅ Good        |
+| Swell Period (s)   | 0.9342  | 1.2942  | 11.3%  | ✅ Good        |
+| Wind Speed (m/s)   | 0.9204  | 1.2086  | 39.4%  | ✅ Good        |
+| Wind Direction (°) | 50.7776 | 73.2275 | 315.2% | ⚠️ High error¹ |
 
-**¹** Swell Height: MAPE of 6.9% is good but absolute MAE of 0.44m indicates larger absolute swells in raw data may inflate this.
-
-**²** Sea Level: The raw StormGlass `seaLevel` data appears to use centimetres rather than the expected metres, causing inflated sea level metrics. This does not affect wave height, swell, or wind predictions.
+**¹** Wind Direction: As a circular variable (0-360), predicting wind direction precisely is mathematically challenging for regression ML models and shows elevated errors. This does not strictly affect wave height precision.
 
 ### MAE by Forecast Horizon (Wave Height)
 
