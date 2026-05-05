@@ -19,22 +19,20 @@
 
 ### Purpose
 
-The **Multi-Output Random Forest Regressor** is used to generate **real-time surf condition predictions** for any geographic location. Given a single set of current weather observations, it instantly predicts three key surf and weather parameters simultaneously.
+The **Random Forest Regressor** is used to generate **real-time surf condition predictions** for any geographic location. Given a single set of current weather observations, it predicts the wave height at the spot.
 
 ### Key Features
 
 - ✅ **Ensemble Learning**: 200 decision trees vote together for robust predictions
-- ✅ **Multi-Output Predictions**: Simultaneously predicts 3 targets in one pass
-- ✅ **Feature Engineering**: 5 domain-specific surf physics features boost accuracy
+- ✅ **Target Prediction**: Strictly predicts wave height (wind targets removed to prevent data leakage)
+- ✅ **Feature Selection**: Uses 6 optimized features (removing noise for higher accuracy)
 - ✅ **Instant Inference**: Single prediction in ~10ms (no GPU required)
 - ✅ **Outlier Resistance**: Ensemble averaging reduces sensitivity to noisy inputs
 - ✅ **Fallback Mechanism**: Mock data generation when live API is unavailable
 
-### Predicted Targets (3 Parameters)
+### Predicted Target (1 Parameter)
 
 1. **Wave Height (m)** — Average wave height at the surf spot
-2. **Wind Speed (m/s)** — Surface wind speed (converted to km/h in API output)
-3. **Wind Direction (°)** — Wind direction in degrees (0–360, meteorological convention)
 
 ---
 
@@ -45,7 +43,7 @@ The **Multi-Output Random Forest Regressor** is used to generate **real-time sur
 A Random Forest is an **ensemble of decision trees**. Each tree independently splits the input data along feature thresholds and produces a prediction. The final output is the **average** of all tree predictions (regression mode).
 
 ```
-Input Features (15 values)
+Input Features (6 values)
           ↓
 ┌─────────────────────────────────────────────────────────────┐
 │                  RANDOM FOREST ENSEMBLE                      │
@@ -57,7 +55,7 @@ Input Features (15 values)
           ↓
   Average(pred₁ ... pred₂₀₀)
           ↓
-  [waveHeight, windSpeed, windDirection]
+  [waveHeight]
 ```
 
 ### Decision Tree Splitting
@@ -87,47 +85,40 @@ Training Data (104,173 samples)
 └──────────────────────────────────────────────────────────────┘
 ```
 
-At each split: randomly choose `√15 ≈ 4` features to consider (not all 15).
+At each split: randomly choose `√6 ≈ 2` features to consider (not all 6).
 
-### Input Features (15 Total)
+### Input Features (6 Total)
 
-#### Base Features (10) — from StormGlass Weather API
+The model uses a refined set of **6 final features**, dropping 9 previously used noisy features (`gust`, `seaLevel`, `periodRatio`, `secondarySwellPeriod`, `secondarySwellDirection`, `windSwellInteraction`, `swellPeriod` (raw), `swellHeight` (raw), `secondarySwellHeight` (raw)) to optimize prediction accuracy.
 
-| #   | Feature                   | Unit | Description                                  |
-| --- | ------------------------- | ---- | -------------------------------------------- |
-| 1   | `swellHeight`             | m    | Primary swell height                         |
-| 2   | `swellPeriod`             | s    | Primary swell period (time between crests)   |
-| 3   | `swellDirection`          | °    | Primary swell direction (degrees from north) |
-| 4   | `windSpeed`               | m/s  | Surface wind speed                           |
-| 5   | `windDirection`           | °    | Wind direction (degrees from north)          |
-| 6   | `seaLevel`                | m    | Sea level / tidal component                  |
-| 7   | `gust`                    | m/s  | Wind gust speed                              |
-| 8   | `secondarySwellHeight`    | m    | Secondary swell height                       |
-| 9   | `secondarySwellPeriod`    | s    | Secondary swell period                       |
-| 10  | `secondarySwellDirection` | °    | Secondary swell direction                    |
+#### Base Features
 
-#### Engineered Features (5) — computed at inference time
+| #   | Feature          | Unit | Description                                  |
+| --- | ---------------- | ---- | -------------------------------------------- |
+| 1   | `windSpeed`      | m/s  | Surface wind speed                           |
+| 2   | `windDirection`  | °    | Wind direction (degrees from north)          |
+| 3   | `swellDirection` | °    | Primary swell direction (degrees from north) |
 
-| Feature                | Formula                                    | Purpose                                |
-| ---------------------- | ------------------------------------------ | -------------------------------------- |
-| `swellEnergy`          | `swellHeight² × swellPeriod`               | Total wave energy (power indicator)    |
-| `offshoreWind`         | `windSpeed × cos(windDirection − 270°)`    | Offshore wind component (surf quality) |
-| `totalSwellHeight`     | `swellHeight + secondarySwellHeight`       | Combined swell from all directions     |
-| `windSwellInteraction` | `windSpeed × swellHeight`                  | Wind influence on wave building        |
-| `periodRatio`          | `swellPeriod / (secondarySwellPeriod + 1)` | Swell dominance / wave quality proxy   |
+#### Engineered Features
+
+| Feature            | Formula                                 | Purpose                                |
+| ------------------ | --------------------------------------- | -------------------------------------- |
+| `swellEnergy`      | `swellHeight² × swellPeriod`            | Total wave energy (power indicator)    |
+| `offshoreWind`     | `windSpeed × cos(windDirection − 270°)` | Offshore wind component (surf quality) |
+| `totalSwellHeight` | `swellHeight + secondarySwellHeight`    | Combined swell from all directions     |
 
 ### Model Specifications
 
-| Parameter           | Value                    | Purpose                               |
-| ------------------- | ------------------------ | ------------------------------------- |
-| `n_estimators`      | 200                      | 200 independent decision trees        |
-| `max_depth`         | 15                       | Maximum tree depth (prevents overfit) |
-| `min_samples_split` | 5                        | Minimum samples to create a split     |
-| `min_samples_leaf`  | 2                        | Minimum samples at a leaf node        |
-| `max_features`      | `'sqrt'` (√15 ≈ 4)       | Features considered per split         |
-| `random_state`      | 42                       | Reproducible results                  |
-| `n_jobs`            | -1                       | Use all available CPU cores           |
-| **Output**          | Multi-output (3 targets) | Single model, 3 predictions           |
+| Parameter           | Value                       | Purpose                               |
+| ------------------- | --------------------------- | ------------------------------------- |
+| `n_estimators`      | 200                         | 200 independent decision trees        |
+| `max_depth`         | 15                          | Maximum tree depth (prevents overfit) |
+| `min_samples_split` | 5                           | Minimum samples to create a split     |
+| `min_samples_leaf`  | 2                           | Minimum samples at a leaf node        |
+| `max_features`      | `'sqrt'` (√6 ≈ 2)           | Features considered per split         |
+| `random_state`      | 42                          | Reproducible results                  |
+| `n_jobs`            | -1                          | Use all available CPU cores           |
+| **Output**          | Single-output (wave height) | 1 prediction target                   |
 
 ---
 
@@ -177,11 +168,10 @@ df = df[(df[col] >= Q1 - 1.5*IQR) & (df[col] <= Q3 + 1.5*IQR)]
 
 ```python
 # Applied to both training data AND at inference time (critical to match)
+# Only computing features relevant to the final 6 feature set
 df['swellEnergy']          = df['swellHeight']**2 * df['swellPeriod']
 df['offshoreWind']         = df['windSpeed'] * np.cos(np.radians(df['windDirection'] - 270))
 df['totalSwellHeight']     = df['swellHeight'] + df['secondarySwellHeight']
-df['windSwellInteraction'] = df['windSpeed'] * df['swellHeight']
-df['periodRatio']          = df['swellPeriod'] / (df['secondarySwellPeriod'] + 1)
 ```
 
 ### Training Configuration
@@ -221,8 +211,8 @@ model.fit(X_train, y_train)
    └─→ Final clean dataset: 130,217 records
 
 3. Feature Engineering
-   └─→ Compute 5 engineered features
-   └─→ Combine with 10 base features = 15 total
+   └─→ Compute 3 engineered features
+   └─→ Filter down to 6 optimized final features
 
 4. Train / Test Split
    └─→ 80% training: 104,173 samples
@@ -234,7 +224,7 @@ model.fit(X_train, y_train)
    └─→ 200 trees trained in parallel
 
 6. Evaluate
-   └─→ R², MAE, RMSE, MAPE per target
+   └─→ R², MAE, RMSE, MAPE for waveHeight target
    └─→ Feature importance ranking
 
 7. Save Artifacts
@@ -278,7 +268,7 @@ SURF_PREDICTOR = load_random_forest_model()
 features, is_valid = fetch_weather_data_with_rotation(
     lat, lng,
     hours_ahead=48,
-    feature_names=RANDOM_FOREST_BASE_FEATURES   # the 10 base features
+    feature_names=RANDOM_FOREST_BASE_FEATURES   # the 6 base features
 )
 
 # Option B: Mock data if API is unavailable
@@ -288,9 +278,11 @@ forecast = generate_mock_spot_forecast(spot)
 #### Step 3: Apply Feature Engineering
 
 ```python
-# CRITICAL: Must apply the same 5 transformations as during training
-input_df = pd.DataFrame([features])           # shape: (1, 10)
-input_df = calculate_engineered_features(input_df)  # shape: (1, 15)
+# CRITICAL: Must apply the same transformations as during training
+input_df = pd.DataFrame([features])
+input_df = calculate_engineered_features(input_df)
+# Final features: ['windSpeed', 'windDirection', 'swellDirection', 'swellEnergy', 'offshoreWind', 'totalSwellHeight']
+input_df = input_df[FINAL_FEATURES]
 ```
 
 #### Step 4: Model Prediction
@@ -404,25 +396,19 @@ All model artifacts are stored in `surfapp--ml-engine/models/`:
 
 ### Loading the Model
 
-```python
+````python
 # From the ml-engine root
 import joblib
 
 model_data = joblib.load('models/surf_forecast_model.joblib')
 model         = model_data['model']          # RandomForestRegressor instance
-feature_names = model_data['feature_names']  # list of 15 feature names
-target_names  = model_data['target_names']   # ['waveHeight', 'windSpeed', 'windDirection']
+feature_names = model_data['feature_names']  # list of 6 feature names
+target_names  = model_data['target_names']   # ['waveHeight']
 
 # Direct prediction
 import pandas as pd
 X = pd.DataFrame([your_feature_dict])[feature_names]
-y_pred = model.predict(X)   # shape: (1, 3)
-```
-
-### Model Wrapper (Production)
-
-The production code uses a wrapper in `models/random_forest.py`:
-
+y_pred = model.predict(X)   # shape: (1, 1)
 ```python
 from models import load_random_forest_model, predict_with_random_forest
 
@@ -430,7 +416,7 @@ predictor = load_random_forest_model()
 # predictor is None if file not found → fallback to mock
 
 predictions = predict_with_random_forest(input_df, model=predictor)
-```
+````
 
 ### Configuration File
 
@@ -568,35 +554,27 @@ import os
 model_data = joblib.load('models/surf_forecast_model.joblib')
 model = model_data['model']
 
-# Provide the 10 base weather features
+# Provide the 6 base weather features
 features = {
     'swellHeight': 1.5,
     'swellPeriod': 12.0,
     'swellDirection': 220.0,
     'windSpeed': 5.0,
     'windDirection': 270.0,
-    'seaLevel': 0.5,
-    'gust': 7.2,
     'secondarySwellHeight': 0.4,
-    'secondarySwellPeriod': 8.0,
-    'secondarySwellDirection': 180.0,
 }
 
-# Apply the same 5 feature engineering steps as training
+# Apply the same 3 feature engineering steps as training
 df = pd.DataFrame([features])
 df['swellEnergy']          = df['swellHeight']**2 * df['swellPeriod']
 df['offshoreWind']         = df['windSpeed'] * np.cos(np.radians(df['windDirection'] - 270))
 df['totalSwellHeight']     = df['swellHeight'] + df['secondarySwellHeight']
-df['windSwellInteraction'] = df['windSpeed'] * df['swellHeight']
-df['periodRatio']          = df['swellPeriod'] / (df['secondarySwellPeriod'] + 1)
 
 # Predict
 y_pred = model.predict(df[model_data['feature_names']])
 result = dict(zip(model_data['target_names'], y_pred[0]))
 
 print(f"Wave Height:    {result['waveHeight']:.2f} m")
-print(f"Wind Speed:     {result['windSpeed']:.2f} m/s  ({result['windSpeed']*3.6:.1f} km/h)")
-print(f"Wind Direction: {result['windDirection']:.1f}°")
 ```
 
 ### 3. Evaluate Model Accuracy (No Retraining)
@@ -661,16 +639,13 @@ const getSpotRecommendations = async (req, res) => {
 
 ### StormGlass API
 
-The model uses the **StormGlass Weather API** to fetch the 10 live weather features:
+The model uses the **StormGlass Weather API** to fetch the 6 live weather features:
 
 ```python
 # 100-key rotation for rate limit management
 params = [
     'swellHeight', 'swellPeriod', 'swellDirection',
-    'windSpeed', 'windDirection', 'seaLevel', 'gust',
-    'secondarySwellHeight', 'secondarySwellPeriod', 'secondarySwellDirection'
-]
-
+    'windSpeed', 'windDirection', 'secondarySwellHeight'
 response = requests.get(
     'https://api.stormglass.io/v2/weather/point',
     params={
@@ -723,28 +698,26 @@ python training/train_random_forest_model.py
 ### Feature Mismatch at Inference
 
 ```
-ValueError: X has 10 features, but RandomForestRegressor is expecting 15 features
+ValueError: X has 3 features, but RandomForestRegressor is expecting 6 features
 ```
 
 **Cause**: Missing feature engineering step at inference time.
 
-**Fix**: Always apply all 5 engineered features before calling `model.predict()`:
+**Fix**: Always apply all 3 engineered features before calling `model.predict()`:
 
 ```python
 df['swellEnergy']          = df['swellHeight']**2 * df['swellPeriod']
 df['offshoreWind']         = df['windSpeed'] * np.cos(np.radians(df['windDirection'] - 270))
 df['totalSwellHeight']     = df['swellHeight'] + df['secondarySwellHeight']
-df['windSwellInteraction'] = df['windSpeed'] * df['swellHeight']
-df['periodRatio']          = df['swellPeriod'] / (df['secondarySwellPeriod'] + 1)
 ```
 
 ---
 
 ### NaN / Inf in Predictions
 
-**Cause**: Input features contain NaN or Inf values (e.g., `periodRatio` when `secondarySwellPeriod` is 0).
+**Cause**: Input features contain NaN or Inf values.
 
-**Fix**: The `+1` guard in `periodRatio` prevents division by zero. For other features, sanitise inputs:
+**Fix**: Sanitise inputs:
 
 ```python
 import numpy as np

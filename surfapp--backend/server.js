@@ -19,9 +19,7 @@ app.use(morgan("combined"));
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(",")
-    : true,
+  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",") : true,
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -50,7 +48,7 @@ const { connectDatabase, getConnectionStatus } = require("./config/database");
 connectDatabase().then(() => {
   const { loadSpotMetadata } = require("./config/spotMetadata");
   loadSpotMetadata();
-  
+
   // Auto-seed surf spots for Risk Analyzer (only if database is empty)
   const { seedSurfSpots } = require("./scripts/seedSurfSpots");
   seedSurfSpots();
@@ -76,6 +74,7 @@ app.use("/api/sessions", require("./routes/sessions"));
 app.use("/api/forecast", require("./routes/forecast"));
 app.use("/api/health", require("./routes/health"));
 app.use("/api/video-analysis", require("./routes/videoAnalysis"));
+app.use("/api/news", require("./routes/news"));
 
 // New Surf Risk Analyzer routes
 app.use("/api/surf-spots", require("./routes/surfSpots"));
@@ -87,7 +86,7 @@ app.use("/api/market", require("./routes/market"));
 
 // ==================== DEFAULT ROUTE ====================
 
-const surfSpotController = require('./controllers/surfSpotController');
+const surfSpotController = require("./controllers/surfSpotController");
 
 app.get("/", surfSpotController.getWelcome);
 
@@ -128,8 +127,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     status: "error",
     message: "Something went wrong!",
-    error:
-      process.env.NODE_ENV === "development" ? err.message : undefined,
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });
 

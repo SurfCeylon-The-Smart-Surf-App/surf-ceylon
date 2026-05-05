@@ -1,38 +1,36 @@
 """Feature Definitions for ML Models.
 Single source of truth for all feature names"""
 
-# Model 1 (Random Forest) - 10 base weather parameters from StormGlass API
+# Model 1 (Random Forest) - 6 base weather parameters from StormGlass API
 RANDOM_FOREST_BASE_FEATURES = [
     'swellHeight',           # Primary swell height (m)
     'swellPeriod',           # Primary swell period (s)
     'swellDirection',        # Primary swell direction (degrees)
     'windSpeed',             # Wind speed (m/s)
     'windDirection',         # Wind direction (degrees)
-    'seaLevel',              # Sea level/tide (m)
-    'gust',                  # Wind gust speed (m/s)
     'secondarySwellHeight',  # Secondary swell height (m)
-    'secondarySwellPeriod',  # Secondary swell period (s)
-    'secondarySwellDirection'  # Secondary swell direction (degrees)
 ]
 
-# Model 1 (Random Forest) - 5 engineered features (calculated from base features)
+# Model 1 (Random Forest) - 3 engineered features (calculated from base features)
 RANDOM_FOREST_ENGINEERED_FEATURES = [
-    'swellEnergy',           # height² × period
     'offshoreWind',          # windSpeed × cos(windDir - 270°)
     'totalSwellHeight',      # primary + secondary swell
-    'windSwellInteraction',  # windSpeed × swellHeight
-    'periodRatio'            # swellPeriod / (secondaryPeriod + 1)
+    'swellEnergy',           # height² × period
 ]
 
-# Model 1 (Random Forest) - Total: 15 features (10 base + 5 engineered)
-RANDOM_FOREST_ALL_FEATURES = RANDOM_FOREST_BASE_FEATURES + \
-    RANDOM_FOREST_ENGINEERED_FEATURES
+# Model 1 (Random Forest) - Total: 6 final features passed to the model
+RANDOM_FOREST_ALL_FEATURES = [
+    'windSpeed',
+    'windDirection',
+    'swellDirection',
+    'swellEnergy',
+    'offshoreWind',
+    'totalSwellHeight'
+]
 
-# Model 1 (Random Forest) - 3 prediction targets
+# Model 1 (Random Forest) - 1 prediction target
 RANDOM_FOREST_TARGETS = [
     'waveHeight',      # Predicted wave height (m)
-    'windSpeed',       # Predicted wind speed (m/s)
-    'windDirection'    # Predicted wind direction (degrees)
 ]
 
 # Model 2 (LSTM) - 6 time-series features for 7-day forecasts

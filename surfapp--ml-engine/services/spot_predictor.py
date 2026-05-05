@@ -64,13 +64,19 @@ def run_ml_prediction(features):
         # Create DataFrame from features
         input_df = pd.DataFrame([features])
 
-        # Calculate 5 engineered features (CRITICAL: must match training)
+        # Calculate 3 engineered features and keep the 6 final features (CRITICAL: must match training)
         input_df = calculate_engineered_features(input_df)
 
-        # Now we have 15 features (10 base + 5 engineered)
+        # Now we have exactly 6 features (as mandated for training)
         predictions_array = predict_with_random_forest(
             input_df, model=SURF_PREDICTOR)
-        predictions = dict(zip(RANDOM_FOREST_TARGETS, predictions_array[0]))
+
+        prediction_output = predictions_array[0]
+        if not isinstance(prediction_output, (list, tuple, np.ndarray)):
+            # Handle single target case where Scikit-Learn might return a scalar
+            prediction_output = [prediction_output]
+
+        predictions = dict(zip(RANDOM_FOREST_TARGETS, prediction_output))
 
         # Extract tide status from sea level
         sea_level = float(features.get('seaLevel', 0.5))
@@ -81,9 +87,10 @@ def run_ml_prediction(features):
             'waveHeight': round(float(predictions.get('waveHeight', 1.0)), 1),
             # Use from API input
             'wavePeriod': round(float(features.get('swellPeriod', 10.0)), 1),
-            # m/s to km/h
-            'windSpeed': round(float(predictions.get('windSpeed', 15.0)) * 3.6, 1),
-            'windDirection': round(float(predictions.get('windDirection', 0)), 1),
+            # m/s to km/h (use API input)
+            'windSpeed': round(float(features.get('windSpeed', 15.0)) * 3.6, 1),
+            # Use API input
+            'windDirection': round(float(features.get('windDirection', 0)), 1),
             'tide': {'status': tide_status}
         }
 

@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   RefreshControl,
   StatusBar,
+  Linking,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,6 +19,7 @@ import SpotCard from "../../components/SpotCard";
 import { useUser } from "../../context/UserContext";
 import { getSpotsData } from "../../data/surfApi";
 import { filterSpotsByRadius } from "../../data/locationUtils";
+import { API_BASE_URL } from "../../config/network";
 import { dummyNews } from "../../constants/dummyData";
 
 const REGIONS = [
@@ -30,6 +33,7 @@ const REGIONS = [
 
 export default function HomeScreen() {
   const [spots, setSpots] = useState([]);
+  const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState("Near Me");
@@ -38,7 +42,20 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetchSpots();
+    fetchNews();
   }, [userPreferences, userLocation, selectedRegion]);
+
+  const fetchNews = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/news`);
+      const data = await response.json();
+      if (data.success && data.data) {
+        setNews(data.data.slice(0, 3));
+      }
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    }
+  };
 
   const fetchSpots = async () => {
     try {
@@ -72,34 +89,65 @@ export default function HomeScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     fetchSpots();
+    fetchNews();
+  };
+
+  const formatTimeAgo = (dateStr) => {
+    if (!dateStr) return "Just now";
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = (now - date) / 1000;
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
   };
 
   const renderNewsCard = ({ item }) => (
-    <View className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-100">
+    <TouchableOpacity
+      onPress={() => (item.link ? Linking.openURL(item.link) : null)}
+      className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-100"
+    >
       <View className="flex-row justify-between items-start mb-3">
         <View className="bg-blue-100 px-2 py-1 rounded">
           <Text className="text-blue-700 text-xs font-medium">
-            {item.category}
+            {item.categories && item.categories.length > 0
+              ? item.categories[0]
+              : item.category || "News"}
           </Text>
         </View>
-        <Text className="text-gray-500 text-xs">{item.timeAgo}</Text>
+        <Text className="text-gray-500 text-xs">
+          {formatTimeAgo(item.pubDate) || item.timeAgo}
+        </Text>
       </View>
 
-      <Text className="text-lg font-semibold text-gray-900 mb-2">
-        {item.title}
-      </Text>
-      <Text className="text-gray-600 text-sm mb-3 leading-5">
-        {item.description}
-      </Text>
+      <View className="flex-row justify-between mb-3">
+        <View className="flex-1 pr-3">
+          <Text className="text-lg font-semibold text-gray-900 mb-1 leading-snug">
+            {item.title}
+          </Text>
+          <Text className="text-gray-600 text-sm leading-5" numberOfLines={2}>
+            {item.contentSnippet || item.description}
+          </Text>
+        </View>
+
+        {item.image && (
+          <Image
+            source={{ uri: item.image }}
+            className="w-20 h-20 rounded-md bg-gray-100"
+            resizeMode="cover"
+          />
+        )}
+      </View>
 
       <View className="flex-row justify-between items-center">
         <View className="flex-row items-center">
-          <View className="w-6 h-6 bg-gray-300 rounded-full mr-2" />
-          <Text className="text-gray-600 text-xs">{item.source}</Text>
+          <View className="bg-gray-200 rounded px-2 py-0.5 mr-2">
+            <Text className="text-gray-600 text-xs">{item.source}</Text>
+          </View>
         </View>
-        <Text className="text-gray-500 text-xs">{item.readTime}</Text>
+        <Text className="text-blue-500 font-medium text-xs">Read more</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -259,16 +307,46 @@ export default function HomeScreen() {
 
           {/* Featured Stories */}
           <View className="px-6 py-2">
-            <Text className="text-xl font-bold text-gray-900 mb-4">
-              Featured Stories
-            </Text>
+            <View className="flex-row justify-between items-center mb-4">
+              <Text className="text-xl font-bold text-gray-900">
+                Featured Stories
+              </Text>
+              <TouchableOpacity onPress={() => router.push("/news")}>
+                <Text className="text-blue-600 font-medium">More News</Text>
+              </TouchableOpacity>
+            </View>
 
             <FlatList
-              data={dummyNews}
+              data={news.length > 0 ? news : dummyNews}
               renderItem={renderNewsCard}
-              keyExtractor={(item) => item.id.toString()}
+              keyExtractor={(item, index) =>
+                item.link ? item.link : index.toString()
+              }
               scrollEnabled={false}
             />
+
+            <TouchableOpacity
+              onPress={() => router.push("/news")}
+              style={{
+                marginTop: 4,
+                marginBottom: 8,
+                paddingVertical: 12,
+                borderRadius: 10,
+                borderWidth: 1.5,
+                borderColor: "#2563eb",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#2563eb",
+                  fontWeight: "600",
+                  fontSize: 14,
+                }}
+              >
+                View All News
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {/* Latest Updates */}

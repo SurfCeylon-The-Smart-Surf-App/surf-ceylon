@@ -160,6 +160,9 @@ export async function getSpotsData(
   userLocation = null,
   userId = null,
 ) {
+  // Create a user-specific cache key based on skill level to prevent stale UI
+  const USER_CACHE_KEY = `${CACHE_KEY}_${preferences?.skillLevel || "Intermediate"}`;
+
   try {
     // Validate preferences
     if (!preferences || typeof preferences !== "object") {
@@ -182,7 +185,7 @@ export async function getSpotsData(
 
     // Try to get cached data first
     try {
-      const cachedData = await AsyncStorage.getItem(CACHE_KEY);
+      const cachedData = await AsyncStorage.getItem(USER_CACHE_KEY);
       if (cachedData) {
         const { data: cachedSpots, timestamp } = JSON.parse(cachedData);
         const cacheAge = Date.now() - timestamp;
@@ -193,7 +196,7 @@ export async function getSpotsData(
           console.log(
             "Cache contains NaN values, clearing and fetching fresh data",
           );
-          await AsyncStorage.removeItem(CACHE_KEY);
+          await AsyncStorage.removeItem(USER_CACHE_KEY);
         } else {
           // Validate cache structure - ensure it has the enhanced scoring data
           const isValidCache =
@@ -288,7 +291,7 @@ export async function getSpotsData(
     // Cache the fresh data
     try {
       await AsyncStorage.setItem(
-        CACHE_KEY,
+        USER_CACHE_KEY,
         JSON.stringify({
           data: validSpots,
           timestamp: Date.now(),
@@ -311,7 +314,7 @@ export async function getSpotsData(
 
     // Try to return stale cache as fallback
     try {
-      const cachedData = await AsyncStorage.getItem(CACHE_KEY);
+      const cachedData = await AsyncStorage.getItem(USER_CACHE_KEY);
       if (cachedData) {
         const { data: cachedSpots } = JSON.parse(cachedData);
         console.log("Returning stale cache due to API error");
@@ -572,7 +575,11 @@ export const surfSpots = surfSpotsData;
  */
 export async function clearSpotsCache() {
   try {
-    await AsyncStorage.removeItem(CACHE_KEY);
+    const allKeys = await AsyncStorage.getAllKeys();
+    const cacheKeys = allKeys.filter((key) => key.startsWith(CACHE_KEY));
+    if (cacheKeys.length > 0) {
+      await AsyncStorage.multiRemove(cacheKeys);
+    }
     console.log("Spot cache cleared");
     return true;
   } catch (error) {

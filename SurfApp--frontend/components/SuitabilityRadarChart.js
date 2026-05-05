@@ -11,13 +11,23 @@ import Svg, {
   Stop,
 } from "react-native-svg";
 
-// Define factors and their positions - removed Timing and Crowd Level
-const factors = [
-  { key: "wave", label: "Wave Quality", angle: 0 },
-  { key: "wind", label: "Wind", angle: 90 },
-  { key: "safety", label: "Safety", angle: 180 },
-  { key: "consistency", label: "Consistency", angle: 270 },
-];
+const getActiveFactors = (scores) => {
+  const defaultFactors = [
+    { key: "wave", label: "Wave Quality" },
+    { key: "wind", label: "Wind" },
+    { key: "safety", label: "Safety" },
+    { key: "consistency", label: "Consistency" },
+  ];
+
+  if (typeof scores?.session === "number") {
+    defaultFactors.push({ key: "session", label: "Session Learn" });
+  }
+
+  return defaultFactors.map((f, i) => ({
+    ...f,
+    angle: i * (360 / defaultFactors.length),
+  }));
+};
 
 /**
  * Radar Chart Component - Phase 4 Visual Scoring
@@ -34,7 +44,7 @@ const SuitabilityRadarChart = ({
   colorScheme = "default",
 }) => {
   const center = size / 2;
-  const radius = size / 2 - 50; // Leave space for labels
+  const radius = size / 2 - 92; // Extra space for longer labels
 
   // Color schemes
   const colors = {
@@ -87,7 +97,7 @@ const SuitabilityRadarChart = ({
         y: center + distance * Math.sin(radians),
       };
     },
-    [center]
+    [center],
   );
 
   // Memoize the chart data preparation
@@ -109,7 +119,8 @@ const SuitabilityRadarChart = ({
       processedScores[key] = typeof val === "number" && !isNaN(val) ? val : 0;
     });
 
-    const polyPoints = factors
+    const activeFactors = getActiveFactors(scores);
+    const polyPoints = activeFactors
       .map((factor) => {
         const score = processedScores[factor.key] || 0;
         const distance = (score / maxScore) * radius;
@@ -146,7 +157,8 @@ const SuitabilityRadarChart = ({
    * Generate axis lines
    */
   const renderAxes = () => {
-    return factors.map((factor, index) => {
+    const activeFactors = getActiveFactors(scores);
+    return activeFactors.map((factor, index) => {
       const end = polarToCartesian(factor.angle, radius);
       return (
         <Line
@@ -181,7 +193,7 @@ const SuitabilityRadarChart = ({
           strokeWidth="2"
           fillOpacity="0.8"
         />
-        {factors.map((factor, index) => {
+        {getActiveFactors(scores).map((factor, index) => {
           const score = chartScores[factor.key] || 0;
           const distance = (score / maxScore) * radius;
           const point = polarToCartesian(factor.angle, distance);
@@ -205,7 +217,8 @@ const SuitabilityRadarChart = ({
   const renderLabels = () => {
     if (!showLabels) return null;
 
-    return factors.map((factor, index) => {
+    const activeFactors = getActiveFactors(scores);
+    return activeFactors.map((factor, index) => {
       const labelDistance = radius + 20;
       const labelPos = polarToCartesian(factor.angle, labelDistance);
       const score = chartScores[factor.key] || 0;

@@ -4,20 +4,12 @@ ORIGINAL FEATURES:
   - swellDirection
   - windSpeed
   - windDirection
-  - seaLevel
-  - gust
   - secondarySwellHeight
-  - secondarySwellPeriod
-  - secondarySwellDirection
 
 ENGINEERED FEATURES:
   - swellEnergy
   - offshoreWind
   - totalSwellHeight
-  - windSwellInteraction
-  - periodRatio
 
 TARGETS:
   - waveHeight
-  - windSpeed
-  - windDirection
