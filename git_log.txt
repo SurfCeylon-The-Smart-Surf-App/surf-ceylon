@@ -1,0 +1,320 @@
+3e51efdc4342402db1dde65056c324634da53ea3|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-13|Merge pull request #62 from SurfCeylon-The-Smart-Surf-App/development
+0b9dbafbc17862d193d5e5bcfa0f31349657204a|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-13|Merge pull request #61 from SurfCeylon-The-Smart-Surf-App/fix/api-timeout
+09f32e24ddd903e9a2b9b3023c70eae48232db54|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-13|fix: Enhance API client with retry logic and configurable timeout settings
+df038b3190dddaafafe982b6a9fd8da90f51a478|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-10|Merge pull request #60 from SurfCeylon-The-Smart-Surf-App/development
+a1b17a03788aaa84a918c4c18b535ffe2efeaf65|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-10|Merge pull request #59 from SurfCeylon-The-Smart-Surf-App/thilina-dev-new
+2bf667ab2af0bcc00e0bdd229ea2d0ea85be4160|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-10|Enhance model evaluation and predictions
+51f19ad9262e1fa6ef0932511fee8e67b0e5cec9|Sabri Mazahim|134320747+Sabrizeek@users.noreply.github.com|2026-03-09|Merge pull request #58 from SurfCeylon-The-Smart-Surf-App/development
+34ed0f14b51de57915296468cedda60921c6aabc|Sabri Mazahim|134320747+Sabrizeek@users.noreply.github.com|2026-03-09|Merge pull request #57 from SurfCeylon-The-Smart-Surf-App/fix/risk-form
+14f68cdd24abb31d1edfdd01fd078d75390ca616|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-09|fix: Add styles to Picker components in ReportHazardScreen
+a23916674537e3d94b9e3cfda1bfc8862dce8f4c|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-09|Refactor suitability scoring system and enhance documentation
+a47860142f5c3e186795d238b98930920ee61169|Keshan Bhanuka Wijesinghe|157897934+KeshanWijesinghe@users.noreply.github.com|2026-03-08|Merge pull request #56 from SurfCeylon-The-Smart-Surf-App/development
+8ef3aa48db4ac10fdbdc803e27f0ad9732cfa762|Keshan Bhanuka Wijesinghe|157897934+KeshanWijesinghe@users.noreply.github.com|2026-03-08|Merge pull request #55 from SurfCeylon-The-Smart-Surf-App/fix/risk-map-and-back-button
+b6c0ec13972d9a1a1859fd7d25dd09f0c755403a|Keshan Bhanuka Wijesinghe|157897934+KeshanWijesinghe@users.noreply.github.com|2026-03-08|Merge pull request #54 from SurfCeylon-The-Smart-Surf-App/fix/cardio-plan
+1735d108aa4dc6d6c98ee5109cb01ed187ee5cda|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-08|fix: Remove outdated AR model setup script
+441dc91c73b308d27733a04ae1b62e275ba8f42f|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-03-08|feat: Enhance UI with back navigation and center map functionality
+f881a79221301196768441fd76d3d6553be6c137|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-08|fix: Ensure limitations are checked as an array before rendering
+8d808ca20ab4051c8b872815f4525d63b181f6b0|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-08|Merge pull request #52 from SurfCeylon-The-Smart-Surf-App/development
+90b6db871760427b7c7cc58a39c28480a80250f7|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-08|Merge pull request #51 from SurfCeylon-The-Smart-Surf-App/Update_Risk_Script
+a3301f4c81eb5aed014ea8560140cbdadcd63f1c|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-03-08|Refactor hazard classifier training and enhance data augmentation
+54a813b743be04d2abc85d34110ff4249c2afa83|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-08|Merge pull request #50 from SurfCeylon-The-Smart-Surf-App/development
+8907a0dceff548ccc6ae5d40ce0a249cac51ca4e|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-08|Merge pull request #49 from SurfCeylon-The-Smart-Surf-App/update-quiz
+540cf667f956212051e5b1e2b076ba7dadef1c2f|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-08|feat: Add AR model setup guide and installation script
+894b7e7593ac87682125320cd4c4be1114d8a217|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-03-07|feat: Update hazard types and implement auto-seeding of surf spots for Risk Analyzer
+d08e17ae2a4e2a87fb8d108ab403453460dfb836|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-07|Merge pull request #47 from SurfCeylon-The-Smart-Surf-App/development
+dfbb39ffe754ca7aeda9f81e18759da65ce75383|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-07|Merge pull request #46 from SurfCeylon-The-Smart-Surf-App/feat/add-more-surf-spots
+dbd072cc210139a0926ca064bdfee95bfaef8e6d|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-07|fix: Correct syntax errors and improve code formatting in ProfileScreen
+2a48e8e522343c5c1bd643d91f758a1a85441877|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-07|feat: Add region selection and enhance surf spot filtering in HomeScreen
+182c38609e98ebe340dafbb6710c7245c8aef5c1|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-07|feat: Expand surf spots database from 31 to 78 individual breaks with updated configurations
+eeda9d05519e80babd412a16cff169ab7fec7f5e|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-07|Merge pull request #44 from SurfCeylon-The-Smart-Surf-App/development
+b838a1f7396215fb4cf2896c58001e565c14273e|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-07|Merge pull request #45 from SurfCeylon-The-Smart-Surf-App/update-quiz
+f175e66679a01907a5a52bf7d13e314dfa93417c|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Remove AR Experience feature from dummy dashboard data
+3bced1bcf720c54f0994c34e1f10f3773f515fda|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Enhance ProgressScreen to load and display AR sessions from AsyncStorage
+ed92cab0f178eb5adaf59193545c7fb4397757fd|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Implement AR session saving and progress tracking in ARViewerScreen
+388de5da5264f32cea5d4679ee86045d106bb936|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Add Training Progress section to ProfileScreen for tracking workouts and achievements
+03717358f54592f491a85257bfe083114f4ba22e|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Remove "Progress" feature from AI Tutor home screen
+14bcad551857063720d99f728b28d8cf316dc9a4|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Add refreshUser function to retrieve and update current user data
+06249a9353a50b1849add25c2c8e600f78d7df6c|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Enhance Surf Tutor Quiz submission to calculate and save BMI, update user profile in database
+0ec905d4d62c59db1e9176b0d4a570d94531f549|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Add AI Surf Tutor Profile section to display user fitness data
+abf5c362bc18498f8609c1ce3dd45844bd1b45dc|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Enhance user profile update to include AI Surf Tutor data
+d452b19b7510a848989832bddc5bfb16e206f2e9|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Add aiSurfTutor profile schema to enhance user fitness tracking
+d572e124885dbd45fc1a75649325cc27076e7450|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Add SurfTutorProfileContext for managing user profile and quiz state
+917b890dd5991e6559a0f98f078b1afc639ea382|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|fix: Update LOCAL_NETWORK_IP to match current local machine's IP address
+cec76ffed006be2f9dcfc6afd57bc39695469ab8|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Add SurfTutorQuizScreen component to unify quiz functionality and enhance user experience
+a6dc65aa9893c13bb8efde7bcfa599f351e4e00e|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|refactor: Remove CardioQuizScreen component to streamline quiz functionality
+387227a99ad5260f1e46c1178d4ddaf764693975|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Update CardioPlansScreen to use SurfTutorProfileContext and streamline quiz handling
+0db1be2033f7f2dd6bde91e7a1b9d4149f2a383c|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Refactor ARVisualizationScreen to utilize user profile for recommendations and enhance UI with profile summary
+4c57e63d818fc7e3e3bb1b2a2983abb4cb7967a2|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|refactor: Remove CardioProfileProvider wrapper from CardioPlans for simplified structure
+6b4a1f73d0e04e403f4739292483fac2fa3e871a|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Add loading state and quiz screen to AITutorHome for improved user experience
+a72a3197c82ade65cf1f39cfa3a77637f8027a16|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-06|feat: Wrap layout in SurfTutorProfileProvider for improved context management
+6d6bdabf6307f067264803fdf01471bba34f18ee|Keshan Bhanuka Wijesinghe|157897934+KeshanWijesinghe@users.noreply.github.com|2026-03-05|Merge pull request #43 from SurfCeylon-The-Smart-Surf-App/update/video-analyzer
+14b63bead97a5f631c0c17dd96e26200cd4d8036|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2026-03-05|feat: Implement YOLOv8 validation for surf video analysis and enhance error handling
+bf64a832c1083e93cece58a3639ee5d83759d2ae|Keshan Bhanuka Wijesinghe|157897934+KeshanWijesinghe@users.noreply.github.com|2026-03-04|Merge pull request #42 from SurfCeylon-The-Smart-Surf-App/development
+be1ffb87c394b03721ce8fdcd69a6362a0f1104f|Keshan Bhanuka Wijesinghe|157897934+KeshanWijesinghe@users.noreply.github.com|2026-03-04|Merge pull request #41 from SurfCeylon-The-Smart-Surf-App/update/video-analyzer
+666d7095389913db913d718c4a11d99a86b9fe69|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2026-03-04|feat: Enhance pose classification by extracting 528 temporal features and updating prediction logic
+620cbab4bfbc3163a2ba9a2c4da6ce45b749d0e0|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #40 from SurfCeylon-The-Smart-Surf-App/development
+f53c91a1294ca5af5257801f283dccd4584455b6|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|fix: Update training date in enhanced model metadata
+7209c9eddc1a978f1fdb7ad617c638174c0cd883|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #39 from SurfCeylon-The-Smart-Surf-App/development
+edfccb7de0a51dcf2ec31ef6b23b83939384205f|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Remove test_model_load.py as deleted in fix/merge-errors-fix
+8e29860906cbfcf5c3aaf47cd9e0c4faeb1fcdd9|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Remove test_model_load.py as deleted in fix/merge-errors-fix
+4b15279e212bd5cdb073249e9d30130d44395fe7|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge all missing changes from fix/merge-errors-fix branch
+383fd6160c71356deef78d3b850373516177cf20|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge all missing changes from fix/merge-errors-fix branch
+eace96ee803a977d475d67f47d92537c3f4cc110|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Add missing config folder from fix/merge-errors-fix branch
+76176c7e71313cd5e1e46ad8d7e4debab0d50b8f|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Add missing config folder from fix/merge-errors-fix branch
+c7472466ec6b2849747da824879812e158109104|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #37 from SurfCeylon-The-Smart-Surf-App/development
+223f666f0cbcbda2b1449a5a45576aa500280f1e|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge main into development - Resolve conflicts by keeping AR surfboard files
+9df0fd844cb718561eb42fe40391d8386eb64231|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|fix: Refactor model path definition for improved readability
+08b2b53e409400956008f3aa4cdb5f99dedc2fa2|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|fix: Enhance model loading with error handling and add test script for model loading
+89e3e578882642c766fdb5ab8e5eef93dd0e9a9d|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #35 from SurfCeylon-The-Smart-Surf-App/fix/merge-errors-fix
+5430f459b355eca6ccb9090d68168a3545510b4b|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #34 from SurfCeylon-The-Smart-Surf-App/revert-33-fix/merge-errors-fix
+ee3942b1201bffa4dd50d99e125c33451dae25f9|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Revert "Fix/merge errors fix"
+46ac4f8fb518b89404d321cdf372b0b313addbd5|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #33 from SurfCeylon-The-Smart-Surf-App/fix/merge-errors-fix
+738d79adf5dd57ecdc3e8b631894786ef0901d9a|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|fix: Update package versions for @react-native-picker/picker and expo-router for compatibility
+0919deb10064b26ed0ac71d82cbf616a55671009|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #32 from SurfCeylon-The-Smart-Surf-App/fix/merge-errors-fix
+7bac37f891ade2435c1029c80418ae4bb2a490e5|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|fix: Remove /api prefix from API endpoints for consistency
+70e3fd206a35b3416b9f78fd7b6f890296ad1d24|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #31 from SurfCeylon-The-Smart-Surf-App/fix/merge-errors-fix
+d3f2d1cb3fd58746d0bcc7bd8370fe7ab4459124|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|feat: Centralize network configuration and update related files
+135817f2ff28ccc3a3264acba83430bc87f080bd|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #29 from SurfCeylon-The-Smart-Surf-App/development-copy-rifaq
+dc2d9983d2ed86ce68d10d1c76c96ff5d7fbb49b|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge branch 'development' into development-copy-rifaq
+4045a7044af997b0e34452bdef5a128399981eb6|Thilina Thushara|thilina.sam.a7@gmail.com|2026-03-04|Merge pull request #30 from SurfCeylon-The-Smart-Surf-App/Dev-copy-sab
+271e124021962bff0334ed5e8189d8be8e0a7258|Sabrizeek|mohamedsabri1717@gmail.com|2026-03-02|Refactor layout structure: remove CardioProfileProvider from RootLayout and wrap CardioPlans and CardioHistory components with it; update API host configurations
+f722728457ebcefe7a15f5e06d2a41bdba675843|Sabrizeek|mohamedsabri1717@gmail.com|2026-02-28|Refactor error handling: remove deprecated errorHandler middleware and update asyncHandler import
+4a89634a3c8b751689b25fdad8ee74c883915453|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-28|update backebd
+312b7a8d64db3611081c7fb1f198de801d391a44|Sabrizeek|mohamedsabri1717@gmail.com|2026-02-28|Refactor code structure for improved readability and maintainability
+1484d6b45f462dcd418b5692eedcaa8c5f9741ea|Sabrizeek|mohamedsabri1717@gmail.com|2026-02-28|Merge branch 'Dev-copy-sab' of https://github.com/SurfCeylon-The-Smart-Surf-App/surf-ceylon into Dev-copy-sab
+aa12adbe433d3c35a718945c4433e1e149e39723|Sabrizeek|mohamedsabri1717@gmail.com|2026-02-28|Refactor ML services to use CLI mode for predictions and remove deprecated code
+c6438760b87b80efac6239e47b615dc1071c382a|Sabri Mazahim|134320747+Sabrizeek@users.noreply.github.com|2026-02-28|Merge branch 'development' into Dev-copy-sab
+30e56e9b1799a403cd988a5211f2d937d9446ae3|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-28|Merge branch 'thilina-dev' of https://github.com/SurfCeylon-The-Smart-Surf-App/surf-ceylon into thilina-dev
+570972d9fb6b09c5f56c8e1f98b0c64dacccf232|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-28|delete pythonrunner.js
+ba1b1d4528ea2e48bb60eb50cacba8e5dfe7d481|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-28|update
+187c72ef2427bb47ef1c3b654360877b16362f59|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update dummydata.js
+58c491637cf676f80e80f0441c1485a0605b184e|Sabrizeek|mohamedsabri1717@gmail.com|2026-02-27|fixed error
+229c8ae208a289d29dbacd215949fce374396a49|Sabrizeek|mohamedsabri1717@gmail.com|2026-02-27|fixed error
+1cb8cd84c342fc1ad2df22015347a7f2ebb7d5fe|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update ReportHazardScreen.js
+1c237ed7bdcb4382bf721ee0196c49060db773eb|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update hazardreport route and model
+b3ee6569459e33d5584347ecfbbd1e040c883e5d|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|created image_hash.py
+efbe270e6b0dfacfbdedf4a9490eb3afceee1920|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update python.js
+cb5305455433034f978ab5c4571e28421482e307|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update risk_api.js
+597ddec8a0cc6073d8965e34ebda9afa47ee7f43|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update shark data set
+7ae0bb48b22db1c5b5e2374bd83bd4f593f33cbf|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update download_hazard_images.py
+8d3f037f0c5d5949cf6e9adfd78663f4800381d2|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update train_hazard_classifier.py
+07be8015c34338d1ad97d8cea39f9d4fc33d4536|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update placeholder.txt
+3620a88f624eb3f6f3d9ceb0b94e9d646bc769bb|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update sea_urchin data set
+fb77da2eb45fbe9cacc4be9bd1ab59ed63821166|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update placeholder.txt
+b8807e26f0f1ed7896751b89e9fab724787bda8d|Sabrizeek|mohamedsabri1717@gmail.com|2026-02-27|AR part implemented
+b52d629b3594799250634d835909a0c7f8c9b418|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update rip_current data set
+767d87d7db1c261cf477e20f0e19070b76574ddb|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update placeholder.txt
+555f7fb4b5a0beddd3e141eaccdfa15224803bd8|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update reef coral data set
+1ab368b658f157fc27792ec61ef803148a576ed9|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update placeholder.txt
+43f815463766afe2bc9f438660a65fa7c7c2961d|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update no_hazard dataset
+f447bdfb9913ef606ab38b8e9534445051703511|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|create placeholder.txt
+d830ee13215fe268c80237151bac3938dc63aafc|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update large waves data set
+dd212956799f3000d3a7ce3c29f8f7ba96e4ac19|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update place holder
+7ace42dd1d4834441f12f6874a08a0edbe465af3|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update
+dde05baedf0e2cbd2c355b5bce082a52cfc1f47e|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update hazard classifier.keras
+e80f32a5229eec44d1e4aab361fb3a56c7efe957|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update jellyfish data set
+1920356db6c00036ba5ab5eea3a5ebbf6795bd7f|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update evaluation_results.json
+e0f2dcd4c23e2e7e880b8e5e0a4648e92b398302|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|create analyze_hazard_cnn.py
+d41c0f315131659f3f361933b64eef299a0c4c25|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-27|update python.js
+8c9c3c76a38016d33d49bb2a244470b085399aa9|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update backend and ml for hazard report
+d51475bc1098b15addd1250123ed114f83ab52ab|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update networkconfig
+e2fabf0dbb3043b1aa750f96c162cd46f972d5eb|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|Merge branch 'development-copy-rifaq' of https://github.com/SurfCeylon-The-Smart-Surf-App/surf-ceylon into development-copy-rifaq
+68811ce06de1fa803fe8abfdba968f7a4e124fa2|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update prepare_data.py
+61bdb8a709fb668b6220ed49af8dfc3eacb7400f|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update test_models.py
+abbbdc58a81eefffc7a2ad27f5e0911075297a88|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update_test_api.py
+995173ca39d351020ed24f5ab36f796f216bdf3d|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update train_risk_model.py
+d802a92838b766966382c99e32f2c0a3a967f22d|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update benchmark.py
+0278e9307a25b3442e82560f5f60d8e976e9b2b8|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update _init_.py
+a5add4ba2f5ea33fc9e3bb95a387eb5e8629cf27|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update_requirement.txt
+a027d40efd6c9f086fa267815620a64d21d41cdc|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update predict_risk.py
+bffd6614c4457463f6961e1d787d8761a852e024|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update import_incidents.py
+0eefef0c02bbb6c5ce86f28d7469f6d6a693cf53|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update surfing_incidents.csv
+cbd946bb448a513acc2f194047beab3d44eae4bd|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update calculate_skill_risk.py
+e7105b674dc3b1f6a028ffb79678da377921ce89|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-26|update analyze_hazard.py
+6b1ee24b806f0595c83d21c9b4b310f2a9f9715a|Sabrizeek|mohamedsabri1717@gmail.com|2026-02-17|Integrated with other feature
+9fe1c81a57c7c1232b346e2c55983ca282f34589|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update networkconfig.js
+591811bc54e7eefbdeea75ff0ef558a211d6d9bf|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update networkconfig.js
+8ddf739c58b2b3c7b07dd7d2c75c9b76a49aef80|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|create helpers.js
+8fd6f7d11e7fdc42466e0bf0238396031bf69d45|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|create contant.js
+676c6a156ff82e38b759b131361ea03d662c440c|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|create risk_api
+d52dd3dda4998c110478719df0a622ab801c9aa2|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|node installation
+5586ea6b08c844c8925c0a36129abf547c705c87|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update Metro.config.js
+30cdbad2af4a43e7b3047db3ceeac7b56b739c86|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update WebMapView.js
+cba4f44e8428d747c129f37240e1349cac2a3a68|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update SkillLevelTab.js
+855e0bf5211e27f222c50e3fa68e8e73d6a1c274|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update babel.config.js
+a90e434f3a4ce9e81ea9e58456e0003da3990099|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update RiskAnalyzer screen .js
+ceb248cf7820c0bcdf8561427db8bc00d4e3046b|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update ReportHazardScreen.js
+2079e7598abf8a9e19c800d8b654c16a7c9f0d53|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update dashboard
+45fecaab80a4b77b2185717d3d530758a4479e68|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update app.json
+cee3fdf7636faded94027b79b01c9cf5a73f0098|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update App.js
+2a484b511a4d5875404d2e042e9e517c45b4a84e|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update app.config.js
+47b1211b1daf1e6907e172b040585a4232228806|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update server.js
+183f152ebe079713607005125bc8ba890758905a|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update surfSpot route
+b35f38d5acafe06e5aa204156d0ebf5287d85e62|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update incident route
+b9d31e62d0ea59b87eecd36529e0ba3732b469a6|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update hazardreport route
+d6e7025cd43443e519b5d1574e3b9e2d4f5a5044|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update surfspot model
+f38de42083dc2583d54da256311d5d1f90255a80|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update incident model
+1bca500f4cd621fe6ba801bf729fcf5deb8cf688|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update HazardReport model
+0b42c5c0e308328ff1b2c52583b3a2f0ea3cf789|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update surfSpotController
+f375418cec3338f01b30e8f9b752a78819c5c102|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|Update incidentController
+59b9bb0bec19a28143a4e4c8f51da1be8e95d792|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update hazardController
+a40503f655ba274be41fce648e13b20700388177|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|update python script
+edc3b7681306dfe86d92bebd1865f65e3e6cab24|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-13|initial commit to config
+706a24805d3f4a8e300fbb77f80c2ad1b6fc92bb|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-02-12|removed unused files
+fe6139a4718f026c4ae5547fd2219dc73c11ed09|Sabri Mazahim|mohamedsabri1717@gmail.com|2026-02-10|update Reademe files
+80094dfa027f18ce35d83beb89220ea52857e540|Sabri Mazahim|mohamedsabri1717@gmail.com|2026-02-10|update and delete unwanted files
+485b439cba314eda4d7ae72af426ac1ba3a2b5d4|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-09|fix: Update API_HOST for Android emulator to correct IP address
+882718528acf8e02130a4b81e9d497b45bcfc534|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-09|fix: Update API_HOST for Android emulator to correct IP address
+625465176a19a849c3d7594c177724546fcb8bb1|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|Merge pull request #23 from SurfCeylon-The-Smart-Surf-App/development
+57bedab17256f53d0cb96f72057add029096d238|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|Merge pull request #22 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+2782c557743a18b28c488a481d567ab38521b70c|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|Merge pull request #22 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+db689a4c6f9152b3b2d9b5424948ea2b7b589ad7|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|Merge pull request #22 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+3087c6a2386fcf216705f05a8dfe71cda7b6dd37|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|Merge pull request #21 from SurfCeylon-The-Smart-Surf-App/development
+4bf4a7176693c7b87eb4917c8c16c87230f571b9|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|Add StandardScaler models for multi-output wave forecast
+0015c3ed917a8cef22c46099e665f58588997ea1|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|Add StandardScaler models for multi-output wave forecast
+57980a6d0e84b96153d7b7c76f1d664b74fcd72d|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|Merge pull request #20 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+8ac5cd6157ed9a1da4c6cc24b9115f0211ae1d21|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|Merge pull request #20 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+04cd277a66f9062d30564cc80e6670be12ca6629|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|feat: Update API key rotation from 19 to 100 keys for improved reliability and request management
+5bf5bf185137f6ea23c80ead4662fe46031575e7|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|feat: Update API key rotation from 19 to 100 keys for improved reliability and request management
+284f482b9af2f25a491a5b1e612fed801035880c|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|feat: Update sample predictions and training history images for improved visualization
+4e4183d3c39c29f8cae560f0fc2027469d252728|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-07|feat: Update sample predictions and training history images for improved visualization
+4833113a707cf2b70d025f98f0f1b45bfb07e44c|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-06|feat: Implement CPU-only execution configuration and optimize threading for LSTM training
+f743531dc13207bc9f811c01177f07556a9bfb99|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-06|feat: Implement CPU-only execution configuration and optimize threading for LSTM training
+8bfa1167ad5e51af9548ed88de0f489602935f1f|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-06|feat: Add CPU-only execution configuration for LSTM training and optimize threading
+f34a3b049fd37c849d0a25478d98909691b40d1c|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-06|feat: Add CPU-only execution configuration for LSTM training and optimize threading
+693d2c3973c07faecb17b5875fae27ea8b896b60|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-05|refactor: Update feature and target definitions for Random Forest model; enhance data handling and predictions
+7612734f3d290253b0ab1203455bae10dab9cacf|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-05|refactor: Update feature and target definitions for Random Forest model; enhance data handling and predictions
+190c89af66b26385c609236ea2fa552df88793b0|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-05|fix: Update .gitignore to include all historical data files for proper exclusion
+39f4e04c4bba5c9ac8ed5fd14d833df57e12e519|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-05|fix: Update .gitignore to include all historical data files for proper exclusion
+95b209f08b2197b3c0383bc264e286c46d2e43ed|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-05|feat: Enhance historical data collection for multiple surf spots
+536e0697372a93e892e1aa62ec8eb675c19df871|Thilina Thushara|thilina.sam.a7@gmail.com|2026-02-05|feat: Enhance historical data collection for multiple surf spots
+75e1064468b2512c8c8c62ecbf32b657dc89ea65|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Merge pull request #19 from SurfCeylon-The-Smart-Surf-App/development
+10c472491e1153b18ba85b1ca234bd9454640a55|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Merge pull request #18 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+23a2d22979a3f50e7eea2d42262a535387fe5a47|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Merge pull request #18 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+de2b6c3d80932a8ef6ecbb38cdc57cf36076486c|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Merge pull request #18 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+690e4080928ccfebe17d547fcb774c6774e73252|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|style: Improve comments for middleware and clarify new route descriptions
+5d007708388fec6acb755da051b02ebf72057a53|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|style: Improve comments for middleware and clarify new route descriptions
+7206f4031d5f6f839671b01dac8f127782a1340f|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Enhance documentation and comments in LSTM model and training scripts for clarity
+ef9fc6d4a9d27d38b023895cdbbd217f66fefb73|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Enhance documentation and comments in LSTM model and training scripts for clarity
+0eee2f297c9568e72685cf615760ea155fd93771|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|docs: update README to enhance feature descriptions and formatting
+4907eb65c1b12c1af4aab534377460e306695997|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|docs: update README to enhance feature descriptions and formatting
+79bc4daf8e0dc67291b0ed5d218c38848c71dc74|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Implement feature X to enhance user experience and fix bug Y in module Z
+a028b0d4b42809b8660e1656648ef7b68e14c85c|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Implement feature X to enhance user experience and fix bug Y in module Z
+f542a0d0489ec1ada23c744dd78d5872b6d94284|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Merge pull request #17 from SurfCeylon-The-Smart-Surf-App/development
+b0dfd73011234f78249eadb389cd8bb7fea644c7|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Merge pull request #16 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+28bff7abf1bf86d75a8f1fd6836e6ee7dc4a8feb|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Merge pull request #16 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+320de721e30664bd13d1da218a06200ac2aa8919|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Add performance visualizations and enhance wave forecast testing metrics
+26160f7c9aa17d2ab065504825cbc81e6b3c8712|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-06|Add performance visualizations and enhance wave forecast testing metrics
+e0d43a65e8fe2cad7c951d39265383c4f124958a|Keshan Bhanuka Wijesinghe|157897934+KeshanWijesinghe@users.noreply.github.com|2026-01-05|Merge pull request #15 from SurfCeylon-The-Smart-Surf-App/keshan-dev
+c8bcab3d3443e0783d89201cd1fe841ecac09b07|Keshan Bhanuka Wijesinghe|157897934+KeshanWijesinghe@users.noreply.github.com|2026-01-05|Merge pull request #15 from SurfCeylon-The-Smart-Surf-App/keshan-dev
+df24f4b43f3f0a5355aad9f3acdb38340fb58e52|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2026-01-05|feat: AI video analyzer
+b9feb08cf99dd4a1bae4e1d069b817996f4543e4|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2026-01-05|feat: AI video analyzer
+e6be5a9045206f8a2d8977a00c9dc11790d5faae|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2026-01-05|feat: AI video analyzer
+db3a7321ced7a0bb30344499f996eb8c023689b6|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2026-01-05|gitignore
+f083b138e7666a60e84976ba7dc6fac5958a2ad5|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2026-01-05|gitignore
+16be521f5cbdff2e57b209859d7a558860b9a78e|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-05|Merge pull request #14 from SurfCeylon-The-Smart-Surf-App/development
+b22f6363fab3ea82879ad79a2bdec547a8992989|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-05|Merge pull request #13 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+24d041ae5812000318090d92f7115734e1aae070|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-05|Merge pull request #13 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+d561d1219c570070d03ccc2eb0f5eebd50b4feef|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-05|Refactor surf forecast model training: remove local data training script, add Random Forest model training with enhanced preprocessing and feature engineering, and generate comprehensive performance report.
+e0850832c1c44e1802a62f6faa82c59eb78c79ad|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-05|Refactor surf forecast model training: remove local data training script, add Random Forest model training with enhanced preprocessing and feature engineering, and generate comprehensive performance report.
+92a45379e8f1617e6a961b5af232c2afce7a1689|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-01-05|Risk Analyzer README>md update
+fa673ebb30ec949224d633d19152ebd0cc688ac3|Sabri Mazahim|mohamedsabri1717@gmail.com|2026-01-05|update ML model for personalized surfing recommendations
+239e22ec822d6502d0376168b91b425d4824dcd5|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|style: Improve code formatting and readability in test and validation scripts
+5f9f3ff808611e0896417e5f6f4725389cc5e129|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|style: Improve code formatting and readability in test and validation scripts
+283d95528c21af435cb50392401e96443863c9f5|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|Refactor file paths and improve code readability
+1c0e9d9eabf75ead838cc60e3126bbcd39c5a628|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|Refactor file paths and improve code readability
+b7368c82b283299cb7c2ca10f85162f2bbc46a44|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-01-04|Risk Analyzer Tab UI theme update
+8d828b248ba761740816bc22026c066bb2c774dc|Sabri Mazahim|mohamedsabri1717@gmail.com|2026-01-04|update cardio ui
+b61dc6507c6bc71035899abbacb1506c1ecba063|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|Merge pull request #12 from SurfCeylon-The-Smart-Surf-App/development
+9229419fac54b378eac36b2323fe40381c3dd691|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|Merge pull request #12 from SurfCeylon-The-Smart-Surf-App/development
+879afabc46d12c20ae1021061562050d43796fb7|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|Merge pull request #11 from SurfCeylon-The-Smart-Surf-App/fix/model-path-restructure
+f02da36435a139aa2101891d7c3c356c2619bce4|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|Merge pull request #11 from SurfCeylon-The-Smart-Surf-App/fix/model-path-restructure
+7a87119b9bb11a9042586037353e50764f034a90|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|style: Improve code formatting and readability in model path and training scripts
+7b949fea2aa2d38e17cfcf24d63868a20c5ac126|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|style: Improve code formatting and readability in model path and training scripts
+587413c0a59e7f226833b58c8e8ce150128de7a8|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|style: Improve code formatting and readability in model path and training scripts
+c53a8d78c08e9c15001633f37baa96aaaab80207|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|fix: Restructure model paths to ensure correct directory references for model files
+47d5a53c36bafa5baa23cdc6e8b6c5aa145e3635|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|fix: Restructure model paths to ensure correct directory references for model files
+c31d545dbe7adf7e3027d8211e20196bc0aee907|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|fix: Update .gitignore to include node_modules and ensure proper formatting
+493f7f248d85767efe2c85853baca05cc836651a|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-04|fix: Update .gitignore to include node_modules and ensure proper formatting
+9e53e5b4d1989309682f06f17bc336e0b6052056|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-01-04|Risk Analyzer Tab update
+c0f1b6af2a5d68c3bd70f1ade89719c65af32737|AJWARDRIFAQ|127876520+AJWARDRIFAQ@users.noreply.github.com|2026-01-03|Initial Integrated Commit
+292be495b15465f61b67fe86b3555bde1deb01c3|Sabri Mazahim|mohamedsabri1717@gmail.com|2026-01-03|update cardio ml model
+2a855fa4c86debc0089c6da2659dbd4e6161e5ac|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-02|integrate phase 2
+4cc26a112815bc8c0cf7c208a4f76bb1720b11f4|Thilina Thushara|thilina.sam.a7@gmail.com|2026-01-02|initiated integration
+54f596335e162f923bb238b878a79fffdb761327|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #10 from SurfCeylon-The-Smart-Surf-App/development
+f01fca8fd6640e257bfe23c11e66cada440fc19d|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #10 from SurfCeylon-The-Smart-Surf-App/development
+92a983ca48090f3d74513d964fd62c075ae2ca5e|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #9 from SurfCeylon-The-Smart-Surf-App/fix/enhance-suitability-calc
+7ffdc474cb25e2e46b95652c14de4933d590f851|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #9 from SurfCeylon-The-Smart-Surf-App/fix/enhance-suitability-calc
+f4ec67ac86951f66ee04d372ce2064399408a055|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #9 from SurfCeylon-The-Smart-Surf-App/fix/enhance-suitability-calc
+0315891ab2d094335240ffb9ac06ddf5c6b300c2|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|feat: Add complete documentation for the SurfCeylon Suitability Scoring System
+4486ea6c3d3cca665787f56f67181aaf16a8a202|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|feat: Add complete documentation for the SurfCeylon Suitability Scoring System
+77c9a18fe780892ff2901b45e2e025caf6e83b98|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|feat: Add complete documentation for the SurfCeylon Suitability Scoring System
+c9261fe45454048998d1a722a91fbc2c13fb6d2e|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Refactor code structure for improved readability and maintainability
+15f1c0581c49795a451b11f30a70b49e050bb5ea|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Refactor code structure for improved readability and maintainability
+d844c575381f30ff5663b99650ab4a55e5289f59|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #8 from SurfCeylon-The-Smart-Surf-App/fix/keyboard-error-at-sessions-page
+be40110b02cf4452f00596144f2bc1496cd38aab|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #8 from SurfCeylon-The-Smart-Surf-App/fix/keyboard-error-at-sessions-page
+27a0f96e67766238e2064cd6a89acb84bca51036|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|fix: Improve keyboard handling and layout in session end modal for better user experience
+77ba785e78d3fe1dc50130b715b0f24a359f3ca1|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|fix: Improve keyboard handling and layout in session end modal for better user experience
+8fe40f75d1b66263657ef7c1cc7180f69f50560d|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|fix: Improve keyboard handling and layout in session end modal for better user experience
+53de2fdaacf2ba14722e8e124e55c49841858c30|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|fix: Implement keyboard handling in session modal for improved user experience
+74f8de77d13b3798cf86c5ba92c6aa57d76ab277|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|fix: Implement keyboard handling in session modal for improved user experience
+853d08fe1b0835a4531f96377e23b717e0016743|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #7 from SurfCeylon-The-Smart-Surf-App/development
+8d7a225e2c27586f112f61aa7216b7605e64a74f|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #7 from SurfCeylon-The-Smart-Surf-App/development
+21f9b8a25fbf9b4d9f086b6046b93c7889743f1c|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #6 from SurfCeylon-The-Smart-Surf-App/fix/session-tracker-UI
+adc1545211fcfd54c9c393f249272682ca3272f4|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #6 from SurfCeylon-The-Smart-Surf-App/fix/session-tracker-UI
+2335d98a9d9490e84aec9255f61f73153165a956|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Clean up imports and improve session sorting logic for better readability
+62207b1997af4cda8bdd488d27c21ca0c6e88992|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Clean up imports and improve session sorting logic for better readability
+31f1d1b82e98d6e6a54db6c07cb949e968747754|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Clean up imports and improve session sorting logic for better readability
+fc26108c189f75b4a395fc9053ebf4a704b846d0|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Update ProfileScreen to use safe area insets and enhance session sorting logic
+f9cbdcc6991cdc2ddfbbf38cf9b258722a9e9171|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Update ProfileScreen to use safe area insets and enhance session sorting logic
+53940e91556ff2857e9dcf2016cbcaed335d0958|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Enhance SessionCard component and improve session details modal layout
+d1b1a6aabdb323fd4d912b041c833ce27e407291|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Enhance SessionCard component and improve session details modal layout
+116725b900744738d5fac50521c37962918091a9|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #5 from SurfCeylon-The-Smart-Surf-App/fix/re-struct-nav-bar
+291e270272f05524844401ced40b8bf285b2ac97|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #5 from SurfCeylon-The-Smart-Surf-App/fix/re-struct-nav-bar
+ca4ba87c9457867bc7e442b93502e91092a1b63f|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Restructure navigation bar and update Dashboard features for improved usability
+1004fe0324274fefca7d13aad8f30137b42b75de|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Restructure navigation bar and update Dashboard features for improved usability
+9f04b40ff1463af6acdfaa85456b504e6e658918|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Restructure navigation bar and update Dashboard features for improved usability
+9fa5558496ba8aa6eb3461ff504cd6c4f07fecbd|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #4 from SurfCeylon-The-Smart-Surf-App/fix/android-ios-ui-compatibility
+e4bf39929a05416b0b4098bcc8aa9060427a2e29|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #4 from SurfCeylon-The-Smart-Surf-App/fix/android-ios-ui-compatibility
+a284af6e03dbc70e3d06a383d712bc6fdd3018e6|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Improve import formatting in index.js for better readability
+bf43cc44a281f5adce9fff0827576277b8110450|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Improve import formatting in index.js for better readability
+7b28faa0c92e9fd2c4014dc637da4a7e99d10cca|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Improve import formatting in index.js for better readability
+d11824393747988b17ed3065a1e82ea2df246eac|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|feat: Add StatusBar configuration for improved UI compatibility across Android and iOS
+78ac41e8bb9538a1085206d62c9d5e4f87f8ddf3|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|feat: Add StatusBar configuration for improved UI compatibility across Android and iOS
+47f2f1074777b39f97f1214acaec10307b1f32ac|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #3 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+2e516e3e5e8561d288b1e0b4d182f4a3e3ea9755|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|Merge pull request #3 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+03bd6278dd2f6adea11bb6a839444b3ead71f57a|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|feat: Enhance Dashboard and Home screens with improved feature handling and data fetching; retire Weather Forecasting screen
+fbccf3a3daf2b2560bb79454162648977fb2b9a3|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|feat: Enhance Dashboard and Home screens with improved feature handling and data fetching; retire Weather Forecasting screen
+d6abb941cbb3e09727df0dc985e4571b09a9e1dd|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Standardize string quotes and improve code formatting in ForecastChart and surfApi components
+f1e06b491900c6af9bb53fd7fb0e1f7c0685b6fa|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|refactor: Standardize string quotes and improve code formatting in ForecastChart and surfApi components
+55bae22962ecf61803a141c01cf7eb283aec721e|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|feat: Update ForecastChart to fetch real 7-day data using spotId and improve data handling
+b6d048ce8fa7dbb763aaf16869f396442aeca4f9|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|feat: Update ForecastChart to fetch real 7-day data using spotId and improve data handling
+52b936b107c1047056d9826c46a35b1e512eee6d|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|chore: Update requirements.txt to reflect changes in dependencies
+901ef42b7031f2ea17eb97014b1216ad0d5ed312|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-23|chore: Update requirements.txt to reflect changes in dependencies
+612186bca88958374e1d3a71b409ae0c33d46b83|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|fix: Correct response data structure in login and register functions
+ab3d1b8e40f311775351f225277bfbec552d8db9|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|fix: Correct response data structure in login and register functions
+5d5206be5fe685ff16508190f19f0e1ebf1462ba|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|Merge pull request #2 from SurfCeylon-The-Smart-Surf-App/Development
+ee7eba6fb194c87138d627e435f10dcdb155ee6a|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|Merge pull request #2 from SurfCeylon-The-Smart-Surf-App/Development
+f3a62a4e77cd8c81716071bb8bede71d4ed00362|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|Merge pull request #1 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+0747a341197582ecd2f59a45ce789e55b2a3dd03|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|Merge pull request #1 from SurfCeylon-The-Smart-Surf-App/thilina-dev
+6f41ce62701ca9dc4c38509cbf1eeb0b380aa98b|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|feat: Enhance user experience with active session tracking and location-based spot recommendations
+c3e50fbddc9e44df2686eb9cfac614c921dc05eb|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|feat: Implement local data training script for surf forecast model
+369e58927bf923ef173c092013f6997833086095|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|style: format API_HOST declaration for improved readability
+06d6f20a1b22feb35007df6777b765536f14871c|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|fix: downgrade react and related dependencies for compatibility; update network configuration for better API access
+d74e80a8d93bbedf7207e253d47ae20e61845f5a|Thilina Thushara|thilina.sam.a7@gmail.com|2025-12-22|chore: update react and react-native-worklets dependencies to latest versions
+1e40c5558611b0b73a76fe319463c209641a6ff0|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-14|feat(AI model): Toxic comment checker
+7de5b55227e30def824c8cf88070757a157e323f|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-14|feat(UI): Auth, Community, Profile, Messenger, Home, Market, AI
+b522b9b08eb20dc03102456d853deece22a0e5e0|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-09|feat(backend): Auth, Post, Profile, Messenger
+1becd8fda68cf9324615d1da57b59a1828cb78c4|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-03|feat: Network configuration
+f663acac0b27e2b9f863206b27be9c79e3e2d68b|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-03|feat(backend): database configuration
+63988e3a4018e22eb662865671cb5df4337b404b|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-02|feat(backend): Auth controller
+ad95338cd5f820cf4ac80e91c95f52aab4e88762|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-02|feat(backend): Auth middleware
+d5a6c53f3001e3ae75b476749ac7c754899855d9|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-02|feat: User routes
+d0f916bbf59c953bd7e49349b4eb92deb24cdaa7|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-02|feat: User model
+3715fe618a0f4ebe2dba7baa87492a04326fba47|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-02|feat: registration form
+6a5f1d28f9ac21ef17234218bb6ac928ab25a7b4|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-01|feat: login form
+8f9b3cacdb44e5e1f687ee34f5e2caecddb7ca73|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-10-01|feat: auth routes
+c2814cff5d22c1943750110257e3398e48d91ccc|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-09-28|chore: frontend config files
+57e2eafc3dc3c9963ddc7a1fd04355cc117cab3d|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-09-28|chore: frontend gitignore file
+2048df5c4c6ab834df7eec906c59e5a8a8362986|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-09-28|chore: package json files
+e5a0b6cd5e7408a9def7f2a3ab1a9ed6b4d59ffa|Keshan Bhanuka Wijesinghe|it22206800@my.sliit.lk|2025-09-28|chore: gitignore files

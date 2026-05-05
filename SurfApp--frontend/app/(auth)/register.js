@@ -10,6 +10,7 @@ import {
   StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../hooks/useAuth";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
@@ -21,6 +22,9 @@ export default function RegisterScreen() {
     email: "",
     password: "",
     confirmPassword: "",
+    accountType: "Personal", // "Personal" | "Business"
+    businessName: "",
+    businessDescription: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -62,6 +66,10 @@ export default function RegisterScreen() {
 
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (formData.accountType === "Business" && !formData.businessName.trim()) {
+      newErrors.businessName = "Business name is required";
     }
 
     if (!agreedToTerms) {
@@ -115,6 +123,60 @@ export default function RegisterScreen() {
             <Text className="text-gray-600 text-base text-center">
               Join the surf community
             </Text>
+          </View>
+
+          {/* Account Type Selector */}
+          <View className="mb-6">
+            <Text className="text-sm font-semibold text-gray-700 mb-3">
+              Account Type
+            </Text>
+            <View className="flex-row space-x-3">
+              <TouchableOpacity
+                onPress={() => handleInputChange("accountType", "Personal")}
+                className={`flex-1 py-4 rounded-xl border-2 items-center ${
+                  formData.accountType === "Personal"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <Text className="text-2xl mb-1">🏄</Text>
+                <Text
+                  className={`font-semibold text-sm ${
+                    formData.accountType === "Personal"
+                      ? "text-blue-600"
+                      : "text-gray-700"
+                  }`}
+                >
+                  Personal
+                </Text>
+                <Text className="text-xs text-gray-500 text-center mt-1">
+                  Browse & book surf services
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleInputChange("accountType", "Business")}
+                className={`flex-1 py-4 rounded-xl border-2 items-center ${
+                  formData.accountType === "Business"
+                    ? "border-orange-500 bg-orange-50"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <Text className="text-2xl mb-1">🏪</Text>
+                <Text
+                  className={`font-semibold text-sm ${
+                    formData.accountType === "Business"
+                      ? "text-orange-600"
+                      : "text-gray-700"
+                  }`}
+                >
+                  Business
+                </Text>
+                <Text className="text-xs text-gray-500 text-center mt-1">
+                  List & manage your services
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Form */}
@@ -176,6 +238,40 @@ export default function RegisterScreen() {
               icon="lock-closed"
               error={errors.confirmPassword}
             />
+
+            {/* Business-only fields */}
+            {formData.accountType === "Business" && (
+              <>
+                <View className="flex-row items-center mb-3 mt-2">
+                  <View className="flex-1 h-px bg-orange-200" />
+                  <Text className="mx-3 text-orange-600 font-semibold text-sm">
+                    Business Details
+                  </Text>
+                  <View className="flex-1 h-px bg-orange-200" />
+                </View>
+
+                <Input
+                  label="Business Name"
+                  value={formData.businessName}
+                  onChangeText={(value) =>
+                    handleInputChange("businessName", value)
+                  }
+                  placeholder="Enter your business name"
+                  icon="storefront"
+                  error={errors.businessName}
+                />
+
+                <Input
+                  label="Business Description (optional)"
+                  value={formData.businessDescription}
+                  onChangeText={(value) =>
+                    handleInputChange("businessDescription", value)
+                  }
+                  placeholder="Briefly describe your business"
+                  icon="information-circle"
+                />
+              </>
+            )}
 
             {/* Terms and Conditions */}
             <View className="flex-row items-start mb-6">

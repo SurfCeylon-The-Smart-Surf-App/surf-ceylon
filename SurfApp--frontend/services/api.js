@@ -1,6 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getStaticApiBaseUrl } from "../utils/networkConfig";
+import { DeviceEventEmitter } from "react-native";
 
 const API_BASE_URL = getStaticApiBaseUrl();
 
@@ -37,8 +38,14 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid, remove it
-      await AsyncStorage.removeItem("userToken");
-      await AsyncStorage.removeItem("userData");
+      await AsyncStorage.multiRemove([
+        "userToken",
+        "userData",
+        "activeSessionId",
+        "activeSessionSpot",
+        "activeSessionStartTime",
+      ]);
+      DeviceEventEmitter.emit("authStateChanged");
     }
     return Promise.reject(error);
   },
@@ -98,7 +105,13 @@ export const postsAPI = {
   updateComment: (commentId, data) =>
     api.put(`/posts/comments/${commentId}`, data),
   deleteComment: (commentId) => api.delete(`/posts/comments/${commentId}`),
+  likeComment: (commentId) => api.post(`/posts/comments/${commentId}/like`),
   updatePost: (postId, postData) => api.put(`/posts/${postId}`, postData),
+  updatePostWithMedia: (postId, formData) =>
+    api.put(`/posts/${postId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 30000,
+    }),
   deletePost: (postId) => api.delete(`/posts/${postId}`),
 };
 

@@ -51,6 +51,19 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    accountType: {
+      type: String,
+      enum: ["Personal", "Business"],
+      default: "Personal",
+    },
+    businessName: {
+      type: String,
+      default: "",
+    },
+    businessDescription: {
+      type: String,
+      default: "",
+    },
     avatar: {
       type: String,
       default: "",

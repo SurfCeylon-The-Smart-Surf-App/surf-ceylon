@@ -29,7 +29,7 @@ const getConversations = async (req, res) => {
     // Format conversations for frontend
     const formattedConversations = conversations.map((conv) => {
       const otherParticipant = conv.participants.find(
-        (p) => p._id.toString() !== userId.toString()
+        (p) => p._id.toString() !== userId.toString(),
       );
 
       return {
@@ -95,11 +95,18 @@ const createConversation = async (req, res) => {
       const isFollowingOther = currentUser.following.includes(otherUserId);
       const isFollowedByOther = otherUser.following.includes(userId.toString());
 
+      // Allow messaging if either user is a Business account
+      const isCurrentUserBusiness = currentUser.accountType === "Business";
+      const isOtherUserBusiness = otherUser.accountType === "Business";
+
       if (!isFollowingOther || !isFollowedByOther) {
-        return res.status(403).json({
-          status: "error",
-          message: "You can only message users you mutually follow",
-        });
+        // Skip mutual follow requirement if either user is a Business account
+        if (!isCurrentUserBusiness && !isOtherUserBusiness) {
+          return res.status(403).json({
+            status: "error",
+            message: "You can only message users you mutually follow",
+          });
+        }
       }
 
       // Check if conversation already exists
@@ -235,12 +242,12 @@ const getMessages = async (req, res) => {
     // Check if user is participant
     const conversation = await Conversation.findById(conversationId).populate(
       "participants",
-      "name username profilePicture isVerified"
+      "name username profilePicture isVerified",
     );
     if (
       !conversation ||
       !conversation.participants.some(
-        (p) => p._id.toString() === userId.toString()
+        (p) => p._id.toString() === userId.toString(),
       )
     ) {
       return res.status(403).json({
@@ -265,7 +272,7 @@ const getMessages = async (req, res) => {
 
     // Get the other participant for the conversation details
     const otherParticipant = conversation.participants.find(
-      (p) => p._id.toString() !== userId.toString()
+      (p) => p._id.toString() !== userId.toString(),
     );
 
     res.json({
@@ -310,7 +317,7 @@ const markAsRead = async (req, res) => {
 
     // Check if user already marked as read
     const alreadyRead = message.readBy.some(
-      (read) => read.user.toString() === userId.toString()
+      (read) => read.user.toString() === userId.toString(),
     );
     if (alreadyRead) {
       return res.json({
@@ -436,7 +443,7 @@ const getMessageableUsers = async (req, res) => {
 
     const currentUser = await User.findById(userId).populate(
       "following",
-      "_id"
+      "_id",
     );
 
     // Find users who are mutually following
@@ -514,9 +521,92 @@ const deleteConversation = async (req, res) => {
   }
 };
 
+// Create business conversation (no mutual follow requirement)
+const createBusinessConversation = async (req, res) => {
+  try {
+    const { participants, isGroup, groupName } = req.body;
+    const userId = req.user._id;
+
+    // Add current user to participants if not included
+    if (!participants.includes(userId.toString())) {
+      participants.push(userId);
+    }
+
+    // Verify current user is a Business account
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    if (currentUser.accountType !== "Business") {
+      return res.status(403).json({
+        status: "error",
+        message: "Only Business accounts can use this messaging feature",
+      });
+    }
+
+    // For non-group chats, verify other user exists
+    if (!isGroup && participants.length === 2) {
+      const otherUserId = participants.find((p) => p !== userId.toString());
+      const otherUser = await User.findById(otherUserId);
+
+      if (!otherUser) {
+        return res.status(404).json({
+          status: "error",
+          message: "User not found",
+        });
+      }
+
+      // Check if conversation already exists
+      const existingConversation = await Conversation.findOne({
+        participants: { $all: participants, $size: 2 },
+        isGroup: false,
+      }).populate("participants", "name username profilePicture");
+
+      if (existingConversation) {
+        return res.status(200).json({
+          status: "success",
+          message: "Conversation found",
+          data: {
+            conversation: existingConversation,
+          },
+        });
+      }
+    }
+
+    const conversation = new Conversation({
+      participants,
+      isGroup,
+      groupName,
+      createdBy: userId,
+    });
+
+    await conversation.save();
+    await conversation.populate("participants", "name username profilePicture");
+
+    res.status(201).json({
+      status: "success",
+      message: "Business conversation created successfully",
+      data: {
+        conversation,
+      },
+    });
+  } catch (error) {
+    console.error("Create business conversation error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Server error",
+    });
+  }
+};
+
 module.exports = {
   getConversations,
   createConversation,
+  createBusinessConversation,
   sendMessage,
   getMessages,
   markAsRead,

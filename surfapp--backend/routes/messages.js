@@ -3,6 +3,7 @@ const { body } = require("express-validator");
 const {
   getConversations,
   createConversation,
+  createBusinessConversation,
   sendMessage,
   getMessages,
   markAsRead,
@@ -40,6 +41,11 @@ router.get("/messageable-users", auth, getMessageableUsers);
 // @access  Private
 router.post("/conversations", auth, createConversation);
 
+// @route   POST /api/messages/business-conversations
+// @desc    Create new business conversation (no mutual follow required)
+// @access  Private - Requires Business Account
+router.post("/business-conversations", auth, createBusinessConversation);
+
 // @route   GET /api/messages/conversations/:conversationId
 // @desc    Get messages in a conversation
 // @access  Private
@@ -52,7 +58,7 @@ router.post(
   "/conversations/:conversationId",
   auth,
   messageValidation,
-  sendMessage
+  sendMessage,
 );
 
 // @route   POST /api/messages/:messageId/read

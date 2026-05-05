@@ -81,6 +81,9 @@ app.use("/api/surf-spots", require("./routes/surfSpots"));
 app.use("/api/hazard-reports", require("./routes/hazardReports"));
 app.use("/api/incidents", require("./routes/incidents"));
 
+// Market listings (role-based: Business CRUD, Personal read-only)
+app.use("/api/market", require("./routes/market"));
+
 // ==================== DEFAULT ROUTE ====================
 
 const surfSpotController = require("./controllers/surfSpotController");

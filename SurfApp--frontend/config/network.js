@@ -133,6 +133,11 @@ export const API_ENDPOINTS = {
 
   // Health
   HEALTH: `${API_BASE_URL}/health`,
+
+  // Market Listings
+  MARKET: `${API_BASE_URL}/market`,
+  MARKET_LISTING: (id) => `${API_BASE_URL}/market/${id}`,
+  MARKET_MY_LISTINGS: `${API_BASE_URL}/market/my-listings`,
 };
 
 /**
