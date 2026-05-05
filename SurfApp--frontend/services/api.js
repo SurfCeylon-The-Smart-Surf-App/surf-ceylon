@@ -8,7 +8,7 @@ const API_BASE_URL = getStaticApiBaseUrl();
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 60000, // 60 seconds (backend ML prediction takes 30-40s when cache is empty)
   headers: {
     "Content-Type": "application/json",
   },
