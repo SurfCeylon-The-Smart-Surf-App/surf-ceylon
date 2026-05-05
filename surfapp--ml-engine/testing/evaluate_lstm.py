@@ -22,22 +22,22 @@ from sklearn.model_selection import train_test_split
 # ─── Feature definitions (must match training script) ─────────────────────────
 FEATURE_NAMES = [
     'Wave Height (m)',
+    'Wave Period (s)',
     'Swell Height (m)',
     'Swell Period (s)',
     'Wind Speed (m/s)',
-    'Wind Direction (°)',
-    'Sea Level (m)',
+    'Wind Direction (°)'
 ]
-FEATURE_UNITS = ['m', 'm', 's', 'm/s', '°', 'm']
+FEATURE_UNITS = ['m', 's', 'm', 's', 'm/s', '°']
 
 # Industry-standard acceptable MAE thresholds per feature
 BENCHMARK_MAE = [
     0.20,   # Wave Height   ±0.20 m
+    1.50,   # Wave Period   ±1.5 s
     0.15,   # Swell Height  ±0.15 m
     1.50,   # Swell Period  ±1.5 s
     1.50,   # Wind Speed    ±1.5 m/s
-    20.0,   # Wind Dir      ±20° (circular variable, harder to predict)
-    0.10,   # Sea Level     ±0.10 m
+    20.0,   # Wind Dir      ±20°
 ]
 
 
