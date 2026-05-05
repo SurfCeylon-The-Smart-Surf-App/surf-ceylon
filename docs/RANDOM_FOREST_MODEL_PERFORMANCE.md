@@ -38,14 +38,14 @@ The Random Forest model achieves **~81.63% overall accuracy (R²)** for surf con
 
 ### Data Preprocessing
 
-- **Duplicates Removed**: 52,750 records
-- **Outliers Removed**: ~56,361 records (using IQR method per feature)
-- **Final Dataset**: 130,217 records
+- **Total Raw Records**: 240,000
+- **Duplicates Removed**: 52,798 records
+- **Final Dataset (Clean Records)**: 148,053 records
 
 ### Data Split
 
-- **Training Set**: 104,173 samples (80%)
-- **Test Set**: 26,044 samples (20%)
+- **Training Set**: 118,442 samples (80%)
+- **Test Set**: 29,611 samples (20%)
 
 ### Features
 
@@ -73,10 +73,12 @@ The Random Forest model achieves **~81.63% overall accuracy (R²)** for surf con
 
 ### 1. Wave Height Prediction ✅ GOOD
 
-| Metric       | Value   | Interpretation             |
-| ------------ | ------- | -------------------------- |
-| **R² Score** | ~0.8163 | Explains 81.6% of variance |
-| **MAE**      | 0.12 m  | Average error: ±12 cm      |
+| Metric       | Value    | Interpretation             |
+| ------------ | -------- | -------------------------- |
+| **R² Score** | 0.8163   | Explains 81.6% of variance |
+| **MAE**      | 0.1251 m | Average error: ±12.5 cm    |
+| **RMSE**     | 0.1691 m | Root Mean Squared Error    |
+| **MAPE**     | 9.1%     | Average percentage error   |
 
 **Analysis**:
 
