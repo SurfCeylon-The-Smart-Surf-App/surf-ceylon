@@ -4,10 +4,16 @@ const postSchema = new mongoose.Schema(
   {
     content: {
       type: String,
-      required: [true, "Post content is required"],
+      required: false,
       maxlength: [2000, "Post content cannot exceed 2000 characters"],
     },
     images: [
+      {
+        url: String,
+        alt: String,
+      },
+    ],
+    videos: [
       {
         url: String,
         alt: String,

@@ -107,6 +107,11 @@ export const postsAPI = {
   deleteComment: (commentId) => api.delete(`/posts/comments/${commentId}`),
   likeComment: (commentId) => api.post(`/posts/comments/${commentId}/like`),
   updatePost: (postId, postData) => api.put(`/posts/${postId}`, postData),
+  updatePostWithMedia: (postId, formData) =>
+    api.put(`/posts/${postId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 30000,
+    }),
   deletePost: (postId) => api.delete(`/posts/${postId}`),
 };
 

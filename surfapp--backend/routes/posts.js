@@ -65,7 +65,7 @@ router.post("/", auth, postValidation, createPost);
 router.post(
   "/with-media",
   auth,
-  upload.array("images", 5),
+  upload.array("media", 10),
   postValidation,
   createPost
 );
@@ -108,7 +108,7 @@ router.post("/comments/:commentId/like", auth, toggleLikeComment);
 // @route   PUT /api/posts/:postId
 // @desc    Update post
 // @access  Private (Owner only)
-router.put("/:postId", auth, postValidation, updatePost);
+router.put("/:postId", auth, upload.array("media", 10), postValidation, updatePost);
 
 // @route   DELETE /api/posts/:postId
 // @desc    Delete post

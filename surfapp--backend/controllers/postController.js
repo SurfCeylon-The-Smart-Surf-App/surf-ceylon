@@ -132,14 +132,14 @@ const createPost = async (req, res) => {
       });
     }
 
-    // Check if either content or images are provided
+    // Check if either content or images/videos are provided
     const hasContent = req.body.content && req.body.content.trim().length > 0;
-    const hasImages = req.files && req.files.length > 0;
+    const hasMedia = req.files && req.files.length > 0;
 
-    if (!hasContent && !hasImages) {
+    if (!hasContent && !hasMedia) {
       return res.status(400).json({
         status: "error",
-        message: "Post must have either content or images",
+        message: "Post must have either content or media",
       });
     }
 
@@ -162,12 +162,24 @@ const createPost = async (req, res) => {
       author: req.user._id,
     };
 
-    // Handle uploaded images
+    // Handle uploaded files — separate images from videos by mimetype
     if (req.files && req.files.length > 0) {
-      postData.images = req.files.map((file) => ({
-        url: `/uploads/${file.filename}`,
-        alt: file.originalname,
-      }));
+      const imageFiles = req.files.filter((f) => f.mimetype.startsWith("image/"));
+      const videoFiles = req.files.filter((f) => f.mimetype.startsWith("video/"));
+
+      if (imageFiles.length > 0) {
+        postData.images = imageFiles.map((file) => ({
+          url: `/uploads/${file.filename}`,
+          alt: file.originalname,
+        }));
+      }
+
+      if (videoFiles.length > 0) {
+        postData.videos = videoFiles.map((file) => ({
+          url: `/uploads/${file.filename}`,
+          alt: file.originalname,
+        }));
+      }
     }
 
     const post = new Post(postData);
@@ -428,7 +440,7 @@ const updatePost = async (req, res) => {
     }
 
     const { postId } = req.params;
-    const { content } = req.body;
+    const { content, keepImages, keepVideos } = req.body;
     const userId = req.user._id;
 
     // Find the post
@@ -448,13 +460,56 @@ const updatePost = async (req, res) => {
       });
     }
 
-    // Update post content
-    post.content = content;
+    // Update text content
+    if (content !== undefined) {
+      post.content = content;
+    }
+
+    // --- Handle images ---
+    // Start with images the user chose to keep (sent as JSON string)
+    let updatedImages = [];
+    if (keepImages) {
+      try {
+        updatedImages = JSON.parse(keepImages);
+      } catch (_) {}
+    }
+    // Append newly uploaded image files
+    if (req.files && req.files.length > 0) {
+      const newImageFiles = req.files.filter((f) => f.mimetype.startsWith("image/"));
+      updatedImages = [
+        ...updatedImages,
+        ...newImageFiles.map((file) => ({
+          url: `/uploads/${file.filename}`,
+          alt: file.originalname,
+        })),
+      ];
+    }
+    post.images = updatedImages;
+
+    // --- Handle videos ---
+    let updatedVideos = [];
+    if (keepVideos) {
+      try {
+        updatedVideos = JSON.parse(keepVideos);
+      } catch (_) {}
+    }
+    if (req.files && req.files.length > 0) {
+      const newVideoFiles = req.files.filter((f) => f.mimetype.startsWith("video/"));
+      updatedVideos = [
+        ...updatedVideos,
+        ...newVideoFiles.map((file) => ({
+          url: `/uploads/${file.filename}`,
+          alt: file.originalname,
+        })),
+      ];
+    }
+    post.videos = updatedVideos;
+
     await post.save();
     await post.populate("author", "name username profilePicture");
 
     // Check for toxic content AFTER updating
-    const toxicityCheck = await checkToxicity(content);
+    const toxicityCheck = content ? await checkToxicity(content) : { isToxic: false, confidence: 0 };
 
     res.json({
       status: "success",

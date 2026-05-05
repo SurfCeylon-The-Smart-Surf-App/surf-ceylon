@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as ImagePicker from "expo-image-picker";
+import { Video, ResizeMode } from "expo-av";
 import { getStaticImageBaseUrl } from "../../utils/networkConfig";
 import * as MediaLibrary from "expo-media-library";
 import { useAuth } from "../../hooks/useAuth";
@@ -51,6 +52,20 @@ export default function CommunityScreen() {
   const [editingPost, setEditingPost] = useState(null);
   const [showEditPostModal, setShowEditPostModal] = useState(false);
   const [editPostContent, setEditPostContent] = useState("");
+  const [editKeepImages, setEditKeepImages] = useState([]); // existing images to keep
+  const [editKeepVideos, setEditKeepVideos] = useState([]); // existing videos to keep
+  const [editNewMedia, setEditNewMedia] = useState([]); // newly picked media
+  // full-screen gallery viewer
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [galleryVisible, setGalleryVisible] = useState(false);
+  const [visiblePostIds, setVisiblePostIds] = useState(new Set()); // for video auto-play
+
+  // Viewability config: play video when ≥50% of the post card is on screen
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
+  const onViewableItemsChanged = useCallback(({ viewableItems }) => {
+    setVisiblePostIds(new Set(viewableItems.map((v) => v.item._id)));
+  }, []);
 
   const { user } = useAuth();
   const navigation = useNavigation();
@@ -223,12 +238,15 @@ export default function CommunityScreen() {
 
         selectedMedia.forEach((media, index) => {
           const uriParts = media.uri.split(".");
-          const fileType = uriParts[uriParts.length - 1];
+          const fileType = uriParts[uriParts.length - 1].toLowerCase();
+          const isVideo = media.type === "video" || ["mp4", "mov", "avi", "mkv", "webm"].includes(fileType);
+          const mimeType = isVideo ? `video/${fileType}` : `image/${fileType}`;
+          const prefix = isVideo ? "video" : "image";
 
-          formData.append("images", {
+          formData.append("media", {
             uri: media.uri,
-            name: `image_${Date.now()}_${index}.${fileType}`,
-            type: `image/${fileType}`,
+            name: `${prefix}_${Date.now()}_${index}.${fileType}`,
+            type: mimeType,
           });
         });
 
@@ -271,29 +289,31 @@ export default function CommunityScreen() {
 
   const pickMedia = () => {
     Alert.alert("Select Media", "Choose an option", [
-      { text: "Camera", onPress: () => openCamera() },
-      { text: "Photo Library", onPress: () => openImagePicker() },
+      { text: "Take Photo", onPress: () => openCamera("photo") },
+      { text: "Record Video", onPress: () => openCamera("video") },
+      { text: "Gallery", onPress: () => openImagePicker() },
       { text: "Cancel", style: "cancel" },
     ]);
   };
 
-  const openCamera = async () => {
+  const openCamera = async (mode = "photo") => {
     try {
       // Request camera permissions
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           "Permission needed",
-          "Camera permission is required to take photos"
+          "Camera permission is required"
         );
         return;
       }
 
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
+        mediaTypes: mode === "video" ? ["videos"] : ["images"],
+        allowsEditing: mode !== "video",
         aspect: [4, 3],
         quality: 0.8,
+        videoMaxDuration: 60,
       });
 
       if (!result.canceled) {
@@ -305,7 +325,7 @@ export default function CommunityScreen() {
     }
   };
 
-  const openImagePicker = async () => {
+  const openImagePicker = async (mode = "all") => {
     try {
       // Request media library permissions
       const { status } =
@@ -313,25 +333,25 @@ export default function CommunityScreen() {
       if (status !== "granted") {
         Alert.alert(
           "Permission needed",
-          "Photo library permission is required to select photos"
+          "Media library permission is required"
         );
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
+        mediaTypes: mode === "video" ? ["videos"] : mode === "photo" ? ["images"] : ["images", "videos"],
+        allowsEditing: false,
         quality: 0.8,
         allowsMultipleSelection: true,
+        videoMaxDuration: 60,
       });
 
       if (!result.canceled) {
         setSelectedMedia((prev) => [...prev, ...result.assets]);
       }
     } catch (error) {
-      console.error("Image picker error:", error);
-      Alert.alert("Error", "Failed to open photo library");
+      console.error("Media picker error:", error);
+      Alert.alert("Error", "Failed to open media library");
     }
   };
 
@@ -422,47 +442,84 @@ export default function CommunityScreen() {
   };
 
   const handleEditPost = () => {
-    setEditPostContent(selectedPost.content);
+    setEditPostContent(selectedPost.content || "");
+    setEditKeepImages(selectedPost.images || []);
+    setEditKeepVideos(selectedPost.videos || []);
+    setEditNewMedia([]);
     setEditingPost(selectedPost);
     setShowPostActionMenu(false);
     setShowEditPostModal(true);
   };
 
   const handleUpdatePost = async () => {
-    if (!editPostContent.trim()) {
-      Alert.alert("Error", "Post content cannot be empty");
+    const hasContent = editPostContent.trim().length > 0;
+    const hasMedia =
+      editKeepImages.length > 0 || editKeepVideos.length > 0 || editNewMedia.length > 0;
+    if (!hasContent && !hasMedia) {
+      Alert.alert("Error", "Post must have text or at least one image/video");
       return;
     }
 
     try {
-      const response = await postsAPI.updatePost(editingPost._id, {
-        content: editPostContent.trim(),
-      });
+      const mediaChanged =
+        editNewMedia.length > 0 ||
+        editKeepImages.length !== (editingPost.images?.length || 0) ||
+        editKeepVideos.length !== (editingPost.videos?.length || 0);
+
+      let response;
+      if (mediaChanged) {
+        const formData = new FormData();
+        if (editPostContent.trim()) {
+          formData.append("content", editPostContent.trim());
+        }
+        formData.append("keepImages", JSON.stringify(editKeepImages));
+        formData.append("keepVideos", JSON.stringify(editKeepVideos));
+
+        editNewMedia.forEach((media, index) => {
+          const uriParts = media.uri.split(".");
+          const fileType = uriParts[uriParts.length - 1].toLowerCase();
+          const isVideo =
+            media.type === "video" ||
+            ["mp4", "mov", "avi", "mkv", "webm"].includes(fileType);
+          formData.append("media", {
+            uri: media.uri,
+            name: `${isVideo ? "video" : "image"}_${Date.now()}_${index}.${fileType}`,
+            type: isVideo ? `video/${fileType}` : `image/${fileType}`,
+          });
+        });
+
+        response = await postsAPI.updatePostWithMedia(editingPost._id, formData);
+      } else {
+        response = await postsAPI.updatePost(editingPost._id, {
+          content: editPostContent.trim(),
+          keepImages: JSON.stringify(editKeepImages),
+          keepVideos: JSON.stringify(editKeepVideos),
+        });
+      }
+
       const updatedPost = response.data.data.post;
       const isToxic = response.data.data.isToxic;
       const confidence = response.data.data.confidence;
 
       setPosts((prev) =>
         prev.map((post) =>
-          post._id === editingPost._id
-            ? { ...post, content: updatedPost.content }
-            : post
+          post._id === editingPost._id ? { ...post, ...updatedPost } : post
         )
       );
 
       setEditPostContent("");
+      setEditKeepImages([]);
+      setEditKeepVideos([]);
+      setEditNewMedia([]);
       setEditingPost(null);
       setShowEditPostModal(false);
 
-      // Show toxicity warning if detected
       if (isToxic) {
         Alert.alert(
           "⚠️ Toxic Content Detected",
           `Your post may contain inappropriate or offensive language (${(
             confidence * 100
-          ).toFixed(
-            1
-          )}% confidence). Please be respectful in your interactions.`,
+          ).toFixed(1)}% confidence). Please be respectful.`,
           [{ text: "OK", style: "default" }]
         );
       } else {
@@ -552,29 +609,83 @@ export default function CommunityScreen() {
           )}
         </View>
 
-        {/* Post Image (if exists) */}
-        {item.images && item.images.length > 0 && (
-          <View>
-            {item.images.length === 1 ? (
-              <Image
-                source={{
-                  uri: `${getStaticImageBaseUrl()}${item.images[0].url}`,
-                }}
-                className="w-full h-64 bg-gray-200"
-                resizeMode="cover"
-              />
-            ) : (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {item.images.map((image, index) => (
+        {/* Post Images (if exists) */}
+        {item.images && item.images.length > 0 && (() => {
+          const urls = item.images.map((img) => `${getStaticImageBaseUrl()}${img.url}`);
+          return (
+            <View>
+              {item.images.length === 1 ? (
+                <TouchableOpacity
+                  activeOpacity={0.92}
+                  onPress={() => {
+                    setGalleryImages(urls);
+                    setGalleryIndex(0);
+                    setGalleryVisible(true);
+                  }}
+                >
                   <Image
-                    key={index}
-                    source={{ uri: `${getStaticImageBaseUrl()}${image.url}` }}
-                    className="w-64 h-64 bg-gray-200 mr-2"
+                    source={{ uri: urls[0] }}
+                    className="w-full h-64 bg-gray-200"
                     resizeMode="cover"
                   />
-                ))}
-              </ScrollView>
-            )}
+                </TouchableOpacity>
+              ) : (
+                <View>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {urls.map((url, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        activeOpacity={0.92}
+                        onPress={() => {
+                          setGalleryImages(urls);
+                          setGalleryIndex(index);
+                          setGalleryVisible(true);
+                        }}
+                      >
+                        <Image
+                          source={{ uri: url }}
+                          style={{ width: 220, height: 220, marginRight: 4, backgroundColor: "#e5e7eb" }}
+                          resizeMode="cover"
+                        />
+                        {/* image count badge on last visible thumbnail */}
+                        {index === 1 && urls.length > 2 && (
+                          <View style={{
+                            position: "absolute", right: 4, bottom: 0,
+                            width: 220, height: 220, backgroundColor: "rgba(0,0,0,0.45)",
+                            justifyContent: "center", alignItems: "center",
+                          }}>
+                            <Text style={{ color: "#fff", fontSize: 28, fontWeight: "bold" }}>
+                              +{urls.length - 2}
+                            </Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                  <Text style={{ fontSize: 12, color: "#6b7280", paddingHorizontal: 12, paddingTop: 4 }}>
+                    {urls.length} photos · tap to view all
+                  </Text>
+                </View>
+              )}
+            </View>
+          );
+        })()}
+
+        {/* Post Videos (if exists) */}
+        {item.videos && item.videos.length > 0 && (
+          <View>
+            {item.videos.map((video, index) => (
+              <View key={index} style={{ position: "relative", marginBottom: 4 }}>
+                <Video
+                  source={{ uri: `${getStaticImageBaseUrl()}${video.url}` }}
+                  style={{ width: "100%", height: 260, backgroundColor: "#111827" }}
+                  resizeMode={ResizeMode.CONTAIN}
+                  useNativeControls
+                  shouldPlay={visiblePostIds.has(item._id)}
+                  isLooping
+                />
+              </View>
+            ))}
           </View>
         )}
 
@@ -823,6 +934,9 @@ export default function CommunityScreen() {
               ) : null
             }
             showsVerticalScrollIndicator={false}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+            contentContainerStyle={{ paddingTop: 16, paddingBottom: 100 }}
           />
         </View>
 
@@ -939,21 +1053,40 @@ export default function CommunityScreen() {
               {selectedMedia.length > 0 && (
                 <View className="mb-4">
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {selectedMedia.map((media, index) => (
-                      <View key={index} className="mr-3 relative">
-                        <Image
-                          source={{ uri: media.uri }}
-                          className="w-32 h-32 rounded-lg"
-                          resizeMode="cover"
-                        />
-                        <TouchableOpacity
-                          onPress={() => removeMedia(index)}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-gray-800 rounded-full items-center justify-center"
-                        >
-                          <Ionicons name="close" size={16} color="#ffffff" />
-                        </TouchableOpacity>
-                      </View>
-                    ))}
+                    {selectedMedia.map((media, index) => {
+                      const ext = media.uri.split(".").pop().toLowerCase();
+                      const isVideo = media.type === "video" || ["mp4", "mov", "avi", "mkv", "webm"].includes(ext);
+                      return (
+                        <View key={index} className="mr-3 relative">
+                          {isVideo ? (
+                            <View style={{ width: 128, height: 128, borderRadius: 8, backgroundColor: "#1f2937", alignItems: "center", justifyContent: "center" }}>
+                              <Video
+                                source={{ uri: media.uri }}
+                                style={{ width: 128, height: 128, borderRadius: 8 }}
+                                resizeMode={ResizeMode.COVER}
+                                shouldPlay={false}
+                                isMuted
+                              />
+                              <View style={{ position: "absolute", backgroundColor: "rgba(0,0,0,0.45)", borderRadius: 24, padding: 6 }}>
+                                <Ionicons name="play" size={22} color="#ffffff" />
+                              </View>
+                            </View>
+                          ) : (
+                            <Image
+                              source={{ uri: media.uri }}
+                              className="w-32 h-32 rounded-lg"
+                              resizeMode="cover"
+                            />
+                          )}
+                          <TouchableOpacity
+                            onPress={() => removeMedia(index)}
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-gray-800 rounded-full items-center justify-center"
+                          >
+                            <Ionicons name="close" size={16} color="#ffffff" />
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
                   </ScrollView>
                 </View>
               )}
@@ -1061,13 +1194,28 @@ export default function CommunityScreen() {
               <TouchableOpacity
                 onPress={handleUpdatePost}
                 className={`px-4 py-2 rounded-lg ${
-                  editPostContent.trim() ? "bg-blue-600" : "bg-gray-300"
+                  editPostContent.trim() ||
+                  editKeepImages.length > 0 ||
+                  editKeepVideos.length > 0 ||
+                  editNewMedia.length > 0
+                    ? "bg-blue-600"
+                    : "bg-gray-300"
                 }`}
-                disabled={!editPostContent.trim()}
+                disabled={
+                  !editPostContent.trim() &&
+                  editKeepImages.length === 0 &&
+                  editKeepVideos.length === 0 &&
+                  editNewMedia.length === 0
+                }
               >
                 <Text
                   className={`font-medium ${
-                    editPostContent.trim() ? "text-white" : "text-gray-500"
+                    editPostContent.trim() ||
+                    editKeepImages.length > 0 ||
+                    editKeepVideos.length > 0 ||
+                    editNewMedia.length > 0
+                      ? "text-white"
+                      : "text-gray-500"
                   }`}
                 >
                   Save
@@ -1116,10 +1264,219 @@ export default function CommunityScreen() {
                 style={{ fontSize: 18 }}
                 autoFocus
               />
+
+              {/* Existing Images */}
+              {editKeepImages.length > 0 && (
+                <View className="mb-3">
+                  <Text className="text-gray-500 text-xs mb-2 font-medium">EXISTING PHOTOS</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {editKeepImages.map((img, i) => (
+                      <View key={i} className="mr-3 relative">
+                        <Image
+                          source={{ uri: `${getStaticImageBaseUrl()}${img.url}` }}
+                          style={{ width: 100, height: 100, borderRadius: 8 }}
+                          resizeMode="cover"
+                        />
+                        <TouchableOpacity
+                          onPress={() => setEditKeepImages((prev) => prev.filter((_, idx) => idx !== i))}
+                          style={{ position: "absolute", top: -8, right: -8, width: 22, height: 22, backgroundColor: "#ef4444", borderRadius: 11, alignItems: "center", justifyContent: "center" }}
+                        >
+                          <Ionicons name="close" size={14} color="#fff" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              {/* Existing Videos */}
+              {editKeepVideos.length > 0 && (
+                <View className="mb-3">
+                  <Text className="text-gray-500 text-xs mb-2 font-medium">EXISTING VIDEOS</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {editKeepVideos.map((vid, i) => (
+                      <View key={i} className="mr-3 relative">
+                        <View style={{ width: 100, height: 100, borderRadius: 8, backgroundColor: "#1f2937", alignItems: "center", justifyContent: "center" }}>
+                          <Ionicons name="videocam" size={30} color="#9ca3af" />
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => setEditKeepVideos((prev) => prev.filter((_, idx) => idx !== i))}
+                          style={{ position: "absolute", top: -8, right: -8, width: 22, height: 22, backgroundColor: "#ef4444", borderRadius: 11, alignItems: "center", justifyContent: "center" }}
+                        >
+                          <Ionicons name="close" size={14} color="#fff" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </ScrollView>
+                </View>
+              )}
+
+              {/* New Media Previews */}
+              {editNewMedia.length > 0 && (
+                <View className="mb-3">
+                  <Text className="text-gray-500 text-xs mb-2 font-medium">NEW MEDIA</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {editNewMedia.map((media, i) => {
+                      const ext = media.uri.split(".").pop().toLowerCase();
+                      const isVideo = media.type === "video" || ["mp4", "mov", "avi", "mkv", "webm"].includes(ext);
+                      return (
+                        <View key={i} className="mr-3 relative">
+                          {isVideo ? (
+                            <View style={{ width: 100, height: 100, borderRadius: 8, backgroundColor: "#1f2937", alignItems: "center", justifyContent: "center" }}>
+                              <Ionicons name="play-circle" size={36} color="#60a5fa" />
+                            </View>
+                          ) : (
+                            <Image source={{ uri: media.uri }} style={{ width: 100, height: 100, borderRadius: 8 }} resizeMode="cover" />
+                          )}
+                          <TouchableOpacity
+                            onPress={() => setEditNewMedia((prev) => prev.filter((_, idx) => idx !== i))}
+                            style={{ position: "absolute", top: -8, right: -8, width: 22, height: 22, backgroundColor: "#ef4444", borderRadius: 11, alignItems: "center", justifyContent: "center" }}
+                          >
+                            <Ionicons name="close" size={14} color="#fff" />
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              )}
+
+              {/* Add Media button */}
+              <TouchableOpacity
+                onPress={() =>
+                  Alert.alert("Add Media", "Choose an option", [
+                    { text: "Take Photo", onPress: async () => {
+                        const r = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], allowsEditing: true, quality: 0.8 });
+                        if (!r.canceled) setEditNewMedia((p) => [...p, r.assets[0]]);
+                    }},
+                    { text: "Record Video", onPress: async () => {
+                        const r = await ImagePicker.launchCameraAsync({ mediaTypes: ["videos"], allowsEditing: false, videoMaxDuration: 60 });
+                        if (!r.canceled) setEditNewMedia((p) => [...p, r.assets[0]]);
+                    }},
+                    { text: "Gallery", onPress: async () => {
+                        const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images", "videos"], allowsMultipleSelection: true, quality: 0.8 });
+                        if (!r.canceled) setEditNewMedia((p) => [...p, ...r.assets]);
+                    }},
+                    { text: "Cancel", style: "cancel" },
+                  ])
+                }
+                style={{ flexDirection: "row", alignItems: "center", backgroundColor: "#f3f4f6", borderRadius: 10, padding: 12, marginBottom: 16 }}
+              >
+                <Ionicons name="images-outline" size={22} color="#3b82f6" />
+                <Text style={{ marginLeft: 10, color: "#3b82f6", fontWeight: "600" }}>Add Photo / Video</Text>
+              </TouchableOpacity>
             </ScrollView>
           </View>
         </Modal>
       </View>
+
+        {/* Full-Screen Gallery Viewer */}
+        <Modal
+          visible={galleryVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setGalleryVisible(false)}
+          statusBarTranslucent
+        >
+          <View style={{ flex: 1, backgroundColor: "#000" }}>
+            {/* Close button */}
+            <TouchableOpacity
+              onPress={() => setGalleryVisible(false)}
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+              style={{
+                position: "absolute",
+                top: 52,
+                right: 16,
+                zIndex: 20,
+                backgroundColor: "rgba(0,0,0,0.55)",
+                borderRadius: 30,
+                padding: 14,
+              }}
+            >
+              <Ionicons name="close" size={32} color="#ffffff" />
+            </TouchableOpacity>
+
+            {/* Counter */}
+            {galleryImages.length > 1 && (
+              <View style={{
+                position: "absolute", top: 58, left: 0, right: 0,
+                alignItems: "center", zIndex: 20,
+              }}>
+                <Text style={{
+                  color: "#fff", fontSize: 15, fontWeight: "600",
+                  backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 14,
+                  paddingVertical: 4, borderRadius: 20,
+                }}>
+                  {galleryIndex + 1} / {galleryImages.length}
+                </Text>
+              </View>
+            )}
+
+            {/* Paged image list */}
+            <FlatList
+              data={galleryImages}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              initialScrollIndex={galleryIndex}
+              getItemLayout={(_, index) => ({
+                length: Dimensions.get("window").width,
+                offset: Dimensions.get("window").width * index,
+                index,
+              })}
+              onMomentumScrollEnd={(e) => {
+                const newIndex = Math.round(
+                  e.nativeEvent.contentOffset.x / Dimensions.get("window").width
+                );
+                setGalleryIndex(newIndex);
+              }}
+              keyExtractor={(_, i) => String(i)}
+              renderItem={({ item: uri }) => (
+                <View style={{
+                  width: Dimensions.get("window").width,
+                  height: Dimensions.get("window").height,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}>
+                  <Image
+                    source={{ uri }}
+                    style={{
+                      width: Dimensions.get("window").width,
+                      height: Dimensions.get("window").height * 0.82,
+                    }}
+                    resizeMode="contain"
+                  />
+                </View>
+              )}
+            />
+
+            {/* Dot indicators */}
+            {galleryImages.length > 1 && (
+              <View style={{
+                position: "absolute",
+                bottom: 40,
+                left: 0,
+                right: 0,
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 6,
+              }}>
+                {galleryImages.map((_, i) => (
+                  <View
+                    key={i}
+                    style={{
+                      width: i === galleryIndex ? 20 : 8,
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: i === galleryIndex ? "#3b82f6" : "rgba(255,255,255,0.5)",
+                    }}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
+        </Modal>
     </GestureHandlerRootView>
   );
 }
